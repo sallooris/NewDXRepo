@@ -226,5 +226,5 @@
     <members>WesternSalesTeam</members>
   </types>
   <version>41.0</version>
-  <fullName>force-dxapp</fullName>
+  <fullName>force-app</fullName>
 </Package>
