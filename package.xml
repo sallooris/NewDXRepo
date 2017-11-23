@@ -4,6 +4,7 @@
     <types>
         <members>TestClass</members>
         <members>TestClass2</members>
+        <members>TestClass3</members>
         <name>ApexClass</name>
     </types>
     <types>
@@ -23,6 +24,13 @@
         <members>standard__ServiceConsole</members>
         <members>standard__Sites</members>
         <name>CustomApplication</name>
+    </types>
+    <types>
+        <members>Account</members>
+        <members>Campaign</members>
+        <members>Case</members>
+        <members>Opportunity</members>
+        <name>CustomObject</name>
     </types>
     <types>
         <members>Account.Standard_Account_Duplicate_Rule</members>
@@ -106,10 +114,14 @@
         <name>ListView</name>
     </types>
     <types>
-        <members>Account.Standard_Account_Match_Rule_v1_0</members>
-        <members>Contact.Standard_Contact_Match_Rule_v1_1</members>
-        <members>Lead.Standard_Lead_Match_Rule_v1_0</members>
+        <members>*</members>
         <name>MatchingRule</name>
+    </types>
+    <types>
+        <members>Account</members>
+        <members>Contact</members>
+        <members>Lead</members>
+        <name>MatchingRules</name>
     </types>
     <types>
         <members>Admin</members>
