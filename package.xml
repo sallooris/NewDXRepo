@@ -8,6 +8,7 @@
         <name>ApexClass</name>
     </types>
     <types>
+        <members>MyPage</members>
         <members>VFPage1</members>
         <name>ApexPage</name>
     </types>
