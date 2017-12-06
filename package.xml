@@ -3,6 +3,7 @@
         <members>MyClass</members>
         <members>Test</members>
         <members>Test2</members>
+        <members>Test6</members>
         <name>ApexClass</name>
     </types>
     <types>
