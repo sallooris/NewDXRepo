@@ -6,12 +6,17 @@
         <members>Test</members>
         <members>Test2</members>
         <members>Test6</members>
+        <members>Test9</members>
         <name>ApexClass</name>
     </types>
     <types>
-        <members>Case.Standard</members>
-        <members>Lead.Standard</members>
+        <members>*</members>
         <name>AssignmentRule</name>
+    </types>
+    <types>
+        <members>Case</members>
+        <members>Lead</members>
+        <name>AssignmentRules</name>
     </types>
     <types>
         <members>DataCloudGeoLocation</members>
@@ -50,6 +55,24 @@
         <name>CustomField</name>
     </types>
     <types>
+        <members>Account</members>
+        <members>Activity</members>
+        <members>Asset</members>
+        <members>Campaign</members>
+        <members>Case</members>
+        <members>Contact</members>
+        <members>Contract</members>
+        <members>Goal</members>
+        <members>Lead</members>
+        <members>Metric</members>
+        <members>Opportunity</members>
+        <members>Order</members>
+        <members>Product2</members>
+        <members>Solution</members>
+        <members>User</members>
+        <name>CustomObject</name>
+    </types>
+    <types>
         <members>Account.Standard_Account_Duplicate_Rule</members>
         <members>Contact.Standard_Contact_Duplicate_Rule</members>
         <members>Lead.Standard_Lead_Duplicate_Rule</members>
@@ -72,8 +95,12 @@
         <name>EmailTemplate</name>
     </types>
     <types>
-        <members>Case.Standard</members>
+        <members>*</members>
         <name>EscalationRule</name>
+    </types>
+    <types>
+        <members>Case</members>
+        <name>EscalationRules</name>
     </types>
     <types>
         <members>LightningSalesConsole_UtilityBar</members>
@@ -188,6 +215,16 @@
         <members>User.AdminUsers</members>
         <members>User.AllUsers</members>
         <name>ListView</name>
+    </types>
+    <types>
+        <members>*</members>
+        <name>MatchingRule</name>
+    </types>
+    <types>
+        <members>Account</members>
+        <members>Contact</members>
+        <members>Lead</members>
+        <name>MatchingRules</name>
     </types>
     <types>
         <members>Admin</members>
