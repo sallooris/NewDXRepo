@@ -6,6 +6,7 @@
         <members>Test</members>
         <members>Test2</members>
         <members>Test6</members>
+        <members>Test9</members>
         <name>ApexClass</name>
     </types>
     <types>
@@ -915,7 +916,15 @@
         <name>Settings</name>
     </types>
     <types>
-        <members>Task.UpdateStatus_0.quickAction</members>
+        <members>Account</members>
+        <members>Asset</members>
+        <members>Campaign</members>
+        <members>Case</members>
+        <members>Contact</members>
+        <members>Lead</members>
+        <members>Opportunity</members>
+        <members>Order</members>
+        <members>User</members>
         <name>SharingRules</name>
     </types>
     <types>
