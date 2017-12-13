@@ -13,6 +13,7 @@
         <members>ApxCls1</members>
         <members>ApxCls2</members>
         <members>ApxCls3</members>
+        <members>JWT</members>
         <members>MyClass</members>
         <members>MyWorld</members>
         <members>Test</members>

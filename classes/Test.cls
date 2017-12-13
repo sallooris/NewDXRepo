@@ -1,2 +1,5 @@
-public class Test{
-}
+Public class Test{
+
+  Public Test()
+  {}
+  }
