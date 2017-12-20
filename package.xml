@@ -11,6 +11,7 @@
         <members>Test2</members>
         <members>Test6</members>
         <members>Test9</members>
+        <members>TestApex</members>
         <name>ApexClass</name>
     </types>
     <types>
