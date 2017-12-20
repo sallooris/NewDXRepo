@@ -6,6 +6,7 @@
         <members>JWT</members>
         <members>JWTBearerFlow</members>
         <members>MyClass</members>
+        <members>SuperClass</members>
         <members>Test</members>
         <members>Test2</members>
         <members>Test6</members>
