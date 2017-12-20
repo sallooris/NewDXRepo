@@ -12,7 +12,12 @@
         <members>Test6</members>
         <members>Test9</members>
         <members>TestApex</members>
+        <members>TestApex1</members>
         <name>ApexClass</name>
+    </types>
+    <types>
+        <members>TestVFPage</members>
+        <name>ApexPage</name>
     </types>
     <types>
         <members>Internal Zone</members>

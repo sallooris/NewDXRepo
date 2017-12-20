@@ -1,0 +1,2 @@
+public class TestApex1{
+}
