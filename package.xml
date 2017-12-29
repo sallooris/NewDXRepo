@@ -2,20 +2,13 @@
 <Package xmlns="http://soap.sforce.com/2006/04/metadata">
     <version>40.0</version>
     <types>
-        <members>ARApexclass2</members>
-        <members>ARApexclass234</members>
-        <members>ARApexclass2345</members>
-        <members>ARPTCls1</members>
-        <members>Ac1</members>
-        <members>Ac2</members>
-        <members>AppCls01</members>
-        <members>AppCls02</members>
-        <members>ApxCls1</members>
-        <members>ApxCls2</members>
-        <members>ApxCls3</members>
+        <members>JWT</members>
+        <members>JWTBearerFlow</members>
         <members>MyClass</members>
-        <members>MyWorld</members>
         <members>Test</members>
+        <members>Test2</members>
+        <members>Test6</members>
+        <members>Test9</members>
         <name>ApexClass</name>
     </types>
     <types>
@@ -417,7 +410,6 @@
         <members>Event.Type</members>
         <members>Event.WhatId</members>
         <members>Event.WhoId</members>
-        <members>Goal.OrigGoalId__c</members>
         <members>Idea.Categories</members>
         <members>Idea.Status</members>
         <members>Lead.Address</members>
@@ -458,7 +450,6 @@
         <members>Macro.Name</members>
         <members>Macro.OwnerId</members>
         <members>Macro.StartingContext</members>
-        <members>Metric.OrigMetricId__c</members>
         <members>Opportunity.AccountId</members>
         <members>Opportunity.Amount</members>
         <members>Opportunity.CampaignId</members>
@@ -870,8 +861,6 @@
     </types>
     <types>
         <members>Idea.InternalIdeasIdeaRecordType</members>
-        <members>Metric.Completion</members>
-        <members>Metric.Progress</members>
         <name>RecordType</name>
     </types>
     <types>
@@ -929,7 +918,15 @@
         <name>Settings</name>
     </types>
     <types>
-        <members>Task.UpdateStatus_0.quickAction</members>
+        <members>Account</members>
+        <members>Asset</members>
+        <members>Campaign</members>
+        <members>Case</members>
+        <members>Contact</members>
+        <members>Lead</members>
+        <members>Opportunity</members>
+        <members>Order</members>
+        <members>User</members>
         <name>SharingRules</name>
     </types>
     <types>
