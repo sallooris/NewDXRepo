@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>Branch</value>
+    </caseValues>
+    <caseValues>
+        <plural>true</plural>
+        <value>Branch</value>
+    </caseValues>
+    <fields>
+        <label><!-- Branch1 --></label>
+        <name>Branch1__c</name>
+        <relationshipLabel><!-- Branch --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- Branch1 formula --></label>
+        <name>Branch1_formula__c</name>
+    </fields>
+    <fields>
+        <label><!-- Branch2 --></label>
+        <name>Branch2__c</name>
+        <relationshipLabel><!-- Branch --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- Branch2 formula --></label>
+        <name>Branch2_formula__c</name>
+    </fields>
+    <fields>
+        <label><!-- Branch3 --></label>
+        <name>Branch3__c</name>
+        <relationshipLabel><!-- Branch --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- Branch3 formula --></label>
+        <name>Branch3_formula__c</name>
+    </fields>
+    <fields>
+        <label><!-- Branch Code --></label>
+        <name>Branch_Code__c</name>
+    </fields>
+    <fields>
+        <label><!-- Fromula1 --></label>
+        <name>Fromula1__c</name>
+    </fields>
+    <layouts>
+        <layout>Branch Layout</layout>
+        <sections>
+            <label><!-- Custom Links --></label>
+            <section>Custom Links</section>
+        </sections>
+    </layouts>
+    <quickActions>
+        <label><!-- Escalate --></label>
+        <name>NewComment</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Log A Note --></label>
+        <name>NewTest</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Email --></label>
+        <name>bfbb</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Edit Comments --></label>
+        <name>fdgfhh</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Change Priority --></label>
+        <name>hghhhh</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- New Child Branch --></label>
+        <name>sfergrg</name>
+    </quickActions>
+    <startsWith>Consonant</startsWith>
+    <validationRules>
+        <errorMessage><!-- No Error --></errorMessage>
+        <name>NewValidation1</name>
+    </validationRules>
+    <validationRules>
+        <errorMessage><!-- NEW ERROR --></errorMessage>
+        <name>New_VAlidta</name>
+    </validationRules>
+    <validationRules>
+        <errorMessage><!-- nulll --></errorMessage>
+        <name>NextValid</name>
+    </validationRules>
+</CustomObjectTranslation>
