@@ -8,5 +8,13 @@
         <plural>true</plural>
         <value>B</value>
     </caseValues>
+    <quickActions>
+        <label><!-- Log A Note --></label>
+        <name>NewCompo</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Add Record --></label>
+        <name>NewQuickPage</name>
+    </quickActions>
     <startsWith>Consonant</startsWith>
 </CustomObjectTranslation>

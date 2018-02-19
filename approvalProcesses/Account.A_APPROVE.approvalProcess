@@ -27,6 +27,13 @@
     </approvalStep>
     <emailTemplate>unfiled$public/EmailSample</emailTemplate>
     <enableMobileDeviceAccess>false</enableMobileDeviceAccess>
+    <entryCriteria>
+        <criteriaItems>
+            <field>Account.kcs_dev__abc__c</field>
+            <operation>notEqual</operation>
+            <value>a</value>
+        </criteriaItems>
+    </entryCriteria>
     <finalApprovalRecordLock>true</finalApprovalRecordLock>
     <finalRejectionRecordLock>false</finalRejectionRecordLock>
     <label>A APPROVE</label>

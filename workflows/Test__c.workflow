@@ -3,10 +3,12 @@
     <fieldUpdates>
         <fullName>Test</fullName>
         <field>Test1__c</field>
+        <formula>Test1__c + &apos;Hello&apos;</formula>
         <name>Test</name>
         <notifyAssignee>false</notifyAssignee>
-        <operation>Null</operation>
-        <protected>false</protected>
+        <operation>Formula</operation>
+        <protected>true</protected>
+        <reevaluateOnChange>true</reevaluateOnChange>
     </fieldUpdates>
     <rules>
         <fullName>Test</fullName>

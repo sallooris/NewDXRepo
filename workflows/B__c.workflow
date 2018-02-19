@@ -6,8 +6,8 @@
         <description>New Eamil</description>
         <protected>false</protected>
         <recipients>
-            <recipient>kcs4u4@gmail.com</recipient>
-            <type>user</type>
+            <field>NewEmail__c</field>
+            <type>email</type>
         </recipients>
         <senderType>CurrentUser</senderType>
         <template>unfiled$public/NewDependent</template>

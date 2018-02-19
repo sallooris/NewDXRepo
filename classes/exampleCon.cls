@@ -24,4 +24,13 @@ public class exampleCon {
     }
             
     private String state = 'no';
+    Public Integer Count=0;
+    Public PageReference IncrementCounter(){
+    count++;
+    return null;
+    }
+    Public Integer getCount(){
+    return count;
+    }
+    
 }

@@ -374,6 +374,18 @@
         <trackFeedHistory>false</trackFeedHistory>
     </fields>
     <fields>
+        <fullName>FieloEE__Number_of_Contacts__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Number of Contacts</label>
+        <precision>18</precision>
+        <required>false</required>
+        <scale>0</scale>
+        <trackFeedHistory>false</trackFeedHistory>
+        <type>Number</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
         <fullName>Industry</fullName>
         <trackFeedHistory>false</trackFeedHistory>
         <type>Picklist</type>
@@ -708,6 +720,27 @@
         <showsLocation>true</showsLocation>
         <showsStatus>true</showsStatus>
         <url>http://www.genwatt.com/genwatt/billing.htm?actname={!Account_Name}</url>
+    </webLinks>
+    <webLinks>
+        <fullName>FieloEE__Convert_Account</fullName>
+        <availability>online</availability>
+        <displayType>button</displayType>
+        <linkType>javascript</linkType>
+        <masterLabel>Convert Account</masterLabel>
+        <openType>onClickJavaScript</openType>
+        <protected>false</protected>
+        <url>{!REQUIRESCRIPT (&quot;/soap/ajax/14.0/connection.js&quot;)}
+{!REQUIRESCRIPT(&quot;/soap/ajax/14.0/apex.js&quot;)}
+
+var idArray = new Array();
+idArray.push(&apos;{!Account.Id}&apos;);
+//var status = sforce.apex.execute(&apos;ContactConvertion&apos;, &apos;registerFromPersonAccont&apos;, {accountIds: idArray, registerType: null});
+var status = &apos;Ok:4352364356&apos;;
+if(status.indexOf(&quot;Ok:&quot;) != -1){
+    window.location = &apos;/apex/{!$Setup.FieloEE__PublicSettings__c.FieloEE__PackagePrefix__c}ContactConvert?contactId=&apos; + status.substring(3,status.length);
+}else{
+    alert(status);
+}</url>
     </webLinks>
     <webLinks>
         <fullName>MC4SF__MailChimp_Subscriptions</fullName>

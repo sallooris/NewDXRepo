@@ -5,7 +5,7 @@
     <letterhead>new</letterhead>
     <name>New</name>
     <style>formalLetter</style>
-    <subject>New</subject>
+    <subject>New {!Branch1__c.Name}</subject>
     <type>html</type>
     <uiType>Aloha</uiType>
 </EmailTemplate>

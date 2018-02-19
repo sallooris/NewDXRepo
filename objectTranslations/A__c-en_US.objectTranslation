@@ -9,8 +9,16 @@
         <value>A</value>
     </caseValues>
     <quickActions>
+        <label><!-- Log a Call --></label>
+        <name>NewAction143</name>
+    </quickActions>
+    <quickActions>
         <label><!-- Email --></label>
         <name>NewEmil</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Log a Call --></label>
+        <name>NewLight</name>
     </quickActions>
     <quickActions>
         <label><!-- Notification --></label>

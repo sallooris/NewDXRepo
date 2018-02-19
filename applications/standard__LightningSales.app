@@ -5,6 +5,14 @@
     <formFactors>Large</formFactors>
     <label>Sales</label>
     <navType>Standard</navType>
+    <profileActionOverrides>
+        <actionName>View</actionName>
+        <content>NewAccount1</content>
+        <formFactor>Large</formFactor>
+        <pageOrSobjectType>Account</pageOrSobjectType>
+        <type>Flexipage</type>
+        <profile>StUser1</profile>
+    </profileActionOverrides>
     <tab>standard-home</tab>
     <tab>standard-Opportunity</tab>
     <tab>standard-Lead</tab>

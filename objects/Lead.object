@@ -108,6 +108,10 @@
             <default>false</default>
         </values>
         <values>
+            <fullName>Next123</fullName>
+            <default>false</default>
+        </values>
+        <values>
             <fullName>Not Completed</fullName>
             <default>false</default>
         </values>
@@ -129,6 +133,10 @@
         </values>
         <values>
             <fullName>Closed - Not Converted</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Next123</fullName>
             <default>false</default>
         </values>
         <values>

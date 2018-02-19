@@ -68,6 +68,30 @@
         <writeRequiresMasterRead>false</writeRequiresMasterRead>
     </fields>
     <fields>
+        <fullName>D__c</fullName>
+        <deleteConstraint>SetNull</deleteConstraint>
+        <externalId>false</externalId>
+        <label>D</label>
+        <referenceTo>D__c</referenceTo>
+        <relationshipLabel>C</relationshipLabel>
+        <relationshipName>C</relationshipName>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Lookup</type>
+    </fields>
+    <fields>
+        <fullName>E__c</fullName>
+        <deleteConstraint>SetNull</deleteConstraint>
+        <externalId>false</externalId>
+        <label>E</label>
+        <referenceTo>E__c</referenceTo>
+        <relationshipLabel>C</relationshipLabel>
+        <relationshipName>C</relationshipName>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Lookup</type>
+    </fields>
+    <fields>
         <fullName>Test__c</fullName>
         <externalId>false</externalId>
         <label>Test</label>
