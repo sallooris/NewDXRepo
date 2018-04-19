@@ -28,6 +28,7 @@
         <members>standard__Chatter</members>
         <members>standard__Community</members>
         <members>standard__Content</members>
+        <members>standard__Insights</members>
         <members>standard__LightningSales</members>
         <members>standard__Marketing</members>
         <members>standard__Platform</members>
