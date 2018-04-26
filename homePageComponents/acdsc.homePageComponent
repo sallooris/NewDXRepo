@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<HomePageComponent xmlns="http://soap.sforce.com/2006/04/metadata">
+    <body>&lt;p>&amp;lt;html&amp;gt;&lt;br>Hello&lt;/p>
+
+&lt;p>&amp;lt;/html&amp;gt;&lt;/p></body>
+    <pageComponentType>htmlArea</pageComponentType>
+    <width>wide</width>
+</HomePageComponent>
