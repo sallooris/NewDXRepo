@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Package xmlns="http://soap.sforce.com/2006/04/metadata">
-    <version>41.0</version>
+    <version>40.0</version>
     <types>
         <members>AccountResponse</members>
         <members>AccountResponseResult</members>
@@ -25,5 +25,15 @@
         <members>standard__ServiceConsole</members>
         <members>standard__Sites</members>
         <name>CustomApplication</name>
+    </types>
+    <types>
+        <members>Account.Standard_Account_Duplicate_Rule</members>
+        <members>Contact.Standard_Contact_Duplicate_Rule</members>
+        <members>Lead.Standard_Lead_Duplicate_Rule</members>
+        <name>DuplicateRule</name>
+    </types>
+    <types>
+        <members>DE Default</members>
+        <name>HomePageLayout</name>
     </types>
 </Package>
