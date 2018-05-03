@@ -20,6 +20,21 @@
         <name>ApexPage</name>
     </types>
     <types>
+        <members>AppSwitcher</members>
+        <members>Salesforce1</members>
+        <name>AppMenu</name>
+    </types>
+    <types>
+        <members>Case</members>
+        <members>Lead</members>
+        <name>AssignmentRules</name>
+    </types>
+    <types>
+        <members>Case</members>
+        <members>Lead</members>
+        <name>AutoResponseRules</name>
+    </types>
+    <types>
         <members>Internal Zone</members>
         <name>Community</name>
     </types>
