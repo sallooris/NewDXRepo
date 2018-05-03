@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Layout xmlns="http://soap.sforce.com/2006/04/metadata">
+    <excludeButtons>Submit</excludeButtons>
     <feedLayout>
         <autocollapsePublisher>true</autocollapsePublisher>
         <compactFeed>true</compactFeed>
@@ -39,7 +40,7 @@
         <layoutColumns>
             <layoutItems>
                 <behavior>Readonly</behavior>
-                <field>LineItemNumber</field>
+                <field>WorkOrderNumber</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
@@ -47,21 +48,33 @@
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
-                <field>ParentWorkOrderLineItemId</field>
+                <field>ParentWorkOrderId</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
-                <field>AssetId</field>
+                <field>AccountId</field>
+            </layoutItems>
+            <layoutItems>
+                <behavior>Edit</behavior>
+                <field>CaseId</field>
             </layoutItems>
         </layoutColumns>
         <layoutColumns>
             <layoutItems>
-                <behavior>Required</behavior>
-                <field>WorkOrderId</field>
+                <behavior>Edit</behavior>
+                <field>OwnerId</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
-                <field>OrderId</field>
+                <field>Priority</field>
+            </layoutItems>
+            <layoutItems>
+                <behavior>Edit</behavior>
+                <field>ContactId</field>
+            </layoutItems>
+            <layoutItems>
+                <behavior>Edit</behavior>
+                <field>AssetId</field>
             </layoutItems>
         </layoutColumns>
         <style>TwoColumnsLeftToRight</style>
@@ -72,6 +85,10 @@
         <editHeading>true</editHeading>
         <label>Description</label>
         <layoutColumns>
+            <layoutItems>
+                <behavior>Edit</behavior>
+                <field>Subject</field>
+            </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
                 <field>Description</field>
@@ -108,11 +125,23 @@
         <layoutColumns/>
         <style>CustomLinks</style>
     </layoutSections>
+    <miniLayout>
+        <fields>WorkOrderNumber</fields>
+        <fields>Subject</fields>
+        <fields>AccountId</fields>
+        <fields>Priority</fields>
+        <fields>Status</fields>
+    </miniLayout>
     <relatedLists>
-        <fields>ContentVersionDocument</fields>
+        <fields>Name</fields>
         <fields>CreatedBy</fields>
         <fields>CreatedDate</fields>
         <relatedList>ServiceReportRelatedList</relatedList>
+    </relatedLists>
+    <relatedLists>
+        <fields>Name</fields>
+        <fields>Asset</fields>
+        <relatedList>WorkOrderLineItems</relatedList>
     </relatedLists>
     <relatedLists>
         <fields>TASK.SUBJECT</fields>
@@ -141,8 +170,11 @@
     </relatedLists>
     <relatedLists>
         <fields>Name</fields>
-        <fields>Asset</fields>
-        <relatedList>ChildWorkOrderLineItems</relatedList>
+        <fields>Subject</fields>
+        <fields>Account</fields>
+        <fields>Priority</fields>
+        <fields>Status</fields>
+        <relatedList>ChildWorkOrders</relatedList>
     </relatedLists>
     <relatedLists>
         <fields>Name</fields>

@@ -96,9 +96,11 @@
         <members>ProductItem-Product Item Layout</members>
         <members>ProductItemTransaction-Product Item Transaction Layout</members>
         <members>ProductRequired-Product Required Layout</members>
+        <members>QuickText-Quick Text Layout</members>
         <members>ResourceAbsence-Resource Absence Layout</members>
         <members>ResourcePreference-Resource Preference Layout</members>
         <members>Scorecard-Scorecard Layout</members>
+        <members>ScorecardAssociation-Scorecard Association Layout</members>
         <members>ScorecardMetric-Scorecard Metric Layout</members>
         <members>ServiceAppointment-Service Appointment Layout</members>
         <members>ServiceResource-Service Resource Layout</members>
