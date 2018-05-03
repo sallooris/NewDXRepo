@@ -31,6 +31,7 @@
         <members>standard__Chatter</members>
         <members>standard__Community</members>
         <members>standard__Content</members>
+        <members>standard__Insights</members>
         <members>standard__LightningSales</members>
         <members>standard__Marketing</members>
         <members>standard__Platform</members>
@@ -39,13 +40,6 @@
         <members>standard__ServiceConsole</members>
         <members>standard__Sites</members>
         <name>CustomApplication</name>
-    </types>
-    <types>
-        <members>Account</members>
-        <members>Campaign</members>
-        <members>Case</members>
-        <members>Opportunity</members>
-        <name>CustomObject</name>
     </types>
     <types>
         <members>Account.Standard_Account_Duplicate_Rule</members>
