@@ -1,0 +1,7 @@
+<messaging:emailTemplate subject="Hello" recipientType="Contact" relatedToType="Account">
+<messaging:plainTextEmailBody >
+Congratulations!
+{!$Label.DX_API}
+This is your new Visualforce Email Template.
+</messaging:plainTextEmailBody>
+</messaging:emailTemplate>
