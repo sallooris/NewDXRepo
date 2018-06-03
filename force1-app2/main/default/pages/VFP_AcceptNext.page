@@ -1,0 +1,174 @@
+<apex:page StandardController="Case" recordSetVar="Cases">
+    <apex:includeScript value="{!URLFor($Resource.CCCClientLibraries,'jQuery/jquery-1.11.1.min.js')}" />
+    <apex:includeScript value="{!URLFor($Resource.CCCClientLibraries,'jsforce-1.4.0/jsforce.min.js')}" />
+    <apex:includeScript value="/support/console/34.0/integration.js"/>
+    <apex:form >
+    <c:newComponent />
+        <apex:pagemessages Id="pageMessages" />
+        <apex:pageBlock >
+            <apex:pageBlockSection >
+                <apex:pageBlockSectionItem >
+               
+                    <table width="100%">
+                        <tr>
+                            <td>
+                                <center>
+                                     <div align="center" style="margin:0 auto; align:center; position: absolute;"> 
+                                        <div id="divLoader" style="margin:0 auto; align:center; position: absolute;display:inline">
+                                            <img src="/img/loading.gif" title="Please Wait…" style="margin-left: 450px;"/>
+                                            <span style="padding-left: 450px;">Loading…</span>
+                                        </div>
+                                    </div>
+                                </center>
+                            </td>
+                        </tr>
+                    </table>
+                </apex:pageblockSectionItem>
+            </apex:pageBlockSection>
+            <apex:PageBlockButtons location="Bottom" >
+                <input type="button" id="Cancel" value="{!$Label.CL00010}" class="btn" />  
+            </apex:PageBlockButtons>
+        </apex:pageBlock>
+        </apex:form>
+    <script>
+        jQuery(document).ready(function() {
+                        
+            var retURL = '{!HTMLENCODE($CurrentPage.parameters.retURL)}';
+            var listViewDescribeResult;
+            console.log( "retURL" + retURL );
+            var sParameterName  =   retURL.split('=');
+            var CaseListViewId  =   sParameterName[1];
+            if(sParameterName[1].indexOf('&') != -1){
+                CaseListViewId = sParameterName[1].substr(0,sParameterName[1].indexOf('&'));
+            }
+            var jsForceConn     =   new jsforce.Connection({ accessToken: '{!$Api.Session_Id}' });
+            var caseSObject     =   jsForceConn.sobject('Case');
+            
+            caseSObject.listview(CaseListViewId).describe().then(function(result){
+                listViewDescribeResult=result;                   
+                console.log('Finished ListViewDescribeCall');
+                console.log(listViewDescribeResult);
+                console.log('List View Query Raw: ' + listViewDescribeResult.query);
+                console.log('List View Query: ' + JSON.stringify(listViewDescribeResult.query));
+                console.log('List View WhereClause: ' + JSON.stringify(listViewDescribeResult.whereCondition));
+                var sQuery = listViewDescribeResult.query;
+                var sQueryArray;
+                var swhereConditionWithOrder;
+                var swhereCondition;
+                if(sQuery.indexOf('FROM') != -1){
+                    sQueryArray = sQuery.split('FROM');
+                    swhereConditionWithOrder = sQueryArray[1];
+                }
+                console.log('swhereConditionWithOrder: ' + swhereConditionWithOrder);
+                //swhereConditionWithOrder = swhereConditionWithOrder.replace(/['"]+/g, '');
+                if(swhereConditionWithOrder.indexOf('ORDER') != -1){
+                    swhereCondition = swhereConditionWithOrder.substr(0,swhereConditionWithOrder.indexOf('ORDER'));
+                }
+                console.log('swhereCondition: ' + swhereCondition);
+                var sListViewQuery = "SELECT Id,CaseNumber FROM " + swhereCondition + " ORDER BY CREATEDDATE ASC LIMIT 1";
+                console.log(sListViewQuery);
+                jsForceConn.query(sListViewQuery)
+                    .then(function(sListViewQueryResult){
+                        var oldestCaseId    =sListViewQueryResult.records[0].Id;
+                        var oldestCaseNum   =sListViewQueryResult.records[0].CaseNumber; 
+                        console.log('Oldest Case Id: ' + oldestCaseId);
+                        jsForceConn.sobject("Case").update({ 
+                            Id : oldestCaseId,
+                            ownerId : '{!$User.Id}' ,
+                            Status : 'In Progress' ,
+                            IsPickNextButtonUsed__c : true
+                        }, function(err, ret) {
+                            if (err || !ret.success) {
+                                var pagemessage = '<div class="message errorM3" role="alert">'
+                                pagemessage+='<table border="0" cellspacing="0" cellpadding="0" style="padding:0px;margin:0px;" class="messageTable">'
+                                pagemessage+='<tbody><tr valign="top"><td><img title="ERROR" src="/s.gif" class="msgIcon" alt="ERROR"></td><td class="messageCell"><div><span style="color:#cc0000" ><h4>&nbsp;&nbsp;Error:</h4></span>';
+                                pagemessage+='<br>&nbsp;&nbsp;' + err.message;
+                                pagemessage+='<br><br></div></td></tr><tr><td></td><td></td></tr></tbody></table></div>';                
+                                jQuery("[id$='pageMessages']").html(pagemessage); 
+                                return console.error(err, ret);
+                                //Add Error to Page 
+                            }
+                            console.log('Updated Successfully : ' + ret.id);
+                            var url = '/' + oldestCaseId;
+                            var redirectURL = "https://" + window.location.hostname + '/' + oldestCaseId;
+                            sfopen(url,oldestCaseNum);
+                        });
+                    });
+            });
+            
+            jQuery(document).ajaxStart(function() {
+                jQuery('#divLoader').css({ display:'inline'});
+                jQuery('#divLoader').show();
+                        
+            });
+
+            jQuery(document).ajaxComplete(function() {
+                jQuery('#divLoader').hide();
+                jQuery('#divLoader').css({ display:'none'});
+
+            });
+            
+            jQuery('#Cancel').click(function(){
+                var cancelURL = '{!HTMLENCODE($CurrentPage.parameters.retURL)}';
+                var cancelRedirectURL = "https://" + window.location.hostname +  cancelURL;
+                console.log(cancelRedirectURL);
+                sfopen(cancelRedirectURL,'');
+
+            });
+        });
+
+        function sfopen(url,titlepage){
+            console.log('Inside sfopen Method'); 
+            if(typeof(sforce)!='undefined' && sforce.console.isInConsole()){
+                console.log('Inside console code');
+                var primarytabid=null;
+                var subtabid=null;
+                
+                sforce.console.getEnclosingPrimaryTabId(function(result){
+                    if(result.success){
+                        primarytabid=result.id;
+                        console.log('Primary tab Id: ' + primarytabid);
+                    }
+                });
+                sforce.console.getEnclosingTabId(function(result){
+                    if(result.success){
+                        subtabid=result.id;
+                        console.log('Sub tab Id: ' + subtabid);
+                    }
+                });  
+                sforce.console.openSubtab(primarytabid, url, true,titlepage , subtabid,function(result){
+                    if(!result.success){
+                        console.log('Opened on Primary Tab');
+                        sforce.console.openPrimaryTab(primarytabid, url, true,titlepage,function(result){
+                            if(!result.success){
+                                setTimeout(window.top.location.reload(), 5000);
+                            }
+                        });
+                         sforce.console.getPrimaryTabIds(function(result){
+                            if(result.success){
+                                console.log('Primary Tab IDs: ' + result.ids);
+                            }
+                        });
+                    }
+                    else{
+                        console.log('Opened on Sub Tab');
+                    }
+                });
+                var id = '{!$CurrentPage.parameters.id}';
+                var origin = '{!$CurrentPage.parameters.origin}';
+                var consoleCheck = '{!$CurrentPage.parameters.isdtp}';
+                var consoleURL = '{!$CurrentPage.parameters.retURL}';
+                
+                console.log('id: ' + id);
+                console.log('origin: ' + origin);
+                console.log('consoleCheck: ' + consoleCheck);
+                console.log('consoleURL: ' + consoleURL);
+                sforce.console.refreshNavigationTab();
+                console.log('Refreshed');   
+            }
+            else{            
+                window.open(url,'_self');
+            }  
+        }
+    </script>
+</apex:page>
