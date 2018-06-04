@@ -1,0 +1,18 @@
+Dear {!BLANKVALUE(Contact.Name,SUBSTITUTE(LEFT(Case.SuppliedEmail, FIND('@',Case.SuppliedEmail)), '@',''))}, 
+
+Thank you for contacting Schneider Electric Customer Care. We have received your request and will respond within 8 business hours. 
+
+In order to provide us with additional details or updates regarding this inquiry, please reply to this message via email. As a valued Customer, we strive to provide you with a world class experience and welcome any feedback that you would be willing to provide. 
+
+The answers to many questions can also be found on our FAQ page at the link below. 
+http://www.schneider-electric.us/sites/us/en/support/faq/faq_main.page 
+
+Case Reference #: {!Case.CaseNumber} 
+
+Thank you again for contacting us! 
+Schneider Electric Customer Care 
+www.Schneider-Electric.com 
+
+Question: {!Case.CustomerRequest__c} 
+
+{!Case.Thread_Id}
