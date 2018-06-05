@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Test123</fullName>
+    <active>true</active>
+    <errorConditionFormula>ISNULL(C__r.Name)</errorConditionFormula>
+    <errorMessage>New Test</errorMessage>
+</ValidationRule>
