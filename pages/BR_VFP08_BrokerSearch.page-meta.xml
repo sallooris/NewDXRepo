@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ApexPage xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>34.0</apiVersion>
+    <availableInTouch>false</availableInTouch>
+    <confirmationTokenRequired>false</confirmationTokenRequired>
+    <description>This is used to search Agency and Broker Accounts</description>
+    <label>BR_VFP08_BrokerSearch</label>
+    <packageVersions>
+        <majorNumber>3</majorNumber>
+        <minorNumber>184</minorNumber>
+        <namespace>CC_CS302</namespace>
+    </packageVersions>
+</ApexPage>

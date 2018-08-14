@@ -1,0 +1,147 @@
+<apex:page controller="SGA_AP27_SearchController" title="Broker Search"  tabStyle="Account">
+    <apex:includeScript value="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"/>
+    <apex:includeScript value="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"/>
+    <apex:includeScript value="/support/console/22.0/integration.js"/>
+    
+    <script>
+        window.onkeypress=jClickEnter;
+        $j = jQuery.noConflict();
+        function jClickEnter(e){
+            var eventInstance = window.event ? event : e; 
+            var keyCode = eventInstance.charCode ? eventInstance.charCode : eventInstance.keyCode; 
+            if (keyCode == 13){ 
+                actionSearchAccount(); 
+                return false; 
+            }  
+        }
+    </script>
+    
+    <apex:sectionHeader title="Broker Search" subtitle="Broker Search using TIN, ETIN or Name"  />
+    <apex:form >
+        <apex:actionFunction action="{!doSearch}" name="actionSearchAccount" rerender="searchResultsPageBlock" status="status"/>
+       <apex:pageBlock id="pgblock">
+            <apex:pageBlockSection id="pgCustomSearch" columns="2">  
+                <apex:inputText value="{!tinText}" label="TIN"/>
+                <apex:inputText value="{!einText}" label="ETIN"/>
+                <apex:inputText value="{!nameText}" label="Account Name"/>
+            </apex:pageBlockSection>
+          
+            <apex:pageBlockButtons >
+                <apex:commandButton value="Search" action="{!doSearch}" rerender="searchResultsPageBlock" status="status" id="gobutton" />
+                <apex:commandButton id="cmdClearSearch" value="Clear" action="{!clearFields}" reRender="pgblock" />   
+            </apex:pageBlockButtons>
+        </apex:pageBlock>
+        <apex:pageBlock id="searchResultsPageBlock">
+            <apex:messages />
+            <apex:actionstatus id="status" startText="requesting...">
+                <apex:facet name="start">
+                    <div class="waitingSearchDiv" id="el_loading" style="background-color: #fbfbfb; height:100%;opacity:0.65;width:100%;">
+                        <div class="waitingHolder" style="top: 100px; width: 91px;">
+                        <img class="waitingImage" src="/resource/AjaxLoaderImage" title="Please Wait..." />
+                        <span class="waitingDescription">Loading...</span>
+                        </div>
+                    </div>
+                </apex:facet>
+            </apex:actionstatus>
+            <apex:pageBlockSection title="Account Results" id="results" columns="1" rendered="{!(results.size!=NULL)}">
+                <!-- Account Table -->
+                <apex:pageBlockTable value="{!results}" var="l">                   
+                    <apex:column headerValue="Account Name">
+                         <apex:outputLink value="/{!l.Id}">{!l.Name}</apex:outputLink>
+                    </apex:column>
+                    <apex:column value="{!l.BR_Encrypted_TIN__c}"/>
+                    <apex:column value="{!l.Employer_EIN__c}"/>
+                    <apex:column value="{!l.BR_National_Producer_Number__c}"/>
+                    <apex:column value="{!l.License_Number__c}"/>
+                    <apex:column value="{!l.Site}"/>
+                    <apex:column value="{!l.Phone}"/>                    
+                    <apex:column value="{!l.Owner.Alias}"/>
+                    <apex:column value="{!l.LastModifiedDate}"/>                    
+                </apex:pageBlockTable>
+                <apex:outputText rendered="{!(results.size = 0)}" value="Result not found" />
+            </apex:pageBlockSection>  
+            <!-- End of Account Table -->
+            <!-- Contact Table -->
+            <apex:pageBlockSection title="Contact Results" id="conresults" columns="1" collapsible="true" rendered="{!(contactList.size!=NULL)}">
+                <apex:pageBlockTable value="{!contactList}" var="c">
+                    <apex:column headerValue="Contact Name">
+                         <apex:outputLink value="/{!c.Id}">{!c.Name}</apex:outputLink>
+                    </apex:column>
+                    <apex:column value="{!c.Account.Name}"/>
+                    <apex:column value="{!c.Account.Site}"/>
+                    <apex:column value="{!c.Phone}"/>
+                    <apex:column value="{!c.Email}"/>
+                    <apex:column value="{!c.Owner.Alias}"/>
+                    <apex:column value="{!c.LastModifiedDate}"/>                  
+                </apex:pageBlockTable>
+                <apex:outputText rendered="{!(contactList.size = 0)}" value="Result not found" />
+            </apex:pageBlockSection>
+            <!-- End of Contact Table -->
+            <!-- Case Table -->
+            <apex:pageBlockSection title="Case Results" id="cresults" columns="1" collapsible="true" rendered="{!(caseList.size!=NULL)}">
+                <apex:pageBlockTable value="{!caseList}" var="c">
+                    <apex:column headerValue="Case Number">
+                         <apex:outputLink value="/{!c.Id}">{!c.CaseNumber}</apex:outputLink>
+                    </apex:column>
+                    <apex:column value="{!c.Account.Name}"/>
+                    <apex:column value="{!c.Origin}"/>
+                    <apex:column value="{!c.BR_State__c}"/>
+                    <apex:column value="{!c.Subject}"/>    
+                    <apex:column value="{!c.BR_Sub_Category__c}"/>  
+                    <apex:column value="{!c.CreatedDate}"/>  
+                    <apex:column value="{!c.Owner.Name}" headerValue="Owner Name"/>  
+                    <apex:column value="{!c.BR_HCID_GroupNumber__c}"/>      
+                    <apex:column value="{!c.LastModifiedDate}"/>            
+                </apex:pageBlockTable>
+                <apex:outputText rendered="{!(caseList.size = 0)}" value="Result not found" />
+            </apex:pageBlockSection>
+            <!-- End of Case Table -->
+            <!-- Quote Table -->
+            <apex:pageBlockSection title="Quote Results" id="qresults" columns="1" collapsible="true" rendered="{!(quoteList.size!=NULL)}">
+                <apex:pageBlockTable value="{!quoteList}" var="q">
+                    <apex:column headerValue="Quote Name">
+                         <apex:outputLink value="/{!q.Id}">{!q.Name}</apex:outputLink>
+                    </apex:column>
+                    <apex:column value="{!q.Opportunity.Name}"/>       
+                    <apex:column value="{!q.IsSyncing}"/> 
+                    <apex:column value="{!q.ExpirationDate}"/>     
+                    <apex:column value="{!q.Subtotal}"/>     
+                    <apex:column value="{!q.TotalPrice }"/>     
+                    <apex:column value="{!q.LastModifiedDate}"/>           
+                </apex:pageBlockTable>
+                <apex:outputText rendered="{!(quoteList.size = 0)}" value="Result not found" />
+            </apex:pageBlockSection>
+            <!-- End of Quote Table -->
+            <!-- Opportunity Table -->
+            <apex:pageBlockSection title="Opportunity Results" id="oresults" columns="1" collapsible="true" rendered="{!(oppList.size!=NULL)}">
+                <apex:pageBlockTable value="{!oppList}" var="o">
+                    <apex:column headerValue="Opportunity Name">
+                         <apex:outputLink value="/{!o.Id}">{!o.Name}</apex:outputLink>
+                    </apex:column>
+                    <apex:column value="{!o.Account.Name}"/>
+                    <apex:column value="{!o.Account.Site}"/>             
+                    <apex:column value="{!o.StageName}"/>
+                    <apex:column value="{!o.CloseDate}"/>
+                    <apex:column value="{!o.Owner.Alias}"/>
+                    <apex:column value="{!o.LastModifiedDate}"/>
+                </apex:pageBlockTable>
+                <apex:outputText rendered="{!(oppList.size = 0)}" value="Result not found" />
+            </apex:pageBlockSection>            
+            <!-- End of Opportunity Table -->
+            <!-- Appointment Table -->
+            <apex:pageBlockSection title="Appointment Results" id="aptresults" columns="1" collapsible="true" rendered="{!(aptList.size!=NULL)}">
+                <apex:pageBlockTable value="{!aptList}" var="apt">
+                    <apex:column headerValue="Appointment Name">
+                         <apex:outputLink value="/{!apt.Id}">{!apt.Name}</apex:outputLink>
+                    </apex:column>
+                    <apex:column value="{!apt.BR_External_Id__c}"/>
+                    <apex:column value="{!apt.BR_Number__c}"/>
+                    <apex:column value="{!apt.BR_State__c}"/>
+                    <apex:column value="{!apt.BR_Status__c}"/>
+                </apex:pageBlockTable>
+                <apex:outputText rendered="{!(aptList.size = 0)}" value="Result not found" />
+            </apex:pageBlockSection> 
+            <!-- End of Appointment Table -->
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

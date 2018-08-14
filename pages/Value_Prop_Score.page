@@ -1,0 +1,19 @@
+<apex:page controller="ValuePropController" showheader="false">
+	<apex:form >
+		<table><tr>
+		<td><apex:image width="50px" value="{!$Resource.KeepItLocal}"/></td>
+		<td><apex:outputText value="Engage at a more personal level!" style="font-weight:normal;font-size:18px"/></td>
+		</tr></table>
+		<br/>
+		&nbsp;&nbsp;<apex:outputText value="Postal Code" style="font-weight:bold"/>&nbsp;&nbsp;<apex:inputText value="{!postalCode}" style="width:70px"/>&nbsp;&nbsp;
+		<apex:commandButton value="Go" style="width:80px" action="{!goSearch}"/>&nbsp;&nbsp;
+		<apex:commandButton value="Clear" style="width:80px" action="{!clearSearch}" rendered="{!showResults}"/>
+		<br/><br/>
+		<apex:pageBlock rendered="{!showResults}" mode="mainDetail">
+			<apex:pageBlockSection title="Basic Information for {!postalCode}" collapsible="false">
+				<img src="http://www.findlocalweather.net/forecast.php?forecast=hourly&pands={!postalCode}&config=png&alt=hwicc&hwvbg=gray" border="0"  alt="Click for the latest weather forecast."/>
+				<apex:outputText value=" Lead Score - {!score}" style="font-weight:bold;color:{!leadFontColor};background-color:{!leadBackColor};font-size:18px"/>
+			</apex:pageBlockSection>
+		</apex:pageBlock>
+	</apex:form>
+</apex:page>

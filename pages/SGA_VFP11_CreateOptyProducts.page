@@ -1,0 +1,82 @@
+<!-- ************************************************************************
+ * Page Name   : SGA_VFP10_CreateOptyProducts
+ * Created By  : IDC Offshore
+ * Created Date: 9/19/2017
+ * Description : It is used to create/update Opportunity Products from
+ *               Opportunity Detail page.
+ **********************************************************************-->
+<apex:page standardController="Opportunity" extensions="SGA_AP49_CreateOptyProducts" action="{!fetchOptyProdRec}">
+    
+    <apex:sectionHeader title="{!$ObjectType.Opportunity_Products__c.label}"/>
+    <apex:form >
+        <apex:pageBlock title="{!$ObjectType.Opportunity_Products__c.label} Detail" id="pb"  >
+            <apex:pageMessages ></apex:pageMessages>
+            <apex:variable var="rowNumber" value="{!0}"/>
+            <apex:pageBlockTable id="pbTable" var="oppPrdRec" value="{!fetchOptyProdRecList}" width="100%">
+                <apex:column headerValue="No." style="width:2%; text-align:center;">
+                    <apex:outputText value="{0}" style="text-align:center;">
+                        <apex:param value="{!rowNumber+1}" />
+                    </apex:outputText>
+                </apex:column>
+                <!--<apex:column headerValue="State" style="width:5%;">
+                    <apex:inputField value="{!oppPrdRec.State__c}" />
+                </apex:column>-->
+                <apex:column headerValue="Product Type" style="width:15%;">
+                    <apex:inputField value="{!oppPrdRec.Product_Type__c}" required="true" />
+                </apex:column>
+                <apex:column style="width:10%;"><apex:facet name="header">24 Month<br/>Rate Guarantee</apex:facet>
+                    <apex:inputField value="{!oppPrdRec.X24_Month_Rate_Guarantee__c}"/>
+                </apex:column>
+                <apex:column headerValue="Current Carrier" style="width:15%;">
+                    <apex:inputField value="{!oppPrdRec.Current_Carrier__c}"/>
+                </apex:column>
+                <apex:column headerValue="Business Lost To" style="width:15%;">
+                    <apex:inputField value="{!oppPrdRec.Business_Lost_To__c}"/>
+                </apex:column>
+                <apex:column headerValue="Won/Lost Status" style="width:10%;">
+                    <apex:inputField value="{!oppPrdRec.Won_Lost_Status__c}" />
+                </apex:column>
+                <apex:column headerValue="Lost Reason" style="width:18%;" >
+                    <apex:inputField value="{!oppPrdRec.Lost_Reason__c}"/>
+                </apex:column>
+                <apex:column headerValue="Comments" style="width:18%;" >
+                    <apex:inputField value="{!oppPrdRec.Comments__c}"/>
+                </apex:column>
+                <apex:column headerValue="Action" style="width:5%;" id="DeleteBtn">
+                    <apex:actionStatus id="delStatus" >
+                        <apex:facet name="start">
+                            <apex:outputPanel >
+                                <apex:image value="{!URLFOR($Resource.AjaxLoaderImage)}" height="20px" width="20px"/>
+                            </apex:outputPanel>
+                        </apex:facet>
+                        <apex:facet name="stop">
+                            <apex:outputPanel >
+                                <apex:commandButton value="Delete" action="{!deleteRow}" reRender="pb" immediate="true" status="delStatus">
+                                    <apex:param name="rowIndex" value="{!rowNumber}"/>
+                                </apex:commandButton>
+                            </apex:outputPanel>
+                        </apex:facet>
+                    </apex:actionStatus>
+                    <apex:variable var="rowNumber" value="{!rowNumber+1}"/>
+                </apex:column>
+            </apex:pageBlockTable><br/>
+            <apex:commandButton action="{!addRow}" value="Add New" reRender="pb" immediate="true" /> <br/><br/>
+            <apex:pageBlockButtons location="Bottom">
+                    <apex:actionStatus id="status" >
+                        <apex:facet name="start">
+                            <apex:outputPanel >
+                                Please wait... <apex:image value="{!URLFOR($Resource.AjaxLoaderImage)}" height="20px" width="20px"/>
+                            </apex:outputPanel>
+                         </apex:facet>
+                        <apex:facet name="stop">
+                            <apex:outputPanel >
+                                <apex:commandButton value="Save" action="{!save}" reRender="pb" status="status"/>
+                                <apex:commandButton id="Cancel" value="Cancel" action="{!cancel}" immediate="true"/>   
+                            </apex:outputPanel>
+                        </apex:facet>
+                    </apex:actionStatus>
+              </apex:pageBlockButtons> 
+        </apex:pageBlock>
+    </apex:form>
+    
+</apex:page>

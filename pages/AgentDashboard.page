@@ -1,0 +1,7 @@
+<apex:page >
+<!--   <script type="text/javascript">
+    window.setTimeout(function(){},2000);
+  </script> -->
+
+<iframe height="900px" id="theIframe" name="theIframe" src="https://brokerportal.anthem.com/ehb/group/bkr/gen/brkhome.htm#b" width="100%"></iframe>
+</apex:page>

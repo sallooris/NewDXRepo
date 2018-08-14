@@ -1,0 +1,8 @@
+<apex:page showHeader="false" sidebar="false" controller="footerController">
+    <body>
+        <div style="position: relative; text-align: left">
+            <p style="position: fixed; bottom: 0; width:100%;"><font size="1"> {!footer} </font></p>
+        </div>
+    </body> 
+ 
+</apex:page>

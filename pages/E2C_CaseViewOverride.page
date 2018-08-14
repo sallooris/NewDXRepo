@@ -1,0 +1,84 @@
+<apex:page standardController="Case" extensions="E2C_CaseCustomEmailMessageListCtrl">
+    
+    <apex:includeScript value="{!$Resource.E2C_jsFunctions}"/>
+    <script type="text/javascript">
+        var pageLoad = window.onload;
+            window.onload = function() {
+                if (pageLoad) {
+                        pageLoad();
+                }
+                setTabTitle('{!Case.CaseNumber}');
+            }
+    </script>
+    <chatter:feed entityId="{!Case.Id}" showPublisher="true" rendered="{!isSGQuoting}" feedItemType="ChangeStatusPost"/ >
+    <apex:detail />
+
+    <apex:form >
+        <!-- added below field and rendered condition in pageblock is added by IDC Offshore -->
+        <apex:inputHidden value="{!Case.Tech_Businesstrack__c}" />
+        <apex:pageBlock title="Emails" id="emailBlock" rendered="{!NOT(isSGQuoting)}">
+            <apex:pageBlockButtons location="top">
+                <apex:commandButton action="{!sendAnEmail}" value="Send An Email" onComplete="openURL('{!redirectURL}');">
+                    <apex:param name="retURL" value="%2F{!Case.Id}" assignTo="{!retURL}"/>
+                </apex:commandButton>
+
+                <!--- just a placeholder block to enable the command button to set the param value, always hidden -->
+                <apex:pageBlock id="setParamBlock" rendered="false"></apex:pageBlock>
+            </apex:pageBlockButtons>
+
+            <apex:variable var="recordNum" value="{!1}" />
+            <apex:pageBlockTable value="{!pageEmailList}" var="email" rendered="{!emailList.size > 0}" id="emailTable">  
+                
+                <apex:column headerValue="Action" styleClass="actionColumn">
+                        <apex:commandLink action="{!reply}" onComplete="openURL('{!redirectURL}');" styleClass="actionLink" title="Reply - Record {!recordNum} - {!email.Status}">
+                            <apex:param name="emailId" value="{!email.Id}"/>
+                            <apex:param name="retURL" value="%2F{!Case.Id}" assignTo="{!retURL}"/>
+                            <apex:param name="emailFrom" value="{!email.FromAddress}"/>
+                            Reply
+                        </apex:commandLink>
+                        &nbsp;|&nbsp;
+
+                        <apex:commandLink action="{!replyToAll}" onComplete="openURL('{!redirectURL}');" styleClass="actionLink" title="Reply To All - Record {!recordNum} - {!email.Status}">
+                            <apex:param name="emailId" value="{!email.Id}"/>
+                            <apex:param name="retURL" value="%2F{!Case.Id}" assignTo="{!retURL}"/>
+                            <apex:param name="emailCC" value="{!email.CcAddress}"/>
+                            <apex:param name="emailFrom" value="{!email.FromAddress}"/>
+                            <apex:param name="emailTo" value="{!email.ToAddress}"/>
+                            Reply To All
+                        </apex:commandLink>
+                        <apex:variable var="recordNum" value="{!recordNum + 1}" />
+                </apex:column>  
+                <apex:column value="{!email.status}" headerValue="Status" styleClass=" zen-deemphasize"> </apex:column>  
+                <apex:column >
+                    <div class="bEmailStatus">
+                        <img src="{!IF(email.Incoming, '/img/emailInbound.gif', '/img/emailOutbound.gif')}"/>
+                        &nbsp;  
+                        <apex:image value="/img/emailHasAttach.gif" alt="Has Attachment" width="16" height="13" title="Has Attachment" rendered="{!email.hasAttachment}"/>
+                    </div>
+                    </apex:column>  
+                <apex:column headerValue="Subject">
+                    <a href="#" onClick="openURL('/apex/E2C_EmailViewOverride?id={!email.Id}');" style="{!IF(email.Status == 'New', 'font-weight:bold;', '')}">{!email.Subject}</a>
+                    <br/>
+                    <font style="font-style:italic;font-decoration:none;font-size:11px;">
+                       <!--{!LEFT(email.TextBody, 77)}{!IF(LEN(email.TextBody) > 77, '...', '')}-->
+                       {!TRIM(email.TextBody)}
+                    </font>
+                </apex:column>  
+                <apex:column headerValue="Email Address">   
+                    {!IF(email.Incoming, email.FromAddress, email.ToAddress)}
+                </apex:column>  
+                <apex:column value="{!email.MessageDate}" headerValue="Message Date">
+                </apex:column>
+            </apex:pageBlockTable>
+           
+            <apex:panelGrid columns="5" id="panelGrid" rendered="{!(emailList.size > 0 && hasMoreRecords)}">
+                <apex:commandLink action="{!showMore}" reRender="emailTable, emailBlock">Show more »</apex:commandlink>
+                &nbsp;|&nbsp;
+                <a href="#" onClick="openURL('/apex/E2C_EmailListCustom?id={!Case.Id}');">Go to list »</a>
+            </apex:panelGrid>
+
+            <apex:outputText rendered="{!NOT(emailList.size > 0)}"> No Emails Available </apex:outputText>
+
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

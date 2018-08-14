@@ -1,0 +1,11 @@
+<apex:page standardController="Account" extensions="QuoteCanvasExt">
+   <apex:form >
+        <apex:sectionHeader title="Quoting in Producer Toolbox"/>
+        <apex:pageBlock >
+        <apex:canvasApp applicationName="QuoteAppForPilot" width="100%" height="730" parameters="{!accountJSON}" scrolling="yes"/>
+            <apex:pageBlockButtons location="bottom">
+                <apex:commandButton value="Back To Salesforce" action="{!backMethod}"/>            
+             </apex:pageBlockButtons>
+         </apex:pageBlock>
+    </apex:form>
+</apex:page>

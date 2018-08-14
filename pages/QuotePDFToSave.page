@@ -1,0 +1,20 @@
+<apex:page standardController="Quote" 
+    applyBodyTag="false" sidebar="false" showHeader="false" standardStylesheets="false" renderAs="pdf" extensions="pdfController" action="{!attachQuote}">
+    
+    <head>
+        <style>
+        <apex:stylesheet value="{!URLFOR($Resource.QuotePDFCss)}"/>
+        body {
+            background-image: url("{!borderUpper}");
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-position: upper-left;
+        }
+        
+        </style>
+        
+    </head>
+    <body>
+    <apex:include pageName="QuotePdf"/>
+    </body>
+</apex:page>

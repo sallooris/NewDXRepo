@@ -1,0 +1,73 @@
+<apex:page controller="ManageMyBrokersController" >
+    <style>
+        .tableContainer
+        {
+            height:100%; 
+            width: 80%;
+            overflow: auto;
+            margin-left:5%; 
+            margin-right:15%;
+        }       
+    </style>
+    <apex:form > 
+    
+        <apex:sectionHeader title="Manage my brokers"/>  
+        <apex:pageBlock id="pageblock" rendered="{!IF(brokersList.size>0, true, false)}" >
+            
+            <apex:pageBlockButtons location="top" >
+                <apex:actionStatus id="SaveButtonStatus">
+                    <apex:facet name="stop">
+                        <apex:outputPanel >
+                            <apex:commandButton action="{!save}" value="Save" status="SaveButtonStatus" reRender="pageblock"/>
+                            <apex:commandButton action="{!cancel}" value="Cancel" immediate="true" reRender="pageblock"/>
+                        </apex:outputPanel>
+                    </apex:facet>
+                    <apex:facet name="start">
+                        <apex:outputPanel >
+                            <apex:commandButton value="Saving..." disabled="true" />
+                            <apex:commandButton value="Saving..." disabled="true" />
+                        </apex:outputPanel>
+                    </apex:facet>
+                </apex:actionStatus>              
+            </apex:pageBlockButtons>
+        
+            <apex:pageMessages />
+        
+            <apex:pageBlockSection columns="1"  collapsible="false" >
+                <apex:outputPanel styleClass="tableContainer" layout="block"  >
+                    <apex:pageBlockTable value="{!brokersList}"  var="broker"    columnsWidth="20%,20%,20%,20%,20%" >
+
+                        <apex:column value="{!broker.Name}" headerValue="Broker Name"/>
+
+                        <apex:column headerValue="{!$ObjectType.User.fields.Deactivate_Broker__c.Label}">
+                            <apex:inputField value="{!broker.Deactivate_Broker__c}"/>
+                        </apex:column> 
+                        
+                        <apex:column headerValue="{!$ObjectType.User.fields.Out_of_office__c.Label}">
+                            <apex:inputField value="{!broker.Out_of_office__c}"/>
+                        </apex:column> 
+            
+                        <apex:column headerValue="{!$ObjectType.User.fields.IND__c .Label}">
+                            <apex:inputCheckbox value="{!broker.IND__c }"/>
+                        </apex:column> 
+                        
+                        <apex:column headerValue="{!$ObjectType.User.fields.IND_Only__c.Label}" >
+                                <apex:inputCheckbox value="{!broker.IND_Only__c}" />                            
+                        </apex:column>                         
+                        
+                        <apex:column headerValue="{!$ObjectType.User.fields.Back_up__c .Label}">
+                            <apex:outputField value="{!broker.Back_up__c}"/>
+                        </apex:column>                                        
+            
+                        <apex:column headerValue="{!$ObjectType.User.fields.Language__c.Label}">
+                            <apex:inputField value="{!broker.Language__c}"/>
+                        </apex:column> 
+
+                    </apex:pageblocktable> 
+                </apex:outputPanel>
+            </apex:pageBlockSection> 
+        </apex:pageBlock>
+        <apex:pageMessages rendered="{!IF(brokersList.size>0, false, true)}" />
+    </apex:form> 
+     
+</apex:page>

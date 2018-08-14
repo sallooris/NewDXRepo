@@ -1,0 +1,2659 @@
+<apex:page showHeader="{!showHeader}" standardStylesheets="true"
+    controller="CC_CS302.CCSearchController" cache="true" sidebar="false" contentType="text/html; charset=utf-8">
+   
+    <!--Minified and consolidated JS files -->
+    <apex:includeScript value="{!URLFOR($Resource.CC_CS302__CC_JS_CSS, '/js/js.build.min.js')}" />
+
+    <!--Minified and consolidated CSS files -->
+    <apex:stylesheet value="{!URLFOR($Resource.CC_CS302__CC_JS_CSS,'/css/minified_css_file.css')}" />
+    
+    <apex:includeScript value="/support/console/22.0/integration.js"/>
+    <apex:includeScript value="/soap/ajax/17.0/connection.js" />
+
+
+    <script>
+
+        (function () {
+         
+        var customDateDDMMMYYYYToOrd = function (date) {
+            "use strict"; //let's avoid tom-foolery in this function
+            // Convert to a number YYYYMMDD which we can use to order
+            var dateParts = date.split(/-/);
+            return (dateParts[2] * 10000) + ($.inArray(dateParts[1].toUpperCase(), ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"]) * 100) + (dateParts[0]*1);
+        };
+         
+        // This will help DataTables magic detect the "dd-MMM-yyyy" format; Unshift
+        // so that it's the first data type (so it takes priority over existing)
+        jQuery.fn.dataTableExt.aTypes.unshift(
+            function (sData) {
+                "use strict"; //let's avoid tom-foolery in this function
+                if (/^([0-2]?\d|3[0-1])-(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)-\d{4}/i.test(sData)) {
+                    return 'date-dd-mmm-yyyy';
+                }
+                return null;
+            }
+        );
+         
+        // define the sorts
+        jQuery.fn.dataTableExt.oSort['date-dd-mmm-yyyy-asc'] = function (a, b) {
+            "use strict"; //let's avoid tom-foolery in this function
+            var ordA = customDateDDMMMYYYYToOrd(a),
+                ordB = customDateDDMMMYYYYToOrd(b);
+            return (ordA < ordB) ? -1 : ((ordA > ordB) ? 1 : 0);
+        };
+         
+        jQuery.fn.dataTableExt.oSort['date-dd-mmm-yyyy-desc'] = function (a, b) {
+            "use strict"; //let's avoid tom-foolery in this function
+            var ordA = customDateDDMMMYYYYToOrd(a),
+                ordB = customDateDDMMMYYYYToOrd(b);
+            return (ordA < ordB) ? 1 : ((ordA > ordB) ? -1 : 0);
+        };
+         
+        })();
+        
+        jQuery.extend( jQuery.fn.dataTableExt.oSort, {
+            "de_datetime-asc": function ( a, b ) {
+                var x, y;
+                if ($.trim(a) !== '') {
+                    var deDatea = $.trim(a).split(' ');
+                    var deTimea = deDatea[1].split(':');
+                    var deDatea2 = deDatea[0].split('.');
+                    x = (deDatea2[2] + deDatea2[1] + deDatea2[0] + deTimea[0] + deTimea[1]) * 1;
+                } else {
+                    x = Infinity; // = l'an 1000 ...
+                }
+         
+                if ($.trim(b) !== '') {
+                    var deDateb = $.trim(b).split(' ');
+                    var deTimeb = deDateb[1].split(':');
+                    deDateb = deDateb[0].split('.');
+                    y = (deDateb[2] + deDateb[1] + deDateb[0] + deTimeb[0] + deTimeb[1]) * 1;
+                } else {
+                    y = Infinity;
+                }
+                var z = ((x < y) ? -1 : ((x > y) ? 1 : 0));
+                return z;
+            },
+         
+            "de_datetime-desc": function ( a, b ) {
+                var x, y;
+                if ($.trim(a) !== '') {
+                    var deDatea = $.trim(a).split(' ');
+                    var deTimea = deDatea[1].split(':');
+                    var deDatea2 = deDatea[0].split('.');
+                    x = (deDatea2[2] + deDatea2[1] + deDatea2[0] + deTimea[0] + deTimea[1]) * 1;
+                } else {
+                    x = Infinity;
+                }
+         
+                if ($.trim(b) !== '') {
+                    var deDateb = $.trim(b).split(' ');
+                    var deTimeb = deDateb[1].split(':');
+                    deDateb = deDateb[0].split('.');
+                    y = (deDateb[2] + deDateb[1] + deDateb[0] + deTimeb[0] + deTimeb[1]) * 1;
+                } else {
+                    y = Infinity;
+                }
+                var z = ((x < y) ? 1 : ((x > y) ? -1 : 0));
+                return z;
+            }
+        } );
+        
+        jQuery.extend( jQuery.fn.dataTableExt.oSort, {
+            "date-eu-pre": function ( date ) {
+                date = date.replace(" ", "");
+                var eu_date, year;
+                 
+                if (date == '') {
+                    return 0;
+                }
+         
+                if (date.indexOf('.') > 0) {
+                    /*date a, format dd.mn.(yyyy) ; (year is optional)*/
+                    eu_date = date.split('.');
+                } else {
+                    /*date a, format dd/mn/(yyyy) ; (year is optional)*/
+                    eu_date = date.split('/');
+                }
+         
+                /*year (optional)*/
+                if (eu_date[2]) {
+                    year = eu_date[2];
+                } else {
+                    year = 0;
+                }
+         
+                /*month*/
+                var month = eu_date[1];
+                if (month.length == 1) {
+                    month = 0+month;
+                }
+         
+                /*day*/
+                var day = eu_date[0];
+                if (day.length == 1) {
+                    day = 0+day;
+                }
+         
+                return (year + month + day) * 1;
+            },
+         
+            "date-eu-asc": function ( a, b ) {
+                return ((a < b) ? -1 : ((a > b) ? 1 : 0));
+            },
+         
+            "date-eu-desc": function ( a, b ) {
+                return ((a < b) ? 1 : ((a > b) ? -1 : 0));
+            }
+        } );
+        
+        jQuery.extend( jQuery.fn.dataTableExt.oSort, {
+            "date-ind-pre": function ( a) {
+                var x;
+            if (jq.trim(a) != '') {
+                var frDatea = jq.trim(a).split(' ');
+                var frTimea = (undefined != frDatea[1]) ? frDatea[1].split(':') : [00,00,00];
+                var frDatea2 = frDatea[0].split('/');
+                var year = frDatea2[2] * 60 * 24 * 366;
+                var month = frDatea2[1] * 60 * 24 * 31;
+                var day = frDatea2[0] * 60 * 24;
+                var hour = frTimea[0];
+                var minute = frTimea[1];
+                /*var second = frTimea[2];*/
+                var ampm = frDatea[2];
+ 
+                if (day < 10) {
+                    day = '0' + day;
+                }
+ 
+                if (ampm == 'PM' && hour < 12) {
+                    hour = parseInt(hour, 10) + 12;
+                }
+ 
+                if (hour < 10) {
+                    hour = '0' + hour;
+                }
+                var hour1 = hour * 60;
+                x = (year + month + day + hour1 + minute) * 1;
+            } else {
+                var x = 99999999999999999;
+            }
+ 
+            return x;
+            },
+         
+            "date-ind-asc": function ( a, b ) {
+                return ((a < b) ? -1 : ((a > b) ? 1 : 0));
+            },
+         
+            "date-ind-desc": function ( a, b ) {
+                return ((a < b) ? 1 : ((a > b) ? -1 : 0));
+            }
+        } );
+        
+        jQuery.extend( jQuery.fn.dataTableExt.oSort, {
+            "date-usa-pre": function ( a) {
+                var x;
+            if (jq.trim(a) != '') {
+                var frDatea = jq.trim(a).split(' ');
+                var frTimea = (undefined != frDatea[1]) ? frDatea[1].split(':') : [00,00,00];
+                var frDatea2 = frDatea[0].split('/');
+                var year = frDatea2[2] * 60 * 24 * 366;
+                var month = frDatea2[0] * 60 * 24 * 31;
+                var day = frDatea2[1] * 60 * 24;
+                var hour = frTimea[0];
+                var minute = frTimea[1];
+                /*var second = frTimea[2];*/
+                var ampm = frDatea[2];
+ 
+                if (day < 10) {
+                    day = '0' + day;
+                }
+ 
+                if (ampm == 'PM' && hour < 12) {
+                    hour = parseInt(hour, 10) + 12;
+                }
+ 
+                if (hour < 10) {
+                    hour = '0' + hour;
+                }
+                var hour1 = hour * 60;
+                x = (year + month + day + hour1 + minute) * 1;
+            } else {
+                var x = 99999999999999999;
+            }
+ 
+            return x;
+            },
+         
+            "date-usa-asc": function ( a, b ) {
+                return ((a < b) ? -1 : ((a > b) ? 1 : 0));
+            },
+         
+            "date-usa-desc": function ( a, b ) {
+                return ((a < b) ? 1 : ((a > b) ? -1 : 0));
+            }
+        } );
+        
+        jQuery.extend( jQuery.fn.dataTableExt.oSort, {
+            "date-euro-pre": function ( a ) {
+                var x;
+         
+                if ( $.trim(a) !== '' ) {
+                    var frDatea = $.trim(a).split(' ');
+                    var frTimea = frDatea[1].split(':');
+                    var frDatea2 = frDatea[0].split('/');
+                    x = (frDatea2[2] + frDatea2[1] + frDatea2[0] + frTimea[0] + frTimea[1] + frTimea[2]) * 1;
+                }
+                else {
+                    x = Infinity;
+                }
+         
+                return x;
+            },
+         
+            "date-euro-asc": function ( a, b ) {
+                return a - b;
+            },
+         
+            "date-euro-desc": function ( a, b ) {
+                return b - a;
+            }
+        } );
+        
+        jQuery.extend( jQuery.fn.dataTableExt.oSort, {
+            "date-uk-pre": function ( a ) {
+                var ukDatea = a.split('/');
+                return (ukDatea[2] + ukDatea[1] + ukDatea[0]) * 1;
+            },
+         
+            "date-uk-asc": function ( a, b ) {
+                return ((a < b) ? -1 : ((a > b) ? 1 : 0));
+            },
+         
+            "date-uk-desc": function ( a, b ) {
+                return ((a < b) ? 1 : ((a > b) ? -1 : 0));
+            }
+        } );
+        
+        jQuery.extend(jQuery.fn.dataTableExt.oSort, {
+            "date-us-pre": function (a) {
+        if (a == '') {
+            return 0;
+        }
+                var b = a.match(/(\d{1,2})\/(\d{1,2})\/(\d{2,4})/),
+                    month = b[1],
+                    day = b[2],
+                    year = b[3];
+        
+                if (year.length == 2) {
+                    if (parseInt(year, 10) < 70) year = '20' + year;
+                    else year = '19' + year;
+                }
+                if (month.length == 1) month = '0' + month;
+                if (day.length == 1) day = '0' + day;
+        
+                var tt = year + month + day;
+                return tt;
+            },
+            "date-us-asc": function (a, b) {
+                return a - b;
+            },
+        
+            "date-us-desc": function (a, b) {
+                return b - a;
+            }
+        });
+
+    </script>
+
+    <style>
+    
+        input[type=text]::-ms-clear{
+            display: none;
+        }
+    
+        .search2TextInputContainer, .search2SubmitBtnContainer, .searchMoreOptions {
+        display: inline-block;
+        vertical-align: middle;
+        }
+
+        .queryText {
+        border: 1px solid #b6b6b6;
+        padding: 3px 5px 3px 5px;
+        width: 280px;
+        font-size: 100%;
+        -moz-border-radius: 5px;
+        -webkit-border-radius: 5px;
+        -moz-box-shadow: 0 1px 1px #969696 inset;
+        height: {!searchTextSize};
+        }
+        .centered {
+            margin: 0 auto;
+            text-align: center;
+            width: 100%;
+        }
+    
+        .ColVis {
+            float: left;
+            height: 20px;
+            width: 200px;
+            margin-left: 15px;
+            margin-bottom: 10px;
+        }
+    
+        table.dataTable thead th {
+            padding: 5px;
+        }
+        
+        .dataTables_paginate {
+            margin-top: 10px;
+        }
+    
+        .ColVis_Button {
+            height: 24px;
+            margin: 0px;
+            position: relative;
+            float: left;
+            margin-left: 30px;
+            margin-right: 0px;
+            padding: 4px;
+            vertical-align: center;
+            background-color: #fff;
+            border: 1px solid #d0d0d0;
+            cursor: pointer;
+            *cursor: hand;
+        }
+        
+        button.ColVis_Button {
+            text-align: left;
+            vertical-align: center;
+        }
+        
+        div.ColVis_collection button.ColVis_Button:hover {
+            border: 1px solid #999;
+            background-color: #f0f0f0;
+            text-align: left;
+        }
+        
+        span.ColVis_radio {
+            display: inline-block;
+            width: 30px;
+            align: left;
+        }
+        
+        div.ColVis_collection button.ColVis_Button {
+            background-color: white;
+            width: 100%;
+            float: none;
+            margin-bottom: 2px;
+            margin-left: 0px;
+            text-align: left;
+            vertical-align: center;
+        }
+        
+        #customSearchWrapper {
+            clear: both;
+            width: 100%;
+            margin: 0 auto;
+        }
+        
+        #ccSearchResultsDiv {
+            min-width: 100%;
+            right: 0px;
+            position: relative;
+        }
+        
+        #searchTr {
+            min-width: 100%;
+        }
+        
+        #sidebarDiv {
+            width: 200px;
+            position: relative;
+        }
+        
+        #sidebarTd {
+            width: 10%;
+            vertical-align: top;
+            position: relative;
+        }
+        
+        
+        #searchResultsTd {
+            min-width: 75%;
+            vertical-align: top;
+            padding-left: 10px;
+        }
+        
+        #ccSearchResultsHeader {
+            padding: 5px 10px;
+        }
+        
+        .ccLinkSelector {
+            text-decoration: none;
+            display: block;
+            position: relative;
+            padding: 4px 5px;
+            -moz-border-radius: 5px;
+            -webkit-border-radius: 5px;
+            margin-bottom: 5px;
+        }
+        
+        #recordsTab,#ChattersTab {
+            border: 1px solid #d4dadc;
+            margin-bottom: 10px;
+            position: relative;
+        }
+        
+        .ccLinkSelector a:link {
+            text-decoration: none;
+        }
+        
+        .ccLinkSelector a:hover {
+            text-decoration: underline;
+        }
+        
+        .ccHighlight {
+            vertical-align: middle;
+            color: #333435;
+            font-weight: bold;
+            background-color: #cfeef8;
+        }
+        
+        .toggleoff {
+            vertical-align: middle;
+            font-weight: normal;
+            background-color: #f7f8f9;
+        }
+        
+        .recordsHeader {
+            text-decoration: none;
+        }
+        
+        .dataTable {
+            word-wrap: normal;
+        }
+        .homeTab .secondaryPalette {
+           background-color: #ffffff;
+        }
+        .sorting,.sorting_asc {
+            background-color: #F2F3F3;
+            background-image: none;
+            background-origin: padding-box;
+            background-size: auto;
+            border-bottom-color: #E0E3E5;
+            border-bottom-style: solid;
+            border-bottom-width: 1px;
+            border-collapse: separate;
+            border-left-color: #E0E3E5;
+            border-left-style: solid;
+            border-left-width: 1px;
+            border-right-color: #E0E3E5;
+            border-right-style: solid;
+            border-right-width: 0.5px;
+            border-top-color: #E0E3E5;
+            border-top-style: solid;
+            border-top-width: 1px;
+        }
+    </style>
+
+
+
+    <script type="text/javascript" charset="UTF-8">
+    
+      var jq = jQuery.noConflict();
+      jq("#phSearchContainer").hide(); 
+      jq('#buttonDiv').hide();
+           
+      var typeKeysAsJSON ;
+      var typeKeyToIdListMap = {};
+      var enabledTypeKeys = [];
+      var tabelKeyVsLabelMap = {};
+      var tabelKeyVsSearchRequestFiredMap = {};
+      var typeKeyToDpsMaxCountMap = {};
+      var paginationRequest = false;
+      var resultsContentPresent = false;
+      var paramConfigMap = {};
+      var finishedTypeKeys = [];
+      var isCodeVsSymbolMap = {};
+      var totalNumberOfQueries = 0;
+      var totalNumberOfResultSets = 0;
+      var resultsFound = false;
+      var minSearchTextLength = {!minSearchTextLength};
+      var minWildCardSearchTextLength = {!minWildCardSearchTextLength};
+      var maximumNoOfSearchWordsPermitted = {!maximumNoOfSearchWordsPermitted};
+      var maxColumns = {!maxColumns};
+      var showSideBarObjects = {!showSideBarObjects} ;
+      var userCanManageSettings = {!userCanManageSettings};
+      var userCanSavePreferences = {!userCanSavePreferences};
+      var chatterEnabled  = {!chatterEnabled};
+      var sortedBy = '{!JSENCODE(sortedBy)}';
+      var queryBatchSize = {!queryBatchSize};
+      var enableSearchFieldOptions = {!enableSearchFieldOptions};
+      var chatterSearchStringUrl = '{!JSENCODE(chatterSearchStringUrl)}';
+      var paginationSize = {!paginationSize};
+      var enabledTypeKeysConfigured = '{!JSENCODE(EnabledTypeKeysAsJson)}';
+      var enabledFieldInfoListConfigured = '{!JSENCODE(FieldInfoListAsJson)}';
+      
+      var dateFormat = '{!JSENCODE(dateFormat)}';
+      var queryFields = '{!JSENCODE(globalQueryFields)}';
+      var openNewTabInServiceConsole = {!openNewTabInServiceConsole};
+      var displayLogs = {!displayLogs};     
+      var enableEditOption = {!enableEditOption};
+      var articlesLanguage = "{!JSENCODE(articlesLanguage)}";
+      var enabledTypeKeysConfiguredFromJson = jq.evalJSON(enabledTypeKeysConfigured);
+      var enabledFieldInfoListConfiguredFromJson = jq.evalJSON(enabledFieldInfoListConfigured);
+      var advanceSearchLinkClicked = false;  
+      var dSearch = true;  
+      var totalNumberOfResp = 0; 
+      var totalNumberOfReq = 0; 
+      var sortedByRelevancy = {!sortedByRelevancy};
+      var config4chatter = {!config4chatter};
+      var enableArticleSorting = {!enableArticleSorting };
+      var sitePrefix = '{!$Site.Prefix}';
+      var rewrittenResultsForDuplicates = {};
+      var knowledgeArticleVersion = "KnowledgeArticleVersion";
+            
+      
+      if (sforce.console && sforce.console.isInConsole()){
+          var searchterm = getParameter('str');
+          if(searchterm != null && searchterm.trim().length>0)
+          {sforce.console.setTabTitle(searchterm);}
+      }
+      
+      var sortByDate = function(inputJSON, sortBy){
+        if(sortBy == 'LastModifiedDate'){
+            inputJSON.sort(function(a, b) {
+                a = new Date(a[a.length-2]);
+                b = new Date(b[b.length-2]);
+                return a>b ? -1 : a<b ? 1 : 0;
+            });
+        }else{
+            inputJSON.sort(function(a, b) {
+                a = new Date(a[a.length-3]);
+                b = new Date(b[b.length-3]);
+                return a>b ? -1 : a<b ? 1 : 0;
+            });
+        }
+        return inputJSON;
+      }
+      
+      var relevantSortedArray = function(searchString, inputJSON, localSearchString){
+          try{
+            var localSearchStringArrayObj= jq.evalJSON(localSearchString);
+            var localsstringConfig='';
+            if(localSearchStringArrayObj){
+                localsstringConfig = localSearchStringArrayObj[0];
+            }
+            if(!(localsstringConfig.queryType != null && localsstringConfig.queryType == 'SOQLOBJIDS')){
+                searchString = searchString.toLowerCase();
+                if(searchString.slice(-1) == "*"){
+                    searchString = searchString.substr(0, searchString.length-1);
+                }
+                if((searchString[0]=="\""&&searchString.slice(-1)=="\"") || (searchString[0]=="'"&&searchString.slice(-1)=="'")){
+                    searchString = searchString.substr(1, searchString.length-2);
+                }
+                var relevanceScoreArray = [];
+                searchString = searchString.trim();
+                var searchStringQueriesArray = searchString.split(/ OR | or | AND | and | NOT IN | not in /);
+                if(searchStringQueriesArray.length<=1){
+                    relevanceScoreArray = scoreForIndividualSearchString(searchString,inputJSON);
+                }else{
+                    var relevanceScoresArray = [];
+                    var temprelevanceScoreArray = [];
+                    for(var i=0;i<searchStringQueriesArray.length;i++){
+                        if(searchStringQueriesArray[i] != ""){
+                            temprelevanceScoreArray = scoreForIndividualSearchString(searchStringQueriesArray[i],inputJSON);
+                            relevanceScoresArray.push(temprelevanceScoreArray);
+                        }
+                    }
+                    var numOfQueries = relevanceScoresArray.length;
+                    for(var i=0;i<temprelevanceScoreArray.length;i++){
+                        relevanceScoreArray[i] = 0;
+                        for(var j=0;j<numOfQueries;j++){
+                            relevanceScoreArray[i] = relevanceScoreArray[i] + relevanceScoresArray[j][i];
+                        }
+                    }
+                }
+                 var relevantScoreVsJSONMap = [];
+                 for(var i = 0; i<relevanceScoreArray.length;i++){
+                   relevantScoreVsJSONMap[i] = {};
+                   relevantScoreVsJSONMap[i].score = relevanceScoreArray[i];
+                   relevantScoreVsJSONMap[i].arr = [];
+                   relevantScoreVsJSONMap[i].arr = inputJSON[i];
+                 }
+                 relevantScoreVsJSONMap.sort(function(a,b){return parseInt(b.score) - parseInt(a.score)});
+                 var sortedJSON = [];
+                 for(var i=0;i<relevantScoreVsJSONMap.length;i++){
+                    sortedJSON.push(relevantScoreVsJSONMap[i].arr);
+                 }
+                 return sortedJSON;
+            }
+          }catch(e){}
+          return inputJSON;
+        }
+
+        
+       var scoreForIndividualSearchString = function(searchString, inputJSON){
+            if(searchString.slice(-1) == "*"){
+                searchString = searchString.substr(0, searchString.length-1);
+            }
+            if(searchString[0] == "*"){
+                searchString = searchString.substr(1, searchString.length-1);
+            }
+            searchString = searchString.replace(" * "," ");
+            searchString = searchString.replace("* "," ");
+            searchString = searchString.replace(" *"," ");
+            var relevanceScoreArray = [];
+            searchString = searchString.trim();
+            var searchStringWordsArray = searchString.split(/ /);
+            for(var i = 0; i < inputJSON.length;i++){
+            tempScore = -1;
+            temp = -1;
+            for(var j=0;j<inputJSON[i].length;j++){
+                var compareColumn = "";
+                if(inputJSON[i][j] != null){
+                    compareColumn = inputJSON[i][j].toString();
+                }
+                if(tempScore == 32000){
+                    break;
+                }
+                var anchortagRegex = /<a\s+[^<>]*>(.*?)<\/a>/g;
+                if(compareColumn!=null){
+                    regexMatched = anchortagRegex.exec(compareColumn);
+                }else{
+                    regexMatched = anchortagRegex.exec("");
+                }
+                var compareString = "";
+                if(regexMatched != null){
+                    compareString = regexMatched[1];
+                }else{
+                    if(compareColumn!=null){
+                        compareString = compareColumn;
+                    }else{
+                        compareString = "";
+                    }
+                }
+                compareString = compareString.toLowerCase();
+                    if(compareString.indexOf(searchString) != -1){
+                        if(compareString.length == searchString.length){
+                            temp = 32000;
+                        }else{
+                            temp = 31999 - compareString.indexOf(searchString);
+                        }
+                    }else{
+                        if(tempScore <=10000){
+                            containsAllWords = true;
+                            var count = 0;
+                            for(var k=0;k<searchStringWordsArray.length;k++){
+                                var tempCount = 0;
+                                if(searchStringWordsArray[k].trim().length>1){
+                                    var re = new RegExp(searchStringWordsArray[k].trim().replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\\\$&"),"g");
+                                    tempCount = compareString.match(re);
+                                    if(tempCount != null){
+                                        count = count + tempCount.length;
+                                    }else{
+                                        containsAllWords = false;
+                                    }
+                                }
+                            }
+                            temp = count;
+                            if(containsAllWords){
+                                temp = temp + 1000;
+                            }
+                        }
+                    }
+                    if(temp>tempScore){
+                        tempScore = temp;
+                    }
+                }
+                relevanceScoreArray[i] = tempScore;
+            }
+            return relevanceScoreArray;
+        }
+
+      function openPrimaryTab(id,title) {
+            if(id){
+                id = jq.trim(id);
+                if(id && id.indexOf("null") == 0){
+                    id = id.substring("null".length,id.length);
+                }
+                if(id && id.indexOf("/") == 0){
+                    id = id.substring("/".length,id.length);
+                }
+                
+                if (sforce.console && sforce.console.isInConsole()) {
+                    sforce.console.openPrimaryTab(null, '/' + id, true, title,openSuccess,id.substring(0,15));
+                } else {
+                   if (window.event.ctrlKey || window.event.shiftKey) {
+                    window.open("/"+id); 
+                    }
+                   else{
+                    window.location.href = ( "/"+id );
+                    }
+                }
+            }
+      }
+      
+      var openSuccess = function openSuccess(result) {
+            //Report whether opening the new tab was successful
+            if (result.success == true) {
+               //alert('Primary tab successfully opened');
+            } else {
+                //alert('Primary tab cannot be opened');
+            }
+      };       
+     
+        
+      jq(document).ready(function()
+      {
+           jq("#phSearchContainer").hide(); 
+           jq('#buttonDiv').hide();
+           enabledTypeKeys = enabledTypeKeysConfiguredFromJson;
+           
+            var head = document.getElementsByTagName('head')[0],
+            script = document.createElement('meta');
+
+            jq(script).attr('http-equiv' , 'X-UA-Compatible');    
+            jq(script).attr('content' , 'IE=9; IE=8; IE=7; IE=EDGE');    
+            
+            head.insertBefore(script, head.firstChild);
+            
+       });
+             
+     function displayTabs(tabs) {
+         if(typeof tabs !== 'undefined' && tabs){            
+            for ( var i = 0; i < tabs.length; i++) {
+             var tab = tabs[i];
+             if(typeof tab !== 'undefined' && tab){            
+                 var objName = tab.sobjectName;
+                 var objLabel = tab.label;
+                 if(objName != ''){
+                     var typeKeyConfig = new Object();
+                     typeKeyConfig.name = objName;
+                     typeKeyConfig.labelPlural = objLabel;
+                     typeKeyConfig.selected = true;
+                     typeKeyConfig.enabled = true;
+                     typeKeyConfig.fieldDefinitions = [];
+                     tabelKeyVsLabelMap[objName.toLowerCase()] = objLabel;
+                 }
+             }
+         }
+        } 
+     }
+     
+    function format_number(number, decimalPlaces) {
+                var output = '';
+                output += currency_format(number, decimalPlaces, '.', '' );
+                return output;
+     }
+     
+     function format_currency(amount, iso) {
+        if(typeof amount != "undefined" && amount != null && amount.trim() != ''){
+            //alert('In format_currency method  and amount :' + amount + ' iso : ' + iso );
+            var currency_before = '';
+            var output = '';
+            var amountAfterSplit=amount.split('-');
+            if(amountAfterSplit.length>1)
+            {
+                currency_before = amountAfterSplit[0];
+                amount=amountAfterSplit[1]
+            }
+            
+            output += currency_before;
+            output += currency_format(amount, {!currencyDecimalPlaces}, '.', ',' );
+            //alert('Final format_currency output is : '+ output);
+            return output;
+        } else {
+            //alert('found empty');
+            return amount;
+        }
+    }
+            
+            function currency_format(number, decimals, dec_point, thousands_sep) {
+               decimalvalue=number.split('\.')[1];
+               s=number.split('\.')[0];
+               number = (number + '').replace(/[^0-9+\-Ee.]/g, '');
+                var n = !isFinite(+number) ? 0 : +number,
+                    prec = !isFinite(+decimals) ? 0 : Math.abs(decimals),
+                    sep = (typeof thousands_sep === 'undefined') ? ',' : thousands_sep,
+                    dec = (typeof dec_point === 'undefined') ? '.' : dec_point;
+                                                       
+                if (s.length > 3) {
+                    s = s.replace(/\B(?=(?:\d{3})+(?!\d))/g, sep);
+                }
+                decimalvalue=(typeof decimalvalue === 'undefined') ? '' : decimalvalue;
+                if(decimalvalue!='')
+                {
+                   if(decimalvalue.length < prec) {
+                    decimalvalue += new Array(prec - decimalvalue.length + 1).join('0');
+                   }else if(decimalvalue.length >= prec){
+                    decimalvalue=decimalvalue.substring(0,prec);
+                   }
+                }                             
+                return (decimalvalue==='') ? s : s+dec+decimalvalue;
+            }
+
+            isNumber: function isNumber(n) {
+                return !isNaN(parseFloat(n)) && isFinite(n);
+            }
+    
+            // IMPORTANT: ////jq('.logDiv').append doesn't work with IE
+            var cacheSynchronized = false;
+            
+            var nameToLabelMap;
+            var enabledTypeKeysFromAdvanceSearch = null;
+            var ccSearchType = 'apiName';
+            var prefixTypeKeys = null;
+            var defaultRows = {!defaultRows};
+            var regexS = /<a[^>]*>(.*?)<\/a>/i;
+            var regexForLinks = new RegExp(regexS);
+            var tablesFound = [];
+            var foundWildCard = false;
+            var queryText;
+            var modifiedQueryString = '' ;
+            var originalQueryString = '';
+            var chatterSearchUrl = '';
+           
+
+            jq(document).ready(function(){
+                
+                isCodeVsSymbolMap['ALL'] = 'Lek';
+                isCodeVsSymbolMap['ARS'] = '$';
+                isCodeVsSymbolMap['AWG'] = 'f';
+                isCodeVsSymbolMap['AUD'] = '$';
+                isCodeVsSymbolMap['BSD'] = '$';
+                isCodeVsSymbolMap['BYR'] = 'p.';
+                isCodeVsSymbolMap['BZD'] = 'BZ$';
+                isCodeVsSymbolMap['BMD'] = '$';
+                isCodeVsSymbolMap['BOB'] = '$b';
+                isCodeVsSymbolMap['BAM'] = 'KM';
+                isCodeVsSymbolMap['BWP'] = 'P';
+                isCodeVsSymbolMap['BRL'] = 'R$';
+                isCodeVsSymbolMap['BND'] = '$';
+                isCodeVsSymbolMap['CAD'] = '$';
+                isCodeVsSymbolMap['KYD'] = '$';
+                isCodeVsSymbolMap['CLP'] = '$';
+                isCodeVsSymbolMap['CNY'] = '&yen;';
+                isCodeVsSymbolMap['COP'] = '$';
+                isCodeVsSymbolMap['CRC'] = 'c';
+                isCodeVsSymbolMap['HRK'] = 'kn';
+                isCodeVsSymbolMap['CZK'] = 'Kc';
+                isCodeVsSymbolMap['DKK'] = 'kr';
+                isCodeVsSymbolMap['DOP'] = 'RD$';
+                isCodeVsSymbolMap['XCD'] = '$';
+                isCodeVsSymbolMap['EGP'] = '&pound;';
+                isCodeVsSymbolMap['SVC'] = '$';
+                isCodeVsSymbolMap['EEK'] = 'kr';
+                isCodeVsSymbolMap['EUR'] = '&euro;';
+                isCodeVsSymbolMap['FKP'] = '&pound;';
+                isCodeVsSymbolMap['FJD'] = '$';
+                isCodeVsSymbolMap['GBP'] = '&pound;';
+                isCodeVsSymbolMap['GHC'] = 'c';
+                isCodeVsSymbolMap['GIP'] = '&pound;';
+                isCodeVsSymbolMap['GTQ'] = 'Q';
+                isCodeVsSymbolMap['GGP'] = '&pound;';
+                isCodeVsSymbolMap['GYD'] = '$';
+                isCodeVsSymbolMap['HNL'] = 'L';
+                isCodeVsSymbolMap['HKD'] = '$';
+                isCodeVsSymbolMap['HUF'] = 'Ft';
+                isCodeVsSymbolMap['ISK'] = 'kr';
+                isCodeVsSymbolMap['IDR'] = 'Rp';
+                isCodeVsSymbolMap['IMP'] = '&pound;';
+                isCodeVsSymbolMap['JMD'] = 'J$';
+                isCodeVsSymbolMap['JPY'] = '&yen;';
+                isCodeVsSymbolMap['JEP'] = '&pound;';
+                isCodeVsSymbolMap['LVL'] = 'Ls';
+                isCodeVsSymbolMap['LBP'] = '&pound;';
+                isCodeVsSymbolMap['LRD'] = '$';
+                isCodeVsSymbolMap['LTL'] = 'Lt';
+                isCodeVsSymbolMap['MYR'] = 'RM';
+                isCodeVsSymbolMap['MXN'] = '$';
+                isCodeVsSymbolMap['MZN'] = 'MT';
+                isCodeVsSymbolMap['NAD'] = '$';
+                isCodeVsSymbolMap['ANG'] = 'f';
+                isCodeVsSymbolMap['NZD'] = '$';
+                isCodeVsSymbolMap['NIO'] = 'C$';
+                isCodeVsSymbolMap['NOK'] = 'kr';
+                isCodeVsSymbolMap['PAB'] = 'B/.';
+                isCodeVsSymbolMap['PYG'] = 'Gs';
+                isCodeVsSymbolMap['PEN'] = 'S/.';
+                isCodeVsSymbolMap['PLN'] = 'zl';
+                isCodeVsSymbolMap['RON'] = 'lei';
+                isCodeVsSymbolMap['SHP'] = '&pound;';
+                isCodeVsSymbolMap['SGD'] = 'S$';
+                isCodeVsSymbolMap['SBD'] = '$';
+                isCodeVsSymbolMap['SOS'] = 'S';
+                isCodeVsSymbolMap['ZAR'] = 'R';
+                isCodeVsSymbolMap['SEK'] = 'kr';
+                isCodeVsSymbolMap['CHF'] = 'CHF';
+                isCodeVsSymbolMap['SRD'] = '$';
+                isCodeVsSymbolMap['SYP'] = '&pound;';
+                isCodeVsSymbolMap['TWD'] = 'NT$';
+                isCodeVsSymbolMap['TTD'] = 'TT$';
+                isCodeVsSymbolMap['TRY'] = 'TL';
+                isCodeVsSymbolMap['TRL'] = '&pound;';
+                isCodeVsSymbolMap['TVD'] = '$';
+                isCodeVsSymbolMap['GBP'] = '&pound;';
+                isCodeVsSymbolMap['USD'] = '$';
+                isCodeVsSymbolMap['UYU'] = '$U';
+                isCodeVsSymbolMap['VEF'] = 'Bs';
+                isCodeVsSymbolMap['ZWD'] = 'Z$';
+                isCodeVsSymbolMap['KWD'] = 'ÃƒËœÃ‚Â¯.Ãƒâ„¢Ã†â€™.';
+                isCodeVsSymbolMap['INR'] = 'Rs.';
+                isCodeVsSymbolMap['BBD'] = 'BBD';
+            });
+            
+            function makeSearchRequest(typeKeyEntity,currentPage,argPaginationSize,argPaginationRequest){
+                jq('#' + typeKeyEntity + 'TableDivTableID_next').addClass('ui-state-disabled');
+
+                paginationRequest = true;
+                var searchStringConfig = paramConfigMap[typeKeyEntity];
+
+                var searchString = '';
+                jq('.logDiv').html('');
+                jq('.queryText').each(function()
+                {
+                    searchString = this.value;
+                });
+                
+                var radios = document.getElementsByName('fieldsSelected');
+                var fieldsToQuery = '';
+                for (var i = 0, length = radios.length; i < length; i++) {
+                    if (radios[i].checked) {
+                        fieldsToQuery = radios[i].value;
+                    }
+                }
+            
+                jq("#status").html(
+                        "Making a Jquery Ajax Request to '{!$Page.ccsearchperentity}'");
+                jq("#response").html('');
+                // Make the Ajax Request
+                  jq("#" + typeKeyEntity + 'SuggestionDiv').css("display", "block");
+                 jq("#" + typeKeyEntity + 'SuggestionDiv').css("visibility","visible");
+                 jq("#" + typeKeyEntity + 'SuggestionDiv').html("<center>{!$Label.cccs_nextset}</center>");
+                    
+
+                var fieldInfoList = jq.toJSON(getFieldInfoListOfObject(typeKeyEntity));
+               
+                jq.post("{!$Page.ccsearchperentity}", {
+                    "core.apexpages.devmode.url" :'1',
+                    "typeKey" : typeKeyEntity,
+                    "q" : searchString,
+                    "fieldInfoList" : fieldInfoList ,
+                    "ccPlainValue" : searchString,                    
+                    "searchStringConfig" : searchStringConfig,
+                    "queryFields" : fieldsToQuery ,
+                    "searchState" : 'search',
+                    "sortedByClause" : sortedBy,
+                    "sortedByRelevancy" : sortedByRelevancy,
+                    "paginationSize" : argPaginationSize                    
+                }, function(data) {
+                    createTable(data,currentPage,argPaginationSize,argPaginationRequest);
+                     jq("#" + typeKeyEntity + 'SuggestionDiv').css("display", "none");
+                     jq("#" + typeKeyEntity + 'SuggestionDiv').html('');                   
+                }, "json");
+         
+               jq("#status").html("Ajax Request Completed !");
+                
+            }
+            
+            function checkForDuplicatesInPagination(parsedResults, colNum,entityName){
+                var rewrittenParsedResults = [];
+                if(parsedResults){
+                var recordColumnNum = colNum - 1;
+                for(var i = 0; i < parsedResults.length; i++) {
+                    var obj = parsedResults[i];
+                    if(obj){
+                        var recordID = obj[recordColumnNum];
+                        if(jQuery.inArray(recordID, typeKeyToIdListMap[entityName]) == -1)
+                        {
+                            rewrittenParsedResults.push(obj);
+                            typeKeyToIdListMap[entityName].push(recordID);
+                        }                              
+                    }
+                }
+                }
+                return rewrittenParsedResults;
+            }
+            
+            function makeSearchRequestForDuplicates(typeKeyEntity,currentPage,numOfRecordsRequesting){
+                var searchStringConfig = paramConfigMap[typeKeyEntity];
+                var searchString = '';
+                jq('.logDiv').html('');
+                jq('.queryText').each(function()
+                {
+                    searchString = this.value;
+                });
+                
+                var radios = document.getElementsByName('fieldsSelected');
+                var fieldsToQuery = '';
+                for (var i = 0, length = radios.length; i < length; i++) {
+                    if (radios[i].checked) {
+                        fieldsToQuery = radios[i].value;
+                    }
+                }
+                jq("#status").html(
+                        "Making a Jquery Ajax Request to '{!$Page.ccsearchperentity}'");
+                jq("#response").html('');
+                // Make the Ajax Request
+                 var fieldInfoList = jq.toJSON(getFieldInfoListOfObject(typeKeyEntity));
+               
+                jq.post("{!$Page.ccsearchperentity}", {
+                    "core.apexpages.devmode.url" :'1',
+                    "typeKey" : typeKeyEntity,
+                    "q" : searchString,
+                    "fieldInfoList" : fieldInfoList,
+                    "ccPlainValue" : searchString,
+                    "searchStringConfig" : searchStringConfig,
+                    "queryFields" : fieldsToQuery ,
+                    "searchState" : 'search',
+                    "sortedByClause" : sortedBy,
+                    "sortedByRelevancy" : sortedByRelevancy,
+                    "paginationSize" : paginationSize                    
+                }, function(data) {
+               var entityName=typeKeyEntity;
+               argCurrentPage = currentPage ;
+               var dataList = data['entitySearchResultResponseList'][0];
+               var searchStringConfig = dataList['searchStringConfig'];
+               var resultsForDuplicates = dataList['resultsFound'];
+               resultsForDuplicates = jq.base64Decode(resultsForDuplicates);
+               resultsForDuplicates = '['+resultsForDuplicates+']';
+               resultsForDuplicates = jq.evalJSON(resultsForDuplicates);
+               var finished = true;
+               var searchStringArrayObj = jq.evalJSON(searchStringConfig);
+                var modifiedSearchStringConfig = [];
+                
+                
+                var dTable = jq('#'+ entityName + 'TableDivTableID').dataTable();
+                var colNum = dTable.fnGetData(0).length;
+                var queriesIssued = data['queriesIssued'];
+                if(displayLogs){
+                    if(queriesIssued != null)
+                    {
+                      queriesIssued = jq.base64Decode(queriesIssued);
+                      queriesIssued = queriesIssued.replace(/\\'/g,"'");
+                      jq('#queriesIssued').append(queriesIssued);
+                    }
+                }
+            
+                    additionalRecordsForDuplicates = checkForDuplicatesInPagination(resultsForDuplicates, colNum, entityName);         
+                    if(searchStringArrayObj){
+                    for(var i = 0; i < searchStringArrayObj.length; i++){
+                      var sstringConfig = searchStringArrayObj[i];
+                      if(sstringConfig && (finished == true)){
+                        var ccgStateList = sstringConfig.ccgStateList;
+                            if(ccgStateList && (finished == true)){
+                                        for(var j = 0;j<ccgStateList.length;j++){
+                                            var ccgState = ccgStateList[j];
+                                            if(ccgState.completedProcessOnCCgateway == false || sstringConfig.completedProcessing == false){
+                                            finished = false;
+                                            break;
+                                            }
+                                        } 
+                                    }else{
+                                        break;
+                                    }
+                        }else{
+                            break;
+                        }
+                    }
+                    }
+                    paramConfigMap[entityName] = searchStringConfig;
+                    if(finished == false){
+                        if(additionalRecordsForDuplicates){
+                            if(additionalRecordsForDuplicates.length<numOfRecordsRequesting){
+                                if(additionalRecordsForDuplicates){
+                                    rewrittenResultsForDuplicates[entityName] = rewrittenResultsForDuplicates[entityName].concat(additionalRecordsForDuplicates);
+                                }
+                                makeSearchRequestForDuplicates(entityName,argCurrentPage,numOfRecordsRequesting-additionalRecordsForDuplicates.length);
+                            }else{
+                                if(additionalRecordsForDuplicates){
+                                    rewrittenResultsForDuplicates[entityName] = rewrittenResultsForDuplicates[entityName].concat(additionalRecordsForDuplicates);
+                                }
+                                parsedResults = rewrittenResultsForDuplicates[entityName];
+                                if(sortedByRelevancy == true && knowledgeArticleVersion.toLowerCase() == entityName.toLowerCase() && enableArticleSorting == true)
+                                {
+                                }else if(sortedByRelevancy == true){
+                                  parsedResults = relevantSortedArray(jq('.queryText')[0].value,parsedResults,paramConfigMap[entityName]);
+                                }else if(sortedByRelevancy == false && knowledgeArticleVersion.toLowerCase() == entityName.toLowerCase() && enableArticleSorting == true){
+                                }else if(sortedByRelevancy == false){
+                                   parsedResults = sortByDate(parsedResults,sortedBy);
+                                }
+                                dTable.fnAddData(
+                                    parsedResults                       
+                                );
+                                var previousRecordsCount = dTable.fnGetData().length;
+                                totalRecordCount = previousRecordsCount ;
+                                var label = data['entitySearchResultResponseList'][0]['label'];
+                                jq("#" + entityName + 'LabelDiv').html(label + " (" + totalRecordCount + "+)");
+                         jq("#" + entityName + 'LabelID').html(label + " (" + totalRecordCount + "+)");
+                                if(currentPage!=0)
+                                {
+                                    dTable.fnPageChange(currentPage);
+                                }
+                                
+                            }
+                        }else{
+                            makeSearchRequestForDuplicates(entityName,argCurrentPage,numOfRecordsRequesting);
+                        }
+                   }else{
+                        if(additionalRecordsForDuplicates){
+                            rewrittenResultsForDuplicates[entityName] = rewrittenResultsForDuplicates[entityName].concat(additionalRecordsForDuplicates);
+                        }
+                       
+                         parsedResults = rewrittenResultsForDuplicates[entityName];
+                                if(sortedByRelevancy == true && knowledgeArticleVersion.toLowerCase() == entityName.toLowerCase() && enableArticleSorting == true)
+                                {
+                                }else if(sortedByRelevancy == true){
+                                  parsedResults = relevantSortedArray(jq('.queryText')[0].value,parsedResults,paramConfigMap[entityName]);
+                                }else if(sortedByRelevancy == false && knowledgeArticleVersion.toLowerCase() == entityName.toLowerCase() && enableArticleSorting == true){
+                                }else if(sortedByRelevancy == false){
+                                   parsedResults = sortByDate(parsedResults,sortedBy);
+                                }
+                                dTable.fnAddData(
+                                    parsedResults                       
+                                );
+                                var previousRecordsCount = dTable.fnGetData().length;
+                                totalRecordCount = previousRecordsCount ;
+                                var label = data['entitySearchResultResponseList'][0]['label'];
+                                jq("#" + entityName + 'LabelDiv').html(label + " (" + totalRecordCount + ")");
+                         jq("#" + entityName + 'LabelID').html(label + " (" + totalRecordCount + ")");
+                                if(currentPage!=0)
+                                {
+                                    dTable.fnPageChange(currentPage);
+                                }
+                   }
+                }, "json");
+         
+               jq("#status").html("Ajax Request Completed !");
+                
+            }
+
+            function getDpsMaxCountPerEntity(typeKeyEntity){
+                return typeKeyToDpsMaxCountMap[typeKeyEntity];
+            }
+            
+            function getSearchStringConfigAsJson(searchString){
+            
+                var searchStringArrayObj = new Array();
+                
+                var searchStringConfigObj = new Object();
+                
+                searchStringConfigObj.ccOrder = -1;
+                searchStringConfigObj.paramName = "q";
+                searchStringConfigObj.searchString = "" ;
+                searchStringConfigObj.searchResultsCountObtained = 0;
+                searchStringConfigObj.processedSearchResults = 0;
+                searchStringConfigObj.startIndex = 0;
+                searchStringConfigObj.endIndex= 0;
+
+
+                 searchStringConfigObj.completedProcessing = false;
+
+                searchStringConfigObj.queryType = 'plain';
+                searchStringConfigObj.dpsIds = 'plain';
+                searchStringConfigObj.requestNumber = 0;
+                var ccgStateList = new Array();
+                var ccgState = new Object();
+                ccgState.dpsType = 0;
+                ccgState.ccStartIndex = 0;
+                ccgState.ccEndIndex = paginationSize;
+                ccgState.completedProcessOnCCgateway = true;
+                ccgStateList.push(ccgState);
+                searchStringConfigObj.ccgStateList = ccgStateList ;
+                
+                searchStringArrayObj.push(searchStringConfigObj);
+                return jq.toJSON(searchStringArrayObj);
+            }
+            
+            
+          
+            function searchForResults(argSearchTypeKeys,argQueryText,argCCSearchType,argQueryText,argQueryFields,argPaginationRequest) {
+            totalNumberOfReq = totalNumberOfReq + 1;
+            
+                jq("#status").html(
+                        "Making a Jquery Ajax Request to '{!$Page.ccsearchperentity}'");
+                jq("#response").html('');
+                // Make the Ajax Request
+                var searchStringConfigJson = getSearchStringConfigAsJson(argQueryText);
+                
+                var radios = document.getElementsByName('fieldsSelected');
+                var fieldsToQuery = '';
+                for (var i = 0, length = radios.length; i < length; i++) {
+                    if (radios[i].checked) {
+                        fieldsToQuery = radios[i].value;
+                    }
+                }
+                var fieldInfoList = jq.toJSON(getFieldInfoListOfObject(argSearchTypeKeys));
+                
+                jq.post("{!$Page.ccsearchperentity}", {
+                    "core.apexpages.devmode.url" :'1',
+                    "typeKey" : argSearchTypeKeys,
+                    "q" : argQueryText,
+                    "fieldInfoList" : fieldInfoList ,
+                    "ccPlainValue" : argQueryText,
+                    "searchState" : 'search',
+                    "paginationSize" : paginationSize,
+                    "queryFields" : fieldsToQuery,
+                    "sortedByClause" : sortedBy,
+                    "sortedByRelevancy" : sortedByRelevancy,
+                    "searchStringConfig" : searchStringConfigJson                                                               
+                }, function(data) {
+                    if(data.toLowerCase().indexOf("/resources/css/errormsg.css") > 0 && data.toLowerCase().indexOf("error page") > 0){
+                       jq("#searchingMessage").html("<b style='color: red;font-size: 1.7em;'>{!$Label.cccs_serviceunavailable}</b>");
+                    }
+                    data = jq.evalJSON(data);
+                    totalNumberOfResp = totalNumberOfResp + 1;
+                    createTable(data,0,paginationSize,argPaginationRequest);
+                },"text");
+         
+               jq("#status").html("Ajax Request Completed !");
+            }
+            
+            function getFieldInfoListOfObject(objectName){
+                if(typeof enabledFieldInfoListConfiguredFromJson != 'undefined' && enabledFieldInfoListConfiguredFromJson != null){
+                    for (var key in enabledFieldInfoListConfiguredFromJson) {
+                      if (key.toLowerCase().indexOf(objectName.toLowerCase()) != -1) {
+                          return enabledFieldInfoListConfiguredFromJson[key];
+                      }
+                    }
+                }               
+            }
+            
+            
+            jq(document).ready(function()
+            {
+            
+             jq('#searchingMessage').hide();
+             jq(document).keypress(function(event) {
+                var keycode = (event.keyCode ? event.keyCode : event.which);
+                if (keycode == '13') {
+                if(dSearch == true){
+                   collectEnabledTypeKeys();
+                   search();
+                } else if(dSearch == false){
+                    advanceSearch();
+                }
+                   return false;
+                }
+            });
+            });
+            
+            
+            jq(document).ready(function()
+            {
+                jq('.hidden').hide();
+                jq('#defaultSearch').hide();
+                var searchString = getParameter('sbstr');
+                if(searchString == null || searchString==''){
+                    searchString = getParameter('str');
+                }
+                createChatterSearchLink(searchString);
+
+                 onCacheSynchronized();
+            });
+
+            function onCacheSynchronized()
+            {
+                if(!userCanSavePreferences)
+                {
+                    jq('#saveUserPreferencesButton').hide();
+                }
+                configureToggling();
+                 jq('#defaultSearch').show();
+                 
+                if(enableSearchFieldOptions){
+                    jq('#selectFieldsId').css("visibility","visible");
+                    jq('#selectFieldsId').show();
+                }
+                
+                if(queryFields == 'ALL FIELDS'){
+                document.getElementById('allFieldsId').checked = true;
+               } else if(queryFields == 'NAME FIELDS'){
+                document.getElementById('nameFieldsId').checked = true;
+               } else if(queryFields == 'SIDEBAR FIELDS'){
+                document.getElementById('sideBarFieldsId').checked = true;
+               }
+               
+                onloadSearch();
+            }
+
+            function createTable(data,currentPage,argPaginationSize,argPaginationRequest)
+            {
+                entitySearchResultResponseList = data['entitySearchResultResponseList'];
+                var queriesIssued = data['queriesIssued'];
+                if(displayLogs){
+                    if(queriesIssued != null)
+                    {
+                      queriesIssued = jq.base64Decode(queriesIssued);
+                      queriesIssued = queriesIssued.replace(/\\'/g,"'");
+                      jq('#queriesIssued').append(queriesIssued);
+                    }
+                }
+                
+                if( typeof entitySearchResultResponseList !== 'undefined' ) {
+                
+                    for(i = 0;i < entitySearchResultResponseList.length;i++)
+                    {
+                        renderSingleTable(entitySearchResultResponseList[i],currentPage,argPaginationSize,argPaginationRequest);
+                    }
+                    if(totalNumberOfResultSets >= totalNumberOfQueries)
+                    {
+                        closeDialog();
+                    }
+                }
+                closeDialog();
+               
+            }
+
+            
+            function renderSingleTable(data,currentPage,currentPaginationSize,argPaginationRequest)
+            {
+                var entityName = data['entityName'];
+                var label = data['label'];
+                
+                var searchStringConfig= data['searchStringConfig'];
+                paramConfigMap[entityName] = searchStringConfig;
+                var recordsCount = data['recordsCount'];
+             
+                if (entityName && label)
+                {
+                    var previousRecordsCount;
+                    try{
+                        if(argPaginationRequest == true){
+                            var dTable = jq('#'+ entityName + 'TableDivTableID').dataTable();
+                           if(typeof dTable != 'undefined' && dTable.fnGetData() != null){
+                               previousRecordsCount = dTable.fnGetData().length;
+                           }
+                        }
+                    } catch(e){
+                    
+                    }
+                       
+                    jq("#sideBar" + entityName + 'LabelDiv').css('display', 'block');
+                    if(typeof previousRecordsCount != 'undefined' && previousRecordsCount !=0){
+                        if(recordsCount > 0 ){
+                            jq("#" + entityName + 'LabelDiv').html(label + " (" + previousRecordsCount + "+)");
+                            jq("#" + entityName + 'LabelID').html(label + " (" + previousRecordsCount + "+)");
+                        }else{
+                            jq("#" + entityName + 'LabelDiv').html(label + " (" + previousRecordsCount + ")");
+                            jq("#" + entityName + 'LabelID').html(label + " (" + previousRecordsCount + ")");
+                        }
+                        
+                    }else{
+                        if(recordsCount>0){
+                            jq("#" + entityName + 'LabelDiv').html(label + " (" + recordsCount + "+)");
+                            jq("#" + entityName + 'LabelID').html(label + " (" + recordsCount + "+)");
+                        }else{
+                            jq("#" + entityName + 'LabelDiv').html(label + " (" + recordsCount + ")");
+                            jq("#" + entityName + 'LabelID').html(label + " (" + recordsCount + ")");
+                        }
+                    }
+                    }
+                var results = data['resultsFound'];
+                
+                var sideBarLink = data['sideBarLink'];
+                var searchStringConfig = data['searchStringConfig'];
+
+                if(displayLogs){
+                    jq('.logDiv').append('entityName found is : ' + entityName + '<br/>');
+                }
+                     
+                if(recordsCount == 0){
+               try{
+                   var dTable = jq('#'+ entityName + 'TableDivTableID').dataTable();
+                   var previousRecordsCount = dTable.fnGetData().length;
+                   recordsCount = previousRecordsCount + recordsCount ; 
+                   jq("#" + entityName + 'LabelID').html(label + " (" + recordsCount + ")");
+                   jq("#" + entityName + 'LabelDiv').html(label + " (" + recordsCount + ")");
+                 }catch(e)  {} 
+                   
+                    if(searchStringConfig != null && searchStringConfig == '[]'){
+                        finishedTypeKeys.push(entityName);
+                    }
+                    if(resultsContentPresent == false)
+                    {   
+                            closeDialog();
+                            jq("#" + entityName + 'LabelID').html(label + " (" + recordsCount + ")");
+                            jq("#" + entityName + 'LabelDiv').html(label + " (" + recordsCount + ")");
+                           
+                            if(totalNumberOfReq == totalNumberOfResp )
+                            {
+                            jq('#noResultsFoundDiv').show();
+                            jq('#searchingMessage').hide();
+                            }
+                           
+                            
+                            var textBoxValue = jq('.queryText').val();
+                            var searchText = jq('<div/>').text(textBoxValue).html();
+                            jq("#tipUl").html('');
+                            
+                            if(!foundWildCard){
+                                jq("ul#tipUl").append(
+                                        "<li>{!$Label.cccs_trySearching} <a href='javascript:searchWithWildCard()'>" + searchText + '*' + "</a></li>");
+                            }
+                            
+                            if(chatterEnabled && config4chatter){
+                                var chatterLinkText = jq('#chatterSearchLinkUrl').text();
+                                jq('ul#tipUl').append(
+                                        "<li>{!$Label.cccs_view}<a href='" + chatterSearchUrl + "" + "</li>");
+                            }
+                            jq('ul#tipUl').append(
+                                    "<li>{!$Label.cccs_tip2}&nbsp;</ll>");
+                                    
+                            jq('#messageText').html(
+                                    "&nbsp;&nbsp;{!$Label.cccs_noresults} \'<b>" + searchText + "</b>\'");
+                     
+                    } else {
+                            jq('#searchingMessage').hide();
+                    }
+                    
+                         var searchStringConfig = data['searchStringConfig'];
+                          var finished = true;
+                          var searchStringArrayObj = jq.evalJSON(searchStringConfig);
+                          if(searchStringArrayObj){
+                            for(var i = 0; i < searchStringArrayObj.length; i++){
+                                var sstringConfig = searchStringArrayObj[i];
+                                if(sstringConfig && (finished == true)){
+                                     var ccgStateList = sstringConfig.ccgStateList;
+                                    if(ccgStateList && (finished == true)){
+                                        for(var j = 0;j<ccgStateList.length;j++){
+                                            var ccgState = ccgStateList[j];
+                                            if(ccgState.completedProcessOnCCgateway == false || sstringConfig.completedProcessing == false){
+                                            finished = false;
+                                            break;
+                                            }
+                                        } 
+                                    }else{
+                                        break;
+                                    }
+                                }else{
+                                    break;
+                                }                           
+                            }
+                          } 
+
+                         var allRecordsRenedered = false;
+                          if(finished == true){
+                              finishedTypeKeys.push(entityName);
+                              for( var i = 0;i < finishedTypeKeys.length;i++) {
+                                if(entityName == finishedTypeKeys[i]){
+                                        allRecordsRenedered = true;
+                                }
+                              }
+                          } 
+                             
+                           if(allRecordsRenedered == false){
+                               jq('#' + entityName + 'TableDivTableID_next').removeClass('ui-state-disabled');
+                               jq('#' + entityName + 'TableDivTableID_next').show();
+                               jq('#' + entityName + 'TableDivTableID_last').show();
+                           }
+                                paramConfigMap[entityName] = searchStringConfig;                                
+                                if(finished == false){
+                                    var queryFields ;
+                                    var radios = document.getElementsByName('fieldsSelected');
+
+                                    for (var i = 0, length = radios.length; i < length; i++) {
+                                        if (radios[i].checked) {
+                                            queryFields = radios[i].value;
+                                        }
+                                    }
+                                   makeSearchRequest(entityName,0,paginationSize,false);
+                                }
+                                 jq("#" + entityName + 'LabelID').hover(
+                                 function() {
+                                    //mouse over
+                                    jq(this).css('color', '#7d7d84')
+                                 });   
+                                return;
+                }
+                    
+                resultsFound = true;
+                resultsContentPresent = true
+               try{
+                     var paginationDiv = data['paginationDiv'];
+                     var fieldLevelFilterDiv = data['fieldLevelFilterDiv'];
+                     var recordsCountMessage = data['recordsCountMessage'];
+
+                     tablesFound.push(entityName);
+                     jq('#' + entityName + 'TableDivTableID_last').show();
+                     jq("#" + entityName + 'fieldLevelFilterDiv').html(fieldLevelFilterDiv);
+                     jq("#" + entityName + 'paginationDiv').html(paginationDiv);
+                     paramConfigMap[entityName] = searchStringConfig;
+                     
+                     if(recordsCount >= 2000){
+                         jq("#" + entityName + 'SuggestionDiv').html(recordsCountMessage);
+                     }
+                     jq("#" + entityName + 'LabelID').css("color", "#015ba7");
+                     jq("#" + entityName + 'Div').css("display", "block");
+                     jq("#" + entityName + 'Div').css("visibility","visible");
+                     jq("#" + entityName + 'sideBarResultsCount').html(recordsCount);
+                     jq("#" + entityName + 'tableResultsCount').html(recordsCount);
+                     
+                     jq('#searchingMessage').hide();
+                     results = jq.base64Decode(results);
+                    jq('#noResultsFoundDiv').hide();
+                    var totalDpsFinishedCount = data['totalDpsCount'];
+                    typeKeyToDpsMaxCountMap[entityName] = totalDpsFinishedCount ;
+                    var totalRecordCount = 0;
+                    var resultsOriginalLength = 0;
+                    var rewrittenParsedResults = [];
+                    var disableNextButtonSearchRequestMade = false;
+                    if(argPaginationRequest == true){
+                            results = '[' + results + ']';
+                             var dTable = jq('#'+ entityName + 'TableDivTableID').dataTable();
+                             var colNum = dTable.fnGetData(0).length;
+                            
+                            
+                             var parsedResults = '';
+                             try{
+                                parsedResults = jq.evalJSON(results);
+                                resultsOriginalLength = parsedResults.length;
+                                rewrittenParsedResults = checkForDuplicatesInPagination(parsedResults, colNum, entityName);
+                                parsedResults = rewrittenParsedResults;
+                             
+                             if(rewrittenParsedResults.length < resultsOriginalLength){
+                                rewrittenResultsForDuplicates[entityName] = [];
+                                rewrittenResultsForDuplicates[entityName] = rewrittenResultsForDuplicates[entityName].concat(rewrittenParsedResults);
+                                makeSearchRequestForDuplicates(entityName,currentPage,resultsOriginalLength-rewrittenParsedResults.length);
+                            }else{
+                                if(sortedByRelevancy == true && knowledgeArticleVersion.toLowerCase() == entityName.toLowerCase() && enableArticleSorting == true)
+                                {
+                                }else if(sortedByRelevancy == true){
+                                  parsedResults = relevantSortedArray(jq('.queryText')[0].value,parsedResults,paramConfigMap[entityName]);
+                                }else if(sortedByRelevancy == false && knowledgeArticleVersion.toLowerCase() == entityName.toLowerCase() && enableArticleSorting == true){
+                                }else if(sortedByRelevancy == false){
+                                   parsedResults = sortByDate(parsedResults,sortedBy);
+                                }
+                                dTable.fnAddData(
+                                    parsedResults                       
+                                );
+                                var previousRecordsCount = dTable.fnGetData().length;
+                                totalRecordCount = previousRecordsCount ;
+                                if(currentPage!=0)
+                                {
+                                    dTable.fnPageChange(currentPage);
+                                }
+                            }
+                             }catch(e){
+
+                              var previousRecordsCount = dTable.fnGetData().length;
+                              totalRecordCount = previousRecordsCount; 
+                             if(displayLogs){
+                                  jq('.logDiv').append('Exception Occured is : ' + e + '<br/>');    
+                             }
+                             if(currentPage!=0)
+                                {
+                                    dTable.fnPageChange(currentPage);
+                                }
+                             };
+                     }else {
+                         totalRecordCount = recordsCount;
+                         var tableStart = data['tableStart'];
+                         var tableEnd = data['tableEnd'];
+                         
+                         typeKeyToIdListMap[entityName] = [];
+                         var rewrittenResults = [];
+                         
+                         var resultsArray = '['+results+']';
+                         resultsArray = jq.evalJSON(resultsArray);
+
+                        if(resultsArray && resultsArray[0]){
+                         
+                         var recordIDColNum = resultsArray[0].length-1;
+
+                         for(var i=0;i<resultsArray.length;i++){
+                             var recordID = resultsArray[i][recordIDColNum];
+                             //if(typeKeyToIdListMap[entityName].indexOf(recordID) == -1)
+                             if(jQuery.inArray(recordID, typeKeyToIdListMap[entityName]) == -1)
+                             {
+                                 typeKeyToIdListMap[entityName].push(recordID);
+                                 rewrittenResults.push(resultsArray[i]);
+                             }
+                         }
+                         } else {
+                            return ;
+                         }
+                         resultsArray = rewrittenResults;
+                         
+                         if(sortedByRelevancy == true && knowledgeArticleVersion.toLowerCase() === entityName.toLowerCase() && enableArticleSorting == true)
+                         {
+                         }else if(sortedByRelevancy == true){
+                              resultsArray = relevantSortedArray(jq('.queryText')[0].value,resultsArray,paramConfigMap[entityName]);
+                         }else if(sortedByRelevancy == false && knowledgeArticleVersion.toLowerCase() == entityName.toLowerCase() && enableArticleSorting == true){
+                         }else if(sortedByRelevancy == false){
+                                resultsArray = sortByDate(resultsArray,sortedBy);
+                         }
+                         results = jq.toJSON(resultsArray);
+                         
+                         results = results.substring(1,results.length-1); 
+                         
+                         var tabletoRender = tableStart + results + tableEnd;
+                         totalRecordCount = resultsArray.length;
+                         try{
+                             eval(tabletoRender);
+                         }catch(e){
+
+                             if(displayLogs){
+                               jq('.logDiv').append('Error occurred while creating NON pagination datatable for ' + entityName + ' with error : ' + e + '<br/>');
+                             }
+                         }
+                         
+                         try
+                         {
+                            var parsedResults = '';
+                             
+                             parsedResults = results;
+                              if(resultsArray.length < currentPaginationSize){
+                              
+                                var searchStringConfig = data['searchStringConfig'];
+                                var finished = true;
+                                var searchStringArrayObj = jq.evalJSON(searchStringConfig);
+                                var modifiedSearchStringConfig = [];
+                                if(searchStringArrayObj){
+                                    for(var i = 0; i < searchStringArrayObj.length; i++){
+                                      var sstringConfig = searchStringArrayObj[i];
+                                     if(sstringConfig && (finished == true)){
+                                             var ccgStateList = sstringConfig.ccgStateList;
+                                            if(ccgStateList && (finished == true)){
+                                            for(var j = 0;j<ccgStateList.length;j++){
+                                            var ccgState = ccgStateList[j];
+                                            if(ccgState.completedProcessOnCCgateway == false || sstringConfig.completedProcessing == false){
+                                            finished = false;
+                                            break;
+                                            }
+                                        } 
+                                    }else{
+                                        break;
+                                    }
+                                    }else{
+                                    break;
+                                    }
+                                    }
+                                }
+                                paramConfigMap[entityName] = searchStringConfig;
+                                var disableNextButtonSearchRequestMade = false;                                
+                                if(finished == false){
+                                    //makeSearchRequestForDuplicates(entityName,argCurrentPage,numOfRecordsRequesting-rewrittenResultsForDuplicates.length);
+                                    makeSearchRequest(entityName,currentPage,currentPaginationSize-resultsArray.length,true);
+                                    disableNextButtonSearchRequestMade = true;
+                                }
+
+                            }
+                            
+                             
+                         }catch(e){
+                                //console.log('Exception occured: ' + e);
+                         }
+                         
+                         jq("#" + entityName + 'LabelDiv').html(label + " (" + recordsCount + ")");
+                         jq("#" + entityName + 'LabelID').html(label + " (" + recordsCount + ")");
+                     }
+                     
+                          var searchStringConfig = data['searchStringConfig'];
+                          var finished = true;
+                          var searchStringArrayObj = jq.evalJSON(searchStringConfig);
+
+                          if(searchStringArrayObj){
+                            for(var i = 0; i < searchStringArrayObj.length; i++){
+                                var sstringConfig = searchStringArrayObj[i];
+                                if(sstringConfig){
+                                var ccgStateList = sstringConfig.ccgStateList;
+                                    if(ccgStateList && (finished == true)){
+                                        for(var j = 0;j<ccgStateList.length;j++){
+                                            var ccgState = ccgStateList[j];
+                                            if(ccgState.completedProcessOnCCgateway== false || sstringConfig.completedProcessing == false){
+                                            finished = false;
+                                            break;
+                                            }
+                                        } 
+                                    }else{
+                                        break;
+                                    }
+                                }                           
+                            }
+                          } 
+                          
+                          var allRecordsRenedered = false;
+                          if(finished == true){
+                            finishedTypeKeys.push(entityName);
+
+                              for( var i = 0;i < finishedTypeKeys.length;i++) {
+                                if(entityName == finishedTypeKeys[i]){
+                                    allRecordsRenedered = true;
+                                }
+                              }
+
+                          } 
+                             
+                           if((argPaginationRequest == false || rewrittenParsedResults.length >= resultsOriginalLength) && allRecordsRenedered == false){
+                            jq("#" + entityName + 'LabelDiv').html(label + " (" + totalRecordCount + "+)");
+                            jq("#" + entityName + 'LabelID').html(label + " (" + totalRecordCount + "+)");                            
+                         } else if(argPaginationRequest == false || rewrittenParsedResults.length >= resultsOriginalLength){
+                            jq("#" + entityName + 'LabelDiv').html(label + " (" + totalRecordCount + ")");
+                            jq("#" + entityName + 'LabelID').html(label + " (" + totalRecordCount + ")");
+                         }
+                         if((argPaginationRequest == false || rewrittenParsedResults.length >= resultsOriginalLength) && allRecordsRenedered == false && disableNextButtonSearchRequestMade == false){
+                               jq('#' + entityName + 'TableDivTableID_next').removeClass('ui-state-disabled');
+                               jq('#' + entityName + 'TableDivTableID_next').show();
+                               jq('#' + entityName + 'TableDivTableID_last').show();
+                           }
+                     
+                     jq('#noResultsFoundDiv').hide();
+               }catch(e){
+
+                     if(displayLogs){
+                           jq('.logDiv').append('Error occurred while creating datatable for ' + entityName + ' with error : ' + e + '<br/>');
+                     }
+               }
+               if (entityName && label)
+                {
+                    try{
+                        jq('#'+ entityName + 'TableDivTableID')[0].style.width = "100%";
+                    }catch(e){
+                     if(displayLogs){
+                           jq('.logDiv').append('Error occurred while creating datatable CSS width for ' + entityName + ' with error : ' + e + '<br/>');
+                     }
+                    }
+                }
+             }
+            
+
+            function showDialog(title_val,msg_val,showOverlay_val)
+            {
+                jq.blockUI({
+                    theme : true,
+                    title : title_val,
+                    message : msg_val,
+                    showOverlay : showOverlay_val,
+                    overlayCSS : {
+                        backgroundColor : '#000',
+                        opacity : 0.0,
+                        cursor : 'wait'
+                    },
+                    timeout : 0
+                });
+            }
+
+            function closeDialog()
+            {
+                jq.unblockUI();
+            }
+
+            function searchWithWildCard(){
+                jq('.queryText').each(function()
+                {
+                     this.value = this.value + '*';
+                });
+                if(dSearch == true){
+                   collectEnabledTypeKeys();
+                   search();
+                } else if(dSearch == false){
+                    advanceSearch();
+                }
+            }
+            
+            var canSearch = false;
+            function search()
+            {
+                typeKeyToIdListMap = {};
+                rewrittenResultsForDuplicates = {};
+                jq('#dataTablesDiv').html('');
+                resultsContentPresent = false;
+                resultsFound = false;
+                collectEnabledTypeKeys();
+                var radios = document.getElementsByName('fieldsSelected');
+
+                for (var i = 0, length = radios.length; i < length; i++) {
+                    if (radios[i].checked) {
+                        queryFields = radios[i].value;
+                    }
+                }
+                
+                tablesFound = [];
+
+                if(enabledTypeKeys == null || enabledTypeKeys.length == 0){
+                    warningMessageWithOK("{!$Label.cccs_status}", "<p><h1>"
+                                + "{!$Label.cccs_selectoneobject}."
+                                + '</h1></p></br><input type="button" id="errorOk" value="{!$Label.cccs_ok}"/>'
+                                ,false);
+                    canSearch = false;
+                    return;
+                }
+                var typeKeys = enabledTypeKeys;
+                if(enabledTypeKeysFromAdvanceSearch != null && enabledTypeKeysFromAdvanceSearch.length >0 )
+                {
+                    typeKeys = enabledTypeKeysFromAdvanceSearch;
+                }
+                if(prefixTypeKeys != null && prefixTypeKeys.length > 0)
+                {
+                    typeKeys = prefixTypeKeys;
+                    prefixTypeKeys = [];
+                }
+                
+                    canSearch = true;
+                    typeKeys = enabledTypeKeysConfiguredFromJson;
+                             
+                    fireSearchCall(typeKeys);
+                    ccSearchType = 'apiName';
+                }
+                
+                function fireSearchCall(typeKeys){
+                if(typeKeys != null && typeKeys.length > 0)
+                    {
+                    totalNumberOfResp = 0; 
+                    totalNumberOfReq = 0; 
+                    finishedTypeKeys = [];
+                    jq('#queriesIssued').html('');
+                    jq('#ccSideBarLinks').html('');
+                    jq('.logDiv').html('');
+                    jq('#exceptionMessageText').html('');
+                    jq('#exceptionOccuredDiv').hide();
+                
+                    paginationRequest = false;                      
+                    jq('.queryText').each(function()
+                    {
+                        queryText = this.value;
+                    });
+                    if(queryText == null || queryText == '' || jq.trim(queryText) == '' )
+                    {    
+                       warningMessageWithOK("{!$Label.cccs_status}",
+                            "<p><h1>"
+                                    + "{!$Label.cccs_enterquerytext}"
+                                    + '</h1></p></br><input type="button" id="errorOk" value="{!$Label.cccs_ok}"/>',true);
+                        canSearch = false;
+                        return;
+                    }
+                    
+                    queryText = jq.trim(queryText);
+                    foundWildCard = (queryText.lastIndexOf("*") === queryText.length - "*".length) > 0;
+                    var noOfWords = queryText.split(' ');
+                    var actualTokens = [];
+                    for(var i = 0; i < noOfWords.length;i++){
+                        var eachToken = noOfWords[i];
+                        if(typeof eachToken !== 'undefined' && eachToken.trim().length>1){
+                            actualTokens.push(eachToken);
+                        }                   
+                    }
+                    noOfWords = actualTokens;
+                    if(!foundWildCard && queryText.length < minSearchTextLength ){
+                        warningMessageWithOK("{!$Label.cccs_status}",
+                            "<p><h1>"
+                                    + "{!$Label.cccs_minSearchTextLength} " + minSearchTextLength + " {!$Label.cccs_enterMinimum4CharactersOfSearchString}"
+                                    + '</h1></p></br><input type="button" id="errorOk" value="{!$Label.cccs_ok}"/>',true);
+                        canSearch = false;
+                        return;
+                    } else if(foundWildCard && queryText.length < minWildCardSearchTextLength){
+                        var minWDSearch = minWildCardSearchTextLength - 1;
+                        warningMessageWithOK("{!$Label.cccs_status}",
+                            "<p><h1>"
+                                    + "{!$Label.cccs_minSearchTextLength} " + minWDSearch + " {!$Label.cccs_enterMinimumWildCardCharacters}"
+                                    + '</h1></p></br><input type="button" id="errorOk" value="{!$Label.cccs_ok}"/>',true);
+                        canSearch = false;
+                        return;
+                    } else if(noOfWords.length > maximumNoOfSearchWordsPermitted){
+                        warningMessageWithOK("{!$Label.cccs_status}",
+                            "<p><h1>"
+                                    + "{!$Label.cccs_maxSearchNoOfWordsPermitted} " +maximumNoOfSearchWordsPermitted+ " {!$Label.cccs_words}"
+                                    + '</h1></p></br><input type="button" id="errorOk" value="{!$Label.cccs_ok}"/>',true);
+                        canSearch = false;
+                        return;
+                    } 
+                    
+                    originalQueryString = queryText;
+                    var strArray = new Array();
+                    strArray = queryText.split(" ");
+                    modifiedQueryString = '';
+                    var removeDoubleQuotes = true;
+                    
+                    //PRI-5465 modified the logic of removing the doublequotes
+                    if(strArray.length == 1 && containsSpecialChar(originalQueryString) == true){
+                        removeDoubleQuotes = false;
+                    }
+                    
+                    if(strArray.length == 1 && removeDoubleQuotes == true){
+                       
+                        modifiedQueryString=originalQueryString;
+                        if(originalQueryString.charAt(0) == '\"' && originalQueryString.charAt(originalQueryString.length-1) == '\"' )
+                        {
+                                modifiedQueryString = originalQueryString.substring(1,originalQueryString.length-1);
+                        }
+                        
+                    } else {
+                        modifiedQueryString = originalQueryString;
+                    }
+                    
+                    queryText = modifiedQueryString;                     
+                    
+                    typeKeys = typeKeys.sort();
+                    createDivs(typeKeys);
+                    createChatterSearchLink(queryText);                   
+                    var searchTypeKeys = '';
+                    var searchTypeLabels = '';
+                    jq('#messageText').empty();
+                    jq('#noResultsFoundDiv').hide();
+                    resultsFound = false;
+                    totalNumberOfQueries = typeKeys.length;
+                
+                    totalNumberOfResultSets = 0;
+                    queryText = jq.trim(modifiedQueryString);
+                    jq('#searchingMessage').show();
+                            
+                    for( var i = 0;i < typeKeys.length;i++)
+                    {
+                        if(i > 0 && i % queryBatchSize == 0)
+                        {
+                            searchTypeKeys = searchTypeKeys.substr(0,
+                                    searchTypeKeys.length - 1);
+                            searchForResults(searchTypeKeys,queryText,ccSearchType,queryText,queryFields,false);
+                            searchTypeKeys = '';
+                        }
+                        searchTypeKeys += typeKeys[i] + ':';
+                    }
+                    
+                    if(searchTypeKeys != '')
+                    {
+                        searchTypeKeys = searchTypeKeys.substr(0,searchTypeKeys.length - 1);
+                        searchTypeLabels = searchTypeLabels.substr(0,
+                                searchTypeLabels.length - 2);
+                        searchForResults(searchTypeKeys,queryText,ccSearchType,queryText,queryFields,false);
+                    }
+                }
+                else
+                {
+                    warningMessageWithOK("{!$Label.cccs_status}", "<p><h1>"
+                                + "{!$Label.cccs_selectoneobject}."
+                                + '</h1></p></br><input type="button" id="errorOk" value="{!$Label.cccs_ok}"/>'
+                                ,false);
+                    canSearch = false;
+                }
+            
+            }
+            function warningMessageWithOK(argTitle,argMsg,argIsModal)
+            {
+                showDialog(argTitle,argMsg,argIsModal);
+                jq('#errorOk').click(function()
+                {
+                    closeDialog();
+                });
+            }
+            
+            function containsSpecialChar(str){
+                
+                var splChars = "*|!,:<>[]{}`\\/\';()@&$#%-_~^?.";
+                for (var i = 0; i < str.length; i++) {
+                    if (splChars.indexOf(str.charAt(i)) != -1){
+                        return true;
+                    }
+                }
+             return false;
+            }
+    
+
+            function warningForEmptyText()
+            {
+                 showDialog(
+                        "{!$Label.cccs_status}",
+                        "<p><h1>"
+                                + "{!$Label.cccs_enterquerytext}"
+                                + '</h1></p></br><input type="button" id="errorOk" value="{!$Label.cccs_ok}"/>',
+                        true);
+                jq('#errorOk').click(function()
+                {
+                    closeDialog();
+                });
+            }
+            
+            function enterMoreThanSpecifedChars()
+            {
+                 showDialog(
+                        "{!$Label.cccs_status}",
+                        "<p><h1>"
+                                + "{!$Label.cccs_enterMinimum4CharactersOfSearchString} " + minSearchTextLength
+                                + '</h1></p></br><input type="button" id="errorOk" value="{!$Label.cccs_ok}"/>',
+                        true);
+                jq('#errorOk').click(function()
+                {
+                    closeDialog();
+                });
+            }
+            
+            function getActualSearchStringFromUrl(){
+                var searchString = getParameter('sbstr');
+                if(searchString == null || searchString==''){
+                    searchString = getParameter('str');
+                }
+                return searchString;
+            }
+            
+            function createChatterSearchLink(localQueryText)
+            {
+                if(localQueryText == null || localQueryText == 'null' || (typeof localQueryText !== undefined  && localQueryText.trim() == '')) {
+                    localQueryText = getActualSearchStringFromUrl();
+                }
+                
+                try{
+                    var chatterSearchStringUrlWithSitePrefix = ((sitePrefix) ? sitePrefix + chatterSearchStringUrl: chatterSearchStringUrl );
+                    var encodedSearchString = encodeURIComponent(jq.trim(localQueryText));
+                    chatterSearchUrl = "<img src='/img/icon/files16.png'/>&nbsp;&nbsp;";
+                    chatterSearchUrl += "<a href=\"" ;
+                    chatterSearchUrl += chatterSearchStringUrlWithSitePrefix +  encodedSearchString ;
+                    chatterSearchUrl += "\">{!$Label.cccs_searchchatterupdates}</a>" ;
+                    jq('#chatterSearchLinkUrl').html( chatterSearchUrl);
+                }catch(ignore){
+                    jq('.logDiv').append('<h1>Exception while creating chatter link : ' + ignore + '</h1>');
+                }
+            }
+
+            function createDivs(typeKeys)
+            {
+                var divs = '';
+                for( var i = 0;i < typeKeys.length;i++)
+                {
+                    var typeKey = typeKeys[i];
+                    var labelDiv = typeKey + 'LabelDiv';
+                    var tableDiv = typeKey + 'TableDiv';
+                    var paginationDiv = typeKey + 'paginationDiv';
+                    var objLabel = typeKey;
+                    
+                    for (var key in tabelKeyVsLabelMap) {
+                      if (key.toUpperCase() === typeKey.toUpperCase()) {
+                          objLabel = tabelKeyVsLabelMap[key];
+                      }
+                    }
+                    
+                    divs += '<div id="' + typeKey + 'Div" style="display:none;visibility:hidden;width:100%;padding-top:10px;"  class="bPageBlock brandSecondaryBrd apexDefaultPageBlock secondaryPalette" >';
+                    divs += '<div class="pbBody" >' + '<h1 style=\"font-family:Helvetica,sans-serif,Arial;font-size:12pt;padding:10px;\"><label id=' + labelDiv + '>' + objLabel + '</label></h1>' + '' + '<div class="horiz-container"><div class="content" style="width:99%;padding:5px;"><br/>';
+                    divs += '<table cellpadding="0" cellspacing="0" border="0" class="display" id="' + typeKey + 'TableDiv' + 'TableID" style="width: 100%;"><tbody><tr><td colspan="2">';
+                    divs += '<h1 style=\"font-family:Helvetica,sans-serif,Arial;font-size:12pt;padding:10px;\">' + '</label></td></tr><tr><td>&nbsp;</td><td>&nbsp;</td></tr><tr><td>&nbsp;</td><td>&nbsp;</td></tr><tr><td>&nbsp;&nbsp;&nbsp;';
+                    divs += "{!$Label.cccs_noresultsfound}" + '</td><td></td><tr></tbody></table><br/></div></div><div></div></div>&nbsp;&nbsp;<br/><div class="centered">';
+                    divs += '<div id="'+ typeKey + 'paginationDiv" /></div><label style="display:none;" id="'+ typeKey + 'SuggestionDiv" /><br/></div>';
+                    
+                }
+                jq('#dataTablesDiv').html(divs);
+
+                //For side bar divs
+                var sideBarDivs = '';
+                for( var i = 0;i < typeKeys.length;i++)
+                {
+                    var typeKey = typeKeys[i];
+                    var sideBarLabelDiv = typeKey + 'LabelDiv';
+                    
+                    if(showSideBarObjects && typeKey && typeof typeKey !== undefined && typeof typeKey !== 'undefined'){
+                        sideBarDivs += '<div style="display:none" id="sideBar'+ sideBarLabelDiv + '"><div class=\"ccLinkSelector\" onclick=\"showOnlyDivByName(\'' + typeKey + 'Div' + '\',\'' + typeKey + '\',this);\"><a href=\"#\" ><div id="' + typeKey + 'LabelID"></div></a></div></div>';
+                    }else {
+                        sideBarDivs += '<div id="sideBar'+ sideBarLabelDiv + '"></div>';
+                    }   
+                }
+                jq('#ccSideBarLinks').html(sideBarDivs);                
+            }
+
+            function collectEnabledTypeKeys()
+            {
+                
+                enabledTypeKeysFromAdvanceSearch = [];
+                jq('.searchableObject :checked').each(function()
+                {
+                    enabledTypeKeysFromAdvanceSearch.push(this.value);
+                });
+                enabledTypeKeysFromAdvanceSearch = jq.unique(enabledTypeKeysFromAdvanceSearch);
+            }
+            
+            function advanceSearch()
+            {
+                jq('#dataTablesDiv').html('');
+                resultsContentPresent = false;
+                var typeKeysSelected = [];
+                jq("input:checkbox[name=searchableObject]:checked").each(function() {
+                    typeKeysSelected.push(jq(this).val());
+                });
+                typeKeysSelected = typeKeysSelected.sort();
+                fireSearchCall(typeKeysSelected);
+            }
+
+
+            function makeAdvanceSearchLinkRequest(){
+                jq.post("{!$Page.advanceSearchLinkPage}", {
+                    "core.apexpages.devmode.url" :'1'
+                }, function(data) {
+                    createAdvanceSearchObjects(data);
+                }, "json");
+            }
+      
+            function createAdvanceSearchObjects(data){
+               var typeDefConfigMap = data['typeDefConfig'];
+               var objectTofieldInfoMapJson = data['objectTofieldInfoMap'];
+               enabledFieldInfoListConfiguredFromJson = jq.evalJSON(objectTofieldInfoMapJson);
+               
+               var container = jq('.searchableObject');
+               var inputs = container.find('input');
+               var id = inputs.length+1;
+               
+               var labelList = [];
+               for (var key in typeDefConfigMap) {
+                 labelList.push(key);
+               } 
+               
+               labelList = labelList.sort();
+               
+               
+                var count = 0;
+                var advanceSearchObjTable = '';
+                advanceSearchObjTable += '<table><tr>';
+                for (var i = 0 ; i < labelList.length ; i++) {
+                     var sobjectState = typeDefConfigMap[labelList[i]];
+                     var label = sobjectState['label'];
+                     var apiName = sobjectState['apiName'];
+                     var selected = sobjectState['selected'];
+                     
+                     advanceSearchObjTable += '<td>';
+                     if(selected == true){
+                         advanceSearchObjTable += '<input type="checkbox" id=\"searchableObject\" class=\"searchableObject\" name=\"searchableObject\" onclick=\"configureToggling()\" value=\"' + apiName + '\" checked=\"yes\">' + label + '</input>';
+                     }else {
+                         advanceSearchObjTable += '<input type="checkbox" id=\"searchableObject\" class=\"searchableObject\" name=\"searchableObject\"  onclick=\"configureToggling()\" value=\"' + apiName + '\">' + label + '</input>';
+                     }
+                     count++;
+                     advanceSearchObjTable += '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>';
+                     if(count % 5 == 0){
+                        advanceSearchObjTable += '</tr><tr>';
+                     }
+                     
+                }       
+                advanceSearchObjTable += '</tr></table>';
+                jq(container).append(advanceSearchObjTable);
+                configureToggling();
+            }
+
+            function showadvanceSettings()
+            {
+            
+                configureToggling();
+                //Make Ajax requ
+                if(advanceSearchLinkClicked == false){
+                    jq(".searchableObject").html('');
+                    makeAdvanceSearchLinkRequest();
+                    jq('#buttonDiv').show();
+                }
+                //
+                //layoutOptions();
+                if(jq('#defaultSearch').is(":visible"))
+                {
+                    jq('#defaultSearch').button({
+                        disabled : true
+                    });
+                    dSearch = false;
+                    jq('#defaultSearch').hide();
+                    jq('.advancedSearch').show();
+                }
+                else
+                {
+                    jq('#defaultSearch').button({
+                        disabled : false
+                    });
+                    dSearch = true;
+                    jq('#defaultSearch').show();
+                    jq('.advancedSearch').hide();
+                }
+                advanceSearchLinkClicked = true;
+                return false;
+            }
+
+            function layoutOptions()
+            {
+                jq('.searchableObject').each(function()
+                {
+                    makeRows(this,4);
+                });
+            }
+
+            function makeRows(table,columnCount)
+            {
+                cells = table.rows[0].cells;
+                cellCount = cells.length;
+                rowCount = Math.ceil(cellCount / columnCount);
+
+                for(i = 0;i < rowCount;i++)
+                {
+                    table.insertRow(0);
+                }
+                for(i = 0;i < cellCount;i++)
+                {
+                    row = Math.floor(i / columnCount);
+                    table.rows[row].appendChild(cells[i].cloneNode(true));
+                }
+                table.deleteRow(rowCount);
+            }
+
+            function selectAll()
+            {
+                enabledTypeKeysFromAdvanceSearch = [];
+                jq('.searchableObject :not(:checked)').each(function()
+                {
+                    this.checked = true;
+                    enabledTypeKeysFromAdvanceSearch.push(this.value);
+                });
+                configureToggling();
+            }
+
+            function saveUserPreferences()
+            {
+                if(userCanSavePreferences)
+                {
+                    collectEnabledTypeKeys();
+                    doSaveUserPreferences(jq.toJSON(enabledTypeKeysFromAdvanceSearch));
+                }
+            }
+
+            function onSaveUserPreferences(msg)
+            {
+                if(msg == null || msg == '')
+                {
+                    msg = "{!$Label.cccs_savesettingsmsg}.";
+                }
+
+                showDialog(
+                        "{!$Label.cccs_status}",
+                        "<p><h1>"
+                                + msg
+                                + '</h1></p></br><input type="button" id="ok" value="{!$Label.cccs_ok}"/>',
+                        false);
+                jq('#ok').click(function()
+                {
+                    closeDialog();
+                });
+            }
+
+            function configureToggling()
+            {
+                if(jq('.searchableObject :checked').length > 0 )
+                {
+                    jq('.toggle').button({
+                        disabled : false
+                    });
+                }
+                else
+                {
+                    jq('.toggle').button({
+                        disabled : true
+                    });
+                }
+            }
+
+            function deselectAll()
+            {
+                enabledTypeKeysFromAdvanceSearch = [];
+                jq('.searchableObject :checked').each(function()
+                {
+                    this.checked = false;
+                });
+                configureToggling();
+            }
+           
+            function onloadSearch()
+            {
+                jq('.queryText').each(
+                        function()
+                        {
+                            queryText = this.value;
+                            queryText = decodeURIComponent(queryText.replace(/\+/g," "));
+                            createChatterSearchLink(queryText);
+                            if(queryText != null && queryText != '' && queryText != 'null')
+                            {                               
+                                search();
+                            }
+                            else
+                            {
+                                var searchString = getParameter('sbstr');
+                                if(searchString == null || searchString==''){
+
+                                    searchString = getParameter('str');
+                                }
+                                this.value = searchString;
+
+                                if(searchString != null && searchString != ''
+                                        && queryText != 'null')
+                                {
+                                    var senParameter = getParameter('sen');
+                                    if(senParameter == null || senParameter==''){
+
+                                        senParameter = getParameter('fen');
+                                    }
+                                    if(senParameter != null || senParameter != ''){
+
+                                        getAllDefaultParametersAndSearch();
+                                    }
+                                }
+                                search();
+                            }
+                        });
+                        
+                        if(enabledTypeKeysConfiguredFromJson.length > 0){
+                            jq('.toggle').button({
+                                disabled : false
+                            });
+                        }
+                return;
+            }
+
+            function getAllDefaultParametersAndSearch()
+            {
+                prefixTypeKeys = enabledTypeKeys;
+            }
+
+            function getParameter(paramName)
+            {
+                var name = paramName.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
+                var regexS = "[\\?&]" + name + "=([^&#]*)";
+                var regex = new RegExp(regexS);
+                var results = regex.exec(window.location.search);
+                if(results == null)
+                    return "";
+                else
+                    return decodeURIComponent(results[1].replace(/\+/g," "));
+            }
+
+            function showOnlyDivByName(divName,sideBarTypeKey,currentDiv)
+            {
+                jq('#noResultsFoundDiv').hide();
+                jq('#searchingMessage').show();
+                jq("#dataTablesDiv").show();
+                jq("#dataTablesDiv").children().hide();
+                jq('#'+divName).show();
+                jq('#'+divName).css("visibility","visible");
+                
+                jq('.ccLinkSelector').css('background','#FFFFFF');
+                jq('.ccLinkSelector').css('font-weight','normal');
+                jq('#recordsTab').css('background','#f7f8f9');
+                jq(currentDiv).css('background','#cfeef8');
+                jq(currentDiv).css('font-weight','bold');
+                jq('#searchingMessage').hide();
+            }
+
+
+            function showAllTables(currentDiv)
+            {
+                jq('#searchingMessage').show();
+                if(tablesFound.length == 0){
+                    jq('#searchingMessage').hide();
+                    jq('#noResultsFoundDiv').show();
+                }
+                jq("#dataTablesDiv").children().hide();
+                //showDialog("{!$Label.cccs_pleasewait} ...");
+                for( var i = 0;i < tablesFound.length;i++)
+                {
+                    jq('#' + tablesFound[i] + 'Div').show();
+                }
+                jq(".ccLinkSelector").css('background','#FFFFFF');
+                jq('.ccLinkSelector').css('font-weight','normal');
+                jq(currentDiv).css('background','#cfeef8');
+                jq(currentDiv).css('font-weight','bold');
+                //closeDialog();
+                jq('#searchingMessage').hide();
+            }
+            
+            function callOrgWideSettings(){
+                var query = '';
+                jq('.queryText').each(function()
+                {
+                    query = this.value;
+                });
+                orgWideSettings(query);
+            }
+
+        </script>
+
+    
+    <div id="customSearchWrapper">
+        <apex:outputLabel rendered="{!displayLogs}">
+            <!-- <apex:pageBlock >LOG Statements</apex:pageBlock> -->
+        </apex:outputLabel>
+    
+        <div id="ccSearchResultsHeader">
+            <br /> <label style="font-size: 2em">{!$Label.cccs_searchresults}</label><br />
+            <br />
+        </div>
+        <table id="searchTbl" width="100%" height="100%" border="0"
+            cellspacing="0" cellpadding="0">
+            <tbody>
+                <tr id="searchTr">
+                    <td id="sidebarTd">
+                        <div id="sidebarDiv">
+                        
+                            <apex:outputlabel rendered="{!IF(config4chatter && chatterEnabled,'true','false')}">
+                                <div class="ccLinkSelector" onclick="" id="ChattersTab">
+                                    <div id="chatterSearchLinkUrl">
+                                        <a href="#" class="chatterHeader"><img
+                                            src="/img/icon/files16.png" />&nbsp;&nbsp;{!$Label.cccs_searchchatterupdates}</a>
+                                    </div>
+                                </div>
+                            </apex:outputlabel>
+    
+                            <!-- <b><a href="#" class="chatterHeader">{!$Label.ciphercloud_searchchatterupdates}</a></b> -->
+                            <div class="ccLinkSelector ccHighlight"
+                                onclick="showAllTables(this);" id="recordsTab">
+                                <img src="/img/icon/files16.png" />&nbsp;&nbsp;<b><a
+                                    href="#" class="recordsHeader">{!$Label.cccs_records}</a></b>
+                            </div>
+                            <div id="ccSideBarResults">
+                                <div id="ccSideBarLinks"></div>
+                            </div>
+                        </div>
+                    </td>
+                    <td id="searchResultsTd">
+                        <div id="ccSearchResultsDiv">
+                            <apex:pageblock >
+                                <br />
+                                <apex:form >
+                                    <div class="search2TextInputContainer">
+                                        <!-- <input class="queryText" maxlength="100" type="text" value="{!queryTokens}" title="Search..."/> -->
+                                        <apex:inputText id="queryText" styleClass="queryText" maxlength="100" value="{!queryTokens}" title="Search..." />
+                                    </div>  
+                    &nbsp;
+                    <input type="button" onclick="advanceSearch()"
+                                        value="{!$Label.cccs_search}"
+                                        class="hidden advancedSearch toggle btn"
+                                        id="advancedSearchButton" />
+                                    <input type="button" onclick="search()"
+                                        value="{!$Label.cccs_search}" id="defaultSearch"
+                                        class="toggle btn" />
+                                    <br />
+                                    <div id="selectFieldsId" style="display:none;visibility:hidden"><br />
+                                        <apex:outputLabel value="{!$Label.cc_cs302__cccs_search_fieldlimit}"/>&nbsp;
+                                            
+                                        <input type="radio" name="fieldsSelected" id="allFieldsId" value="ALL FIELDS" />{!$Label.cccs_select_allfields} &nbsp;&nbsp;
+                                        <input type="radio" name="fieldsSelected" id="nameFieldsId" value="NAME FIELDS" />{!$Label.cccs_select_namefields} &nbsp;&nbsp;
+                                        <input type="radio" name="fieldsSelected" id="sideBarFieldsId" value="SIDEBAR FIELDS"/>{!$Label.cccs_select_sidebarfields}&nbsp;&nbsp;
+                                    </div>
+                                    <br />
+                                    <apex:outputLabel rendered="{!enableAdvanceSearch}">
+                                        <apex:commandLink onclick="if(!showadvanceSettings()) return false;" action="{!transientSettings}" value="{!$Label.cc_cs302__cccs_advancedsearch}" id="advanceSearch" />
+                                    </apex:outputLabel> 
+                &nbsp;&nbsp;
+                &nbsp;&nbsp;
+                &nbsp;&nbsp;
+                <apex:commandLink action="{!settings}"
+                                        value="{!$Label.cc_cs302__cccs_orgwide_settings}"
+                                        rendered="{!userCanManageSettings}"></apex:commandLink>
+                                </apex:form>
+                                <br />
+                            </apex:pageblock>
+    
+    
+                            <div id="advancedSearch" class="hidden advancedSearch"
+                                title="{!$Label.cc_cs302__cccs_advancedsearch}">
+                                <apex:pageBlock title="{!$Label.cc_cs302__cccs_advancedsearchoptions}">
+                                    <apex:outputPanel layout="block">
+                                        <apex:outputPanel >
+                                            <div id="buttonDiv">
+                                                <input type="button" id="selectAllButton"
+                                                    onclick="selectAll()" value="{!$Label.cccs_selectall}"
+                                                    class="btn" />&nbsp;&nbsp;
+                                                <input type="button" id="deselectAllButton"
+                                                    onclick="deselectAll()" value="{!$Label.cccs_deselectall}"
+                                                    class="btn" />&nbsp;&nbsp;
+                                                <input type="button" id="saveUserPreferencesButton"
+                                                    onclick="saveUserPreferences()" value="{!$Label.cccs_save}"
+                                                    class="toggle btn" />&nbsp;&nbsp;
+                                            </div>
+                                        </apex:outputPanel>
+                                        <apex:form >
+                                            <apex:selectCheckboxes value="{!enabledTypeKeys}"
+                                                styleClass="searchableObject" rendered="true"
+                                                onclick="configureToggling()" id="selectedeObjects">
+                                                <apex:selectOptions value="{!searchableItems}" />
+                                            </apex:selectCheckboxes>
+                                        </apex:form>
+                                    </apex:outputPanel>
+                                </apex:pageBlock>
+                            </div>
+    
+                            <!-- <apex:pageBlockSection id="searchBlock" collapsible="false">-->
+                            <div id="searchBlock">
+                                <apex:form >
+                                    <apex:actionFunction name="doSaveUserPreferences"
+                                        action="{!doSaveUserPreferences}"
+                                        oncomplete="onSaveUserPreferences({!errorMessage});">
+                                        <apex:param name="userPreferredTypeKeys" value="" />
+                                    </apex:actionFunction>
+                                </apex:form>
+                            </div>
+    
+                            <!--  <div id="status"></div>-->
+                            <apex:outputLabel rendered="{!displayLogs}">
+                                <apex:outputLabel escape="false">
+                                    <div id="queriesIssued"></div>
+                                </apex:outputLabel>
+                            </apex:outputLabel>
+    
+                            <center>
+                                <div id="searchingMessage">
+                                    <apex:image url="{!URLFOR($Resource.CC_CS302__CC_Datatables, 'images/loading24.gif')}" />
+                                    &nbsp;&nbsp;&nbsp;
+                                    <apex:outputLabel style="padding:0 10px 0 0">{!$Label.cc_cs302__cccs_searchinglabel}</apex:outputLabel>
+                                </div>
+                            </center>
+    
+                            <div id="dataTablesDiv">
+                                <br />
+                                <br />
+                                <br />
+    
+                            </div>
+                            <div id="noResultsFoundDiv" class="hidden">
+                                <div class="individualPalette" id="searchResultsHolderDiv">
+                                    <div class="messages"></div>
+                                    <div class="searchResultsMessageContainer">
+                                        <div class="message warningM4"
+                                            id="searchResultsWarningMessageBox">
+                                            <table class="messageTable" border="0" cellpadding="0"
+                                                cellspacing="0">
+                                                <tbody>
+                                                    <tr>
+                                                        <td><img src="/s.gif" alt="Warning" class="msgIcon"
+                                                            title="Warning" /></td>
+                                                        <td class="messageCell"><div id="messageText"></div></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="searchResultsTipsContainer">
+                                            <div class="searchResultsTipsHeader">{!$Label.cccs_tipheader}</div>
+                                            <div id="tipDiv">
+                                                <ul id="tipUl"></ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+    
+                            <div id="exceptionOccuredDiv" class="hidden">
+                                <div class="individualPalette" id="searchResultsHolderDiv">
+                                    <div class="messages"></div>
+                                    <div class="searchResultsMessageContainer">
+                                        <div class="message warningM4"
+                                            id="searchResultsWarningMessageBox">
+                                            <table class="messageTable" border="0" cellpadding="0"
+                                                cellspacing="0">
+                                                <tbody>
+                                                    <tr>
+                                                        <td><img src="/s.gif" alt="Warning" class="msgIcon"
+                                                            title="Warning" /></td>
+                                                        <td class="messageCell"><div id="exceptionMessageText"></div></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="searchResultsTipsContainer">
+                                            <div class="searchResultsTipsHeader">{!$Label.cccs_searchtips}</div>
+                                            <ul>
+                                                <li>{!$Label.cccs_refinesearch}</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="logDiv"></div>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+                       
+    <script type="text/javascript">
+       
+       function pagingFunction(oTable,tableId){
+           var oSettings = oTable.fnSettings();
+           var currentPage = Math.ceil( oSettings._iDisplayStart / oSettings._iDisplayLength );
+           var totalPages = Math.ceil( oSettings.fnRecordsDisplay() / oSettings._iDisplayLength );
+           if((currentPage + 1 ) == totalPages){
+                    var allRecordsRenedered = false;
+                    for( var i = 0;i < finishedTypeKeys.length;i++) {
+                       if(tableId == finishedTypeKeys[i]){
+                            allRecordsRenedered = true;
+                       }
+                     }
+                    
+                    if(allRecordsRenedered != true){//reached last of cached data
+                      makeSearchRequest(tableId,currentPage,paginationSize,true);
+    
+                      for( var i = 0;i < finishedTypeKeys.length;i++) {
+                       if(tableId == finishedTypeKeys[i]){
+                            jq('#' + tableId + 'TableDivTableID_last').hide();
+                       }
+                      }
+                    }
+           }
+        }
+       
+       jq(document).ready(function()
+       {
+           checkLastPage = function(oSettings,tableId){
+               
+                var currentPage = Math.ceil( oSettings._iDisplayStart / oSettings._iDisplayLength );
+                var totalPages = Math.ceil( oSettings.fnRecordsDisplay() / oSettings._iDisplayLength );
+           
+               jq('#' + tableId + 'TableDivTableID_length select').live('change', function(e){
+                  var allRecordsRenedered = false;
+                    for( var i = 0;i < finishedTypeKeys.length;i++) {
+                       if(tableId == finishedTypeKeys[i]){
+                            allRecordsRenedered = true;
+                       }
+                     }
+                    if(allRecordsRenedered == true){
+                      //Do Default execution.  
+                    } else{
+                      e.preventDefault();
+                      jq('#' + tableId + 'TableDivTableID_next').removeClass('ui-state-disabled');
+                      jq('#' + tableId + 'TableDivTableID_last').show();
+                      jq('#' + tableId + 'TableDivTableID_next').show();
+                    }
+               });
+               //listen for when the Next button is clicked.
+              
+           }
+        });
+    </script>
+</apex:page>

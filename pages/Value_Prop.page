@@ -1,0 +1,158 @@
+<apex:page controller="ValuePropController">
+    <apex:stylesheet value="{!$Resource.weatherCSS}" />
+    <apex:includeScript value="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"/>
+    <apex:includeScript value="{!$Resource.simpleweather}"/>
+    <script type="text/javascript">
+    
+    $(document).ready(function() {
+        loadWeather('{!postalCode}'); //@params location, woeid
+        loadNews('{!postalCode}');
+    });
+    
+function loadWeather(location) {
+    $.simpleWeather({
+        location: location,
+        unit: 'F',
+        success: function (weather) {
+            html = '<span><i><img style="vertical-align: middle;" width="100px" src="' + weather.image + '">    ' + weather.city + '&nbsp;' + weather.temp + '&deg;' + weather.units.temp + '&nbsp;' + weather.currently + '</i></span><br/>';
+            //html += '<ul><li>'+weather.city+', '+weather.region+'</li>';
+            //html += '<li class="currently">'+weather.currently+'</li>';
+
+            for (var i = 0; i < weather.forecast.length; i++) {
+                img = '<img style="float:left;" width="125px" align="middle" src="' + weather.forecast[i].image + '">';
+                html += '<span id="fore"><i style="color:#000" class="icon-' + weather.code + '"></i>' + weather.forecast[i].day + ': ' + weather.forecast[i].high + '</span>';
+            }
+
+            $("#weather").html(html);
+        },
+        error: function (error) {
+            $("#weather").html('<p>' + error + '</p>');
+        }
+    });
+};
+    
+    
+function loadNews(zipper) {
+        $.ajax({
+            url: 'https://ajax.googleapis.com/ajax/services/feed/load?v=1.0&num=8&q=http%3A%2F%2Fnews.google.com%2Fnews%3Foutput%3Drss%26geo%3D' + zipper,
+            dataType: 'jsonp',
+            success: function (data) {
+                //console.log(data.feed.entries);
+                $(data.responseData.feed.entries).each(function (index, entry) {
+                    var item_html = '<li><a target="_blank" href="' + entry.link + '">' + entry.title + '</a></li>';
+                    $('#rssdata ul.rss-items').append(item_html);
+                });
+                $('#rssdata div.loading').fadeOut();
+                $('#rssdata ul.rss-items').slideDown();
+            },
+            error: function () {}
+            
+        });
+    };
+    </script>
+    <apex:form >
+        <table><tr>
+            <td>
+                <!-- <apex:image id="theImage" value="{!$Resource.SPLASH}"/></td> 
+                <apex:image width="75px" value="{!$Resource.KeepItLocal}"/></td>
+            <td><p>
+                
+                </p><apex:outputText value="With Keep it Local, learn more about the customer's local area, lead quality, etc." style="font-weight:normal;font-size:18px;"/><br/>
+                <apex:outputText value="Engage at a more personal level!" style="font-weight:normal;font-size:18px"/><br/><br/>
+                
+                <!-- BREAKS ENTER KEY <apex:commandButton value="Launch in Window"  onClick="window.open('/apex/value_prop_pop', 'Value Prop', 'width=350, height=600, location=no')"/></td> -->
+            </td>
+            </tr></table>
+        
+        <br/>
+        
+        <apex:outputText value="Postal Code" style="font-weight:bold"/>&nbsp;&nbsp;
+        <apex:inputText value="{!postalCode}" style="width:70px"/>&nbsp;&nbsp;
+        <apex:commandButton value="Go" action="{!goSearch}"
+                            
+                            style="border-style: outset; border-width:1px; text-decoration: none; padding:4px; background: #1797c0; color: white; font-weight:700;">
+            
+          
+            
+            
+        </apex:commandButton>&nbsp;&nbsp;
+        
+        <apex:commandButton value="Clear" action="{!clearSearch}" rendered="{!showResults}"
+                            style="border-style: outset; border-width:1px; text-decoration: none; padding:4px; background: #1797c0; color: white; font-weight:700;"/>
+        <br/><br/>
+        
+       
+        
+        <apex:pageBlock rendered="{!showResults}" mode="mainDetail">
+            
+            
+                <apex:pageBlockSection collapsible="false" columns="2" >
+            	 
+                
+                
+                <apex:outputPanel >
+                    
+                  	
+                   
+                    
+					<div id="weather"></div>
+                    
+                    <div id="rssdata">
+                        
+                        <ul class="rss-items"></ul>
+                        <div class="loading">Loading RSS items...</div>
+                    </div>
+                    <!--
+                     <apex:map width="500px"  height="300px" mapType="roadmap" zoomLevel="9" center="{!postalCode}" >
+                    	<apex:mapMarker title="{!postalCode} Center" position="{!postalCode}"></apex:mapMarker>
+                    </apex:map> 
+                    
+                    /-->
+                </apex:outputPanel>
+                
+                
+                
+                
+               
+                
+                <apex:outputPanel >
+                    
+                    
+                        
+                        
+                     
+                    <!--<apex:outputText value="Lead Score and Demographics for: {!postalCode}" style="font-size: 1.4em;font-weight:bold;"></apex:outputText>-->
+                     
+                        
+                        <p>
+                            &nbsp;
+                        </p>
+                        <apex:outputText value="Average Lead Score - {!score}" style="font-weight:bold;color:{!leadFontColor};background-color:{!leadBackColor};font-size:18px;text-align: center;"></apex:outputText>
+                    	<p>
+                            &nbsp;
+                        </p>
+                    	<apex:outputText value="Anthem's Value to Customer: {!valuePropMessage}" style="font-weight:bold;font-size:18px;text-align: center;"></apex:outputText>
+                    	<p>
+                            &nbsp;
+                        </p>
+                    	<!--<apex:outputText value="{!valuePropState}"></apex:outputText>-->
+                    	<p>
+                            &nbsp;
+                        </p>
+                 
+                    
+                    <apex:pageBlockTable value="{!Top_Plans_HIX}" var="Top_Plans__c">
+						<apex:column value="{!Top_Plans__c.ON_HIX__c}" title="On Hix"/>
+                        <apex:column value="{!Top_Plans__c.OFF_HIX__c}" />
+					</apex:pageBlockTable>
+                   
+
+                </apex:outputPanel>
+            </apex:pageBlockSection>
+            
+           
+        </apex:pageBlock>
+        
+    </apex:form>
+    <apex:image url="{!$Resource.On_Exch_Map}"/>
+</apex:page>

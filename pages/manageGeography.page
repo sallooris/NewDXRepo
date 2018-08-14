@@ -1,0 +1,99 @@
+<apex:page controller="ManageGeographyController" >
+
+ <style>
+    .tableStyle {border-collapse: collapse; border-spacing: 0px 0px; }
+    .colStyle1 { width: 33%;}
+    .colStyle2 { width: 66%; }
+    .colStyle3 { width: 50%;}
+    .colStyle4 { width: 50%;}  
+    .colStyle5 { width: 100%;}  
+</style> 
+
+    <apex:form > 
+        <apex:sectionHeader title="Manage Geography"/>  
+        <apex:outputPanel id="pageblock" >
+            <apex:pageBlock id="block" rendered="{!IF(salesRepOpt<>null, true, false)}"  >
+            
+                <apex:pageBlockButtons location="top" >
+                    <apex:actionStatus id="SaveButtonStatus">
+                        <apex:facet name="stop">
+                            <apex:outputPanel >
+                                <apex:commandButton action="{!save}" value="Save" status="SaveButtonStatus" reRender="pageblock"/>
+                                <apex:commandButton action="{!cancel}" value="Cancel" immediate="true" reRender="pageblock"/>
+                            </apex:outputPanel>
+                        </apex:facet>
+                        <apex:facet name="start">
+                            <apex:outputPanel >
+                                <apex:commandButton value="Saving..." disabled="true" />
+                                <apex:commandButton value="Saving..." disabled="true" />
+                            </apex:outputPanel>
+                        </apex:facet>
+                    </apex:actionStatus>                
+                </apex:pageBlockButtons>             
+                <apex:pageMessages />
+                <apex:pageBlockSection title="Sale Reps." columns="1"  collapsible="false"  >
+
+                    <apex:panelGrid columns="2" border="0" styleClass="tableStyle" width="100%" columnClasses="colStyle1,colStyle2">
+                    
+                        <apex:panelGrid columns="1"  border="0" styleClass="tableStyle" width="100%" columnClasses="colStyle5" >
+                        
+                        <apex:outputPanel rendered="{!adminProf}" >
+                            <apex:outputLabel >Filter by State: </apex:outputLabel>
+                            <apex:selectList value="{!statesMultiPickList}" multiselect="false" size="1">
+                                <apex:selectOptions value="{!statesMultiPickListOptions}"/>
+                            </apex:selectList>
+                            
+                                 <apex:actionStatus id="filterStatus">
+                                    <apex:facet name="stop">
+                                        <apex:outputPanel >
+                                            <apex:commandButton action="{!filterSR}" value="Filter"  reRender="pageblock" status="filterStatus"/>
+                                        </apex:outputPanel>
+                                    </apex:facet>
+                                    <apex:facet name="start">
+                                        <apex:outputPanel >
+                                            <apex:commandButton value="Searching.." disabled="true" />
+                                        </apex:outputPanel>
+                                    </apex:facet>
+                                </apex:actionStatus>                             
+                            
+                        </apex:outputPanel> 
+                        
+                            <apex:selectRadio value="{!salesRep}" layout="pageDirection" >
+                                <apex:actionSupport event="onchange" action="{!salesRepSelectedActions}" reRender="pageblock"/>
+                                <apex:selectOptions value="{!salesRepOpt}"/>
+                            </apex:selectRadio>
+                            <apex:pageMessage summary="There are no Sales Rep. assigned to {!statesMultiPickList}"  severity="INFO" rendered="{!if(salesRepOpt.size==0, true,false)}" strength="1"/>
+                        
+                            <apex:pageBlockSection title="Brokers" columns="1" >
+                            
+                                <apex:selectRadio value="{!brokerSelected}" layout="pageDirection">
+                                    <apex:actionSupport event="onchange" action="{!brokerSelectedActions}" reRender="pageblock"/>
+                                    <apex:selectOptions value="{!brokersOpts}"/>                       
+                                </apex:selectRadio> 
+                                
+                                   
+                            </apex:pageBlockSection>
+                            <apex:pageMessage summary="There are no Brokers. assigned to {!statesMultiPickList}"  severity="INFO" rendered="{!if(brokersOpts.size==0, true,false)}" strength="1"/>
+                        </apex:panelGrid> 
+                                           
+                        <apex:panelGrid columns="2" border="0" styleClass="tableStyle" width="100%" columnClasses="colStyle3,colStyle4" >
+                            <apex:pageBlockSection title="States" columns="1" >
+                                <apex:selectCheckboxes disabled="{!salesRepSelected}" value="{!statesSelected}" layout="pageDirection">
+                                    <apex:actionSupport event="onchange" action="{!statesSelectedActions}" reRender="pageblock"/>
+                                    <apex:selectOptions value="{!statesOpts}"/>
+                                </apex:selectCheckboxes> 
+                            </apex:pageBlockSection>  
+                    
+                            <apex:pageBlockSection title="Territories" columns="1" >
+                                <apex:selectCheckboxes disabled="{!salesRepSelected}" value="{!territoriesSelected}" layout="pageDirection">
+                                    <apex:selectOptions value="{!territoriesOpts}"/>
+                                </apex:selectCheckboxes> 
+                            </apex:pageBlockSection>                                                         
+                        </apex:panelGrid>
+                    </apex:panelGrid> 
+                </apex:pageBlockSection>               
+
+            </apex:pageBlock>
+        </apex:outputPanel> 
+    </apex:form> 
+</apex:page>

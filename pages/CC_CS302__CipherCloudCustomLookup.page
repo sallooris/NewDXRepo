@@ -1,0 +1,1837 @@
+<apex:page controller="CC_CS302.CCCustomLookupController" applyHtmlTag="false" showHeader="false" sideBar="false" tabStyle="Account" id="pg" Action="{!buildQueryObjects}" contentType="text/html; charset=utf-8">
+
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=9; IE=8; IE=7; IE=EDGE" />
+    </head>
+
+    <!--Minified and consolidated JS files -->
+    <apex:includeScript value="{!URLFOR($Resource.CC_CS302__CC_JS_CSS, '/js/js.build.min.js')}" />
+
+    <!--Minified and consolidated CSS files -->
+    <apex:stylesheet value="{!URLFOR($Resource.CC_CS302__CC_JS_CSS,'/css/minified_css_file.css')}" />
+
+    <apex:includeScript value="/support/console/22.0/integration.js" />
+    <apex:includeScript value="/soap/ajax/17.0/connection.js" />
+
+    <script>
+        (function() {
+
+            var customDateDDMMMYYYYToOrd = function(date) {
+                "use strict"; //let's avoid tom-foolery in this function
+                // Convert to a number YYYYMMDD which we can use to order
+                var dateParts = date.split(/-/);
+                return (dateParts[2] * 10000) + ($.inArray(dateParts[1].toUpperCase(), ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"]) * 100) + (dateParts[0] * 1);
+            };
+
+            // This will help DataTables magic detect the "dd-MMM-yyyy" format; Unshift
+            // so that it's the first data type (so it takes priority over existing)
+            jQuery.fn.dataTableExt.aTypes.unshift(
+                function(sData) {
+                    "use strict"; //let's avoid tom-foolery in this function
+                    if (/^([0-2]?\d|3[0-1])-(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)-\d{4}/i.test(sData)) {
+                        return 'date-dd-mmm-yyyy';
+                    }
+                    return null;
+                }
+            );
+
+            // define the sorts
+            jQuery.fn.dataTableExt.oSort['date-dd-mmm-yyyy-asc'] = function(a, b) {
+                "use strict"; //let's avoid tom-foolery in this function
+                var ordA = customDateDDMMMYYYYToOrd(a),
+                    ordB = customDateDDMMMYYYYToOrd(b);
+                return (ordA < ordB) ? -1 : ((ordA > ordB) ? 1 : 0);
+            };
+
+            jQuery.fn.dataTableExt.oSort['date-dd-mmm-yyyy-desc'] = function(a, b) {
+                "use strict"; //let's avoid tom-foolery in this function
+                var ordA = customDateDDMMMYYYYToOrd(a),
+                    ordB = customDateDDMMMYYYYToOrd(b);
+                return (ordA < ordB) ? 1 : ((ordA > ordB) ? -1 : 0);
+            };
+
+        })();
+
+        jQuery.extend(jQuery.fn.dataTableExt.oSort, {
+            "de_datetime-asc": function(a, b) {
+                var x, y;
+                if ($.trim(a) !== '') {
+                    var deDatea = $.trim(a).split(' ');
+                    var deTimea = deDatea[1].split(':');
+                    var deDatea2 = deDatea[0].split('.');
+                    x = (deDatea2[2] + deDatea2[1] + deDatea2[0] + deTimea[0] + deTimea[1]) * 1;
+                } else {
+                    x = Infinity; // = l'an 1000 ...
+                }
+
+                if ($.trim(b) !== '') {
+                    var deDateb = $.trim(b).split(' ');
+                    var deTimeb = deDateb[1].split(':');
+                    deDateb = deDateb[0].split('.');
+                    y = (deDateb[2] + deDateb[1] + deDateb[0] + deTimeb[0] + deTimeb[1]) * 1;
+                } else {
+                    y = Infinity;
+                }
+                var z = ((x < y) ? -1 : ((x > y) ? 1 : 0));
+                return z;
+            },
+
+            "de_datetime-desc": function(a, b) {
+                var x, y;
+                if ($.trim(a) !== '') {
+                    var deDatea = $.trim(a).split(' ');
+                    var deTimea = deDatea[1].split(':');
+                    var deDatea2 = deDatea[0].split('.');
+                    x = (deDatea2[2] + deDatea2[1] + deDatea2[0] + deTimea[0] + deTimea[1]) * 1;
+                } else {
+                    x = Infinity;
+                }
+
+                if ($.trim(b) !== '') {
+                    var deDateb = $.trim(b).split(' ');
+                    var deTimeb = deDateb[1].split(':');
+                    deDateb = deDateb[0].split('.');
+                    y = (deDateb[2] + deDateb[1] + deDateb[0] + deTimeb[0] + deTimeb[1]) * 1;
+                } else {
+                    y = Infinity;
+                }
+                var z = ((x < y) ? 1 : ((x > y) ? -1 : 0));
+                return z;
+            }
+        });
+
+jQuery.extend( jQuery.fn.dataTableExt.oSort, {
+            "date-ind-pre": function ( a) {
+                var x;
+            if (jq.trim(a) != '') {
+                var frDatea = jq.trim(a).split(' ');
+                var frTimea = (undefined != frDatea[1]) ? frDatea[1].split(':') : [00,00,00];
+                var frDatea2 = frDatea[0].split('/');
+                var year = frDatea2[2] * 60 * 24 * 366;
+                var month = frDatea2[1] * 60 * 24 * 31;
+                var day = frDatea2[0] * 60 * 24;
+                var hour = frTimea[0];
+                var minute = frTimea[1];
+                /*var second = frTimea[2];*/
+                var ampm = frDatea[2];
+ 
+                if (day < 10) {
+                    day = '0' + day;
+                }
+ 
+                if (ampm == 'PM' && hour < 12) {
+                    hour = parseInt(hour, 10) + 12;
+                }
+ 
+                if (hour < 10) {
+                    hour = '0' + hour;
+                }
+                var hour1 = hour * 60;
+                x = (year + month + day + hour1 + minute) * 1;
+            } else {
+                var x = 99999999999999999;
+            }
+ 
+            return x;
+            },
+         
+            "date-ind-asc": function ( a, b ) {
+                return ((a < b) ? -1 : ((a > b) ? 1 : 0));
+            },
+         
+            "date-ind-desc": function ( a, b ) {
+                return ((a < b) ? 1 : ((a > b) ? -1 : 0));
+            }
+        } );
+        
+        jQuery.extend( jQuery.fn.dataTableExt.oSort, {
+            "date-usa-pre": function ( a) {
+                var x;
+            if (jq.trim(a) != '') {
+                var frDatea = jq.trim(a).split(' ');
+                var frTimea = (undefined != frDatea[1]) ? frDatea[1].split(':') : [00,00,00];
+                var frDatea2 = frDatea[0].split('/');
+                var year = frDatea2[2] * 60 * 24 * 366;
+                var month = frDatea2[0] * 60 * 24 * 31;
+                var day = frDatea2[1] * 60 * 24;
+                var hour = frTimea[0];
+                var minute = frTimea[1];
+                /*var second = frTimea[2];*/
+                var ampm = frDatea[2];
+ 
+                if (day < 10) {
+                    day = '0' + day;
+                }
+ 
+                if (ampm == 'PM' && hour < 12) {
+                    hour = parseInt(hour, 10) + 12;
+                }
+ 
+                if (hour < 10) {
+                    hour = '0' + hour;
+                }
+                var hour1 = hour * 60;
+                x = (year + month + day + hour1 + minute) * 1;
+            } else {
+                var x = 99999999999999999;
+            }
+ 
+            return x;
+            },
+         
+            "date-usa-asc": function ( a, b ) {
+                return ((a < b) ? -1 : ((a > b) ? 1 : 0));
+            },
+         
+            "date-usa-desc": function ( a, b ) {
+                return ((a < b) ? 1 : ((a > b) ? -1 : 0));
+            }
+        } );
+        
+
+        jQuery.extend(jQuery.fn.dataTableExt.oSort, {
+            "date-eu-pre": function(date) {
+                date = date.replace(" ", "");
+                var eu_date, year;
+
+                if (date == '') {
+                    return 0;
+                }
+
+                if (date.indexOf('.') > 0) {
+                    /*date a, format dd.mn.(yyyy) ; (year is optional)*/
+                    eu_date = date.split('.');
+                } else {
+                    /*date a, format dd/mn/(yyyy) ; (year is optional)*/
+                    eu_date = date.split('/');
+                }
+
+                /*year (optional)*/
+                if (eu_date[2]) {
+                    year = eu_date[2];
+                } else {
+                    year = 0;
+                }
+
+                /*month*/
+                var month = eu_date[1];
+                if (month.length == 1) {
+                    month = 0 + month;
+                }
+
+                /*day*/
+                var day = eu_date[0];
+                if (day.length == 1) {
+                    day = 0 + day;
+                }
+
+                return (year + month + day) * 1;
+            },
+
+            "date-eu-asc": function(a, b) {
+                return ((a < b) ? -1 : ((a > b) ? 1 : 0));
+            },
+
+            "date-eu-desc": function(a, b) {
+                return ((a < b) ? 1 : ((a > b) ? -1 : 0));
+            }
+        });
+
+        jQuery.extend(jQuery.fn.dataTableExt.oSort, {
+            "date-euro-pre": function(a) {
+                var x;
+
+                if ($.trim(a) !== '') {
+                    var frDatea = $.trim(a).split(' ');
+                    var frTimea = frDatea[1].split(':');
+                    var frDatea2 = frDatea[0].split('/');
+                    x = (frDatea2[2] + frDatea2[1] + frDatea2[0] + frTimea[0] + frTimea[1] + frTimea[2]) * 1;
+                } else {
+                    x = Infinity;
+                }
+
+                return x;
+            },
+
+            "date-euro-asc": function(a, b) {
+                return a - b;
+            },
+
+            "date-euro-desc": function(a, b) {
+                return b - a;
+            }
+        });
+
+        jQuery.extend(jQuery.fn.dataTableExt.oSort, {
+            "date-uk-pre": function(a) {
+                var ukDatea = a.split('/');
+                return (ukDatea[2] + ukDatea[1] + ukDatea[0]) * 1;
+            },
+
+            "date-uk-asc": function(a, b) {
+                return ((a < b) ? -1 : ((a > b) ? 1 : 0));
+            },
+
+            "date-uk-desc": function(a, b) {
+                return ((a < b) ? 1 : ((a > b) ? -1 : 0));
+            }
+        });
+
+        jQuery.extend(jQuery.fn.dataTableExt.oSort, {
+            "date-us-pre": function(a) {
+                if (a == '') {
+                    return 0;
+                }
+                var b = a.match(/(\d{1,2})\/(\d{1,2})\/(\d{2,4})/),
+                    month = b[1],
+                    day = b[2],
+                    year = b[3];
+
+                if (year.length == 2) {
+                    if (parseInt(year, 10) < 70) year = '20' + year;
+                    else year = '19' + year;
+                }
+                if (month.length == 1) month = '0' + month;
+                if (day.length == 1) day = '0' + day;
+
+                var tt = year + month + day;
+                return tt;
+            },
+            "date-us-asc": function(a, b) {
+                return a - b;
+            },
+
+            "date-us-desc": function(a, b) {
+                return b - a;
+            }
+        });
+    </script>
+
+    <script type="text/javascript">
+        var jq = jQuery.noConflict();
+        var parentUrl = window.parent.location;
+        if (!window.console) console = {
+            log: function() {}
+        };
+        var canFireSearchCall = true;
+        var typeKeyToDpsMaxCountMap = {};
+        var typeKeyToIdListMap = {};
+        var lookupSearchFields = '{!JSENCODE(lookupSearchFields)}';
+        var ccSearchType = 'prefix';
+        var paginationSize = {!paginationSize};
+        var defaultRows = {!defaultRows};
+        var displayLogs = {!displayLogs};
+        var finishedTypeKeys = [];
+        var originalQueryString = '';
+        var initialSearchStringConfig = '{!JSENCODE(searchStringConfig)}';
+        var sessionId = '{!$Api.Session_ID}';
+        var lktp = '{!JSENCODE(typeName)}';
+        var typeKey = '{!JSENCODE(typeKeyApiName)}';
+        var paramConfigMap = {};
+        var searchString;
+        var dateFormat = '{!JSENCODE(dateFormat)}';
+        var tabelKeyVsSearchRequestFiredMap = {};
+        var currentTable = '{!JSENCODE(typeKeyApiName)}';
+        var currentTableLabel = '{!JSENCODE(typeKeyLabel)}';
+        var currentTableDivId = currentTable + 'TableDivTableID';
+        var isCodeVsSymbolMap = {};
+        var headerList = '{!JSENCODE(headerList)}';
+        var sortedBy = '{!JSENCODE(sortedBy)}';
+        var sortedByRelevancy = {!sortedByRelevancy};
+        var rewrittenResultsForDuplicates = {};
+        var rightToLeftScripts = {!rightToLeftScripts};
+        var allowChangeColumns = {!allowChangeColumns};
+        var sdomElement = 'Rlfrtip';
+        var showWithInResults = {!showWithInResults};
+        var displayColumns = '{!JSENCODE(displayColumns)}';
+        if (allowChangeColumns) {sdomElement = 'lCfrtip';}
+    </script>
+
+    <style>
+        #lookupSearchResultsDiv table th {
+            font-size: 90%;
+        }
+
+        #lookupSearchResultsDiv table tr {
+            font-size: 80%;
+        }
+
+        #customSearchWrapper {
+            position: relative;
+            clear: both;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        #ccSearchResultsDiv {
+            float: right;
+            width: 82%;
+        }
+
+        #CC_DatatablesDiv {
+            float: auto;
+            width: 100%;
+        }
+
+        #sidebarDiv {
+            float: left;
+            width: 17%;
+        }
+
+        #ccSearchResultsHeader {
+            padding: 5px 10px;
+        }
+
+        .ccLinkSelector {
+            text-decoration: none;
+            display: block;
+            position: relative;
+            padding: 4px 5px;
+            -moz-border-radius: 5px;
+            -webkit-border-radius: 5px;
+            margin-bottom: 5px;
+        }
+
+        #recordsTab,
+        #ChattersTab {
+            border: 1px solid #d4dadc;
+            margin-bottom: 10px;
+        }
+
+        .ccLinkSelector a:link {
+            text-decoration: none;
+        }
+
+        .ccLinkSelector a:hover {
+            text-decoration: underline;
+        }
+
+        .ccHighlight {
+            vertical-align: middle;
+            color: #333435;
+            font-weight: bold;
+            background-color: #cfeef8;
+        }
+
+        .toggleoff {
+            vertical-align: middle;
+            font-weight: normal;
+            background-color: #f7f8f9;
+        }
+
+        .recordsHeader {
+            text-decoration: none;
+        }
+
+        .individualPalette .accountBlock .secondaryPalette {
+            background-color: white;
+        }
+
+        .ui-dialog-titlebar-close .hidden {
+            display: none;
+        }
+
+        .ColVis {
+            padding-bottom: 6px;
+        }
+
+        .ColVis_Button {
+            color: black;
+            background: none;
+            font-weight: normal;
+        }
+    </style>
+
+    <script type="text/javascript" charset="UTF-8">
+        var sortByDate = function(inputJSON, sortBy) {
+            if (sortBy == 'LastModifiedDate') {
+                inputJSON.sort(function(a, b) {
+                    a = new Date(a[a.length - 2]);
+                    b = new Date(b[b.length - 2]);
+                    return a > b ? -1 : a < b ? 1 : 0;
+                });
+            } else {
+                inputJSON.sort(function(a, b) {
+                    a = new Date(a[a.length - 3]);
+                    b = new Date(b[b.length - 3]);
+                    return a > b ? -1 : a < b ? 1 : 0;
+                });
+            }
+            return inputJSON;
+        }
+
+        var relevantSortedArray = function(searchString, inputJSON) {
+            searchString = searchString.toLowerCase();
+            if (searchString.slice(-1) == "*") {
+                searchString = searchString.substr(0, searchString.length - 1);
+            }
+            if ((searchString[0] == "\"" && searchString.slice(-1) == "\"") || (searchString[0] == "'" && searchString.slice(-1) == "'")) {
+                searchString = searchString.substr(1, searchString.length - 2);
+            }
+            var relevanceScoreArray = [];
+            searchString = searchString.trim();
+            var searchStringQueriesArray = searchString.split(/ OR | or | AND | and | NOT IN | not in /);
+
+            if (searchStringQueriesArray.length <= 1) {
+                relevanceScoreArray = scoreForIndividualSearchString(searchString, inputJSON);
+            } else {
+                var relevanceScoresArray = [];
+                var temprelevanceScoreArray = [];
+                for (var i = 0; i < searchStringQueriesArray.length; i++) {
+                    if (searchStringQueriesArray[i] != "") {
+                        temprelevanceScoreArray = scoreForIndividualSearchString(searchStringQueriesArray[i], inputJSON);
+                        relevanceScoresArray.push(temprelevanceScoreArray);
+                    }
+                }
+                var numOfQueries = relevanceScoresArray.length;
+                for (var i = 0; i < temprelevanceScoreArray.length; i++) {
+                    relevanceScoreArray[i] = 0;
+                    for (var j = 0; j < numOfQueries; j++) {
+                        relevanceScoreArray[i] = relevanceScoreArray[i] + relevanceScoresArray[j][i];
+                    }
+                }
+            }
+
+            var relevantScoreVsJSONMap = [];
+            for (var i = 0; i < relevanceScoreArray.length; i++) {
+                relevantScoreVsJSONMap[i] = {};
+                relevantScoreVsJSONMap[i].score = relevanceScoreArray[i];
+                relevantScoreVsJSONMap[i].arr = [];
+                relevantScoreVsJSONMap[i].arr = inputJSON[i];
+            }
+            relevantScoreVsJSONMap.sort(function(a, b) {
+                return parseInt(b.score) - parseInt(a.score)
+            });
+            var sortedJSON = [];
+            for (var i = 0; i < relevantScoreVsJSONMap.length; i++) {
+                sortedJSON.push(relevantScoreVsJSONMap[i].arr);
+            }
+            return sortedJSON;
+        }
+
+        var scoreForIndividualSearchString = function(searchString, inputJSON) {
+            if (searchString.slice(-1) == "*") {
+                searchString = searchString.substr(0, searchString.length - 1);
+            }
+            if (searchString[0] == "*") {
+                searchString = searchString.substr(1, searchString.length - 1);
+            }
+            searchString = searchString.replace(" * ", " ");
+            searchString = searchString.replace("* ", " ");
+            searchString = searchString.replace(" *", " ");
+            var relevanceScoreArray = [];
+            searchString = searchString.trim();
+            var searchStringWordsArray = searchString.split(/ /);
+            for (var i = 0; i < inputJSON.length; i++) {
+                tempScore = -1;
+                temp = -1;
+                for (var j = 0; j < inputJSON[i].length; j++) {
+                    var compareColumn = "";
+                    if (inputJSON[i][j] != null) {
+                        compareColumn = inputJSON[i][j].toString();
+                    }
+                    if (tempScore == 32000) {
+                        break;
+                    }
+                    var anchortagRegex = /<a\s+[^<>]*>(.*?)<\/a>/g;
+                    if (compareColumn != null) {
+                        regexMatched = anchortagRegex.exec(compareColumn);
+                    } else {
+                        regexMatched = anchortagRegex.exec("");
+                    }
+                    var compareString = "";
+                    if (regexMatched != null) {
+                        compareString = regexMatched[1];
+                    } else {
+                        if (compareColumn != null) {
+                            compareString = compareColumn;
+                        } else {
+                            compareString = "";
+                        }
+                    }
+                    compareString = compareString.toLowerCase();
+                    if (compareString.indexOf(searchString) != -1) {
+                        if (compareString.length == searchString.length) {
+                            temp = 32000;
+                        } else {
+                            temp = 31999 - compareString.indexOf(searchString);
+                        }
+                    } else {
+                        if (tempScore <= 100) {
+                            var count = 0;
+                            for (var k = 0; k < searchStringWordsArray.length; k++) {
+                                var tempCount = 0;
+                                if (searchStringWordsArray[k].trim().length > 2) {
+                                    var re = new RegExp(searchStringWordsArray[k].trim().replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\\\$&"), "g");
+                                    tempCount = compareString.match(re);
+                                    if (tempCount != null) {
+                                        count = count + tempCount.length;
+                                    }
+                                }
+                            }
+                            temp = tempScore + count;
+                        }
+                    }
+                    if (temp > tempScore) {
+                        tempScore = temp;
+                    }
+                }
+                relevanceScoreArray[i] = tempScore;
+            }
+            return relevanceScoreArray;
+        }
+
+        function checkForDuplicatesInPagination(parsedResults, colNum, entityName) {
+            var rewrittenParsedResults = [];
+            if (parsedResults) {
+                var recordColumnNum = colNum - 1;
+                for (var i = 0; i < parsedResults.length; i++) {
+                    var obj = parsedResults[i];
+                    if (obj) {
+                        var recordID = obj[recordColumnNum];
+                        if (jQuery.inArray(recordID, typeKeyToIdListMap[entityName]) == -1) {
+                            rewrittenParsedResults.push(obj);
+                            typeKeyToIdListMap[entityName].push(recordID);
+                        }
+                    }
+                }
+            }
+            return rewrittenParsedResults;
+        }
+
+        function format_number(number, decimalPlaces) {
+            var output = '';
+            output += currency_format(number, decimalPlaces, '.', '');
+            return output;
+        }
+
+        function format_currency(amount, iso) {
+        if(typeof amount != "undefined" && amount != null && amount.trim() != ''){
+            var bc = iso;
+            var currency_before = '';
+            
+            currency_before = isCodeVsSymbolMap[bc];
+            
+            if( typeof currency_before === 'undefined' || currency_before == '' ) currency_before = '$';
+            
+            var output = '';
+            output += currency_before;
+            output += currency_format(amount, {!currencyDecimalPlaces}, '.', ',' );
+            if ({!displayLogs}) {
+                jq('.logDiv').append('Final format_currency output is : '+ output);
+            }                
+            return output;
+        } else {
+            return amount;
+        }
+    }
+
+        function currency_format(number, decimals, dec_point, thousands_sep) {
+               decimalvalue=number.split('\.')[1];
+               s=number.split('\.')[0];
+               number = (number + '').replace(/[^0-9+\-Ee.]/g, '');
+                var n = !isFinite(+number) ? 0 : +number,
+                    prec = !isFinite(+decimals) ? 0 : Math.abs(decimals),
+                    sep = (typeof thousands_sep === 'undefined') ? ',' : thousands_sep,
+                    dec = (typeof dec_point === 'undefined') ? '.' : dec_point;
+                                                       
+                if (s.length > 3) {
+                    s = s.replace(/\B(?=(?:\d{3})+(?!\d))/g, sep);
+                }
+                decimalvalue=(typeof decimalvalue === 'undefined') ? '' : decimalvalue;
+                if(decimalvalue!='')
+                {
+                   if(decimalvalue.length < prec) {
+                    decimalvalue += new Array(prec - decimalvalue.length + 1).join('0');
+                   }else if(decimalvalue.length >= prec){
+                    decimalvalue=decimalvalue.substring(0,prec);
+                   }
+                }                             
+                return (decimalvalue==='') ? s : s+dec+decimalvalue;
+        }
+
+        isNumber: function isNumber(n) {
+            return !isNaN(parseFloat(n)) && isFinite(n);
+        }
+
+        var regexS = '--ccHrefLink--(.*?)--ccHrefLink--';
+        var regexForLinks = new RegExp(regexS);
+
+        window.onload = function() {
+            var searchString = window.parent.document.getElementById("searchFrame").contentWindow.document.getElementById('lksrch').value;
+                if (searchString && searchString.trim() && canFireSearchCall == true) {
+                    typeKeyToIdListMap = {};
+                    rewrittenResultsForDuplicates = {};
+                    var str = '';
+                    str += '<div class="horiz-container"><div class="content">';
+                    str += '<table id="' + currentTableDivId + '" class="list"  cellpadding="0" cellspacing="0" border="1px dotted black" border-spacing="0px"><tr><td></td></tr>';
+                    str += '</table></div></div>';
+                    jq('#' + 'lookupSearchResultsDiv').html(str);
+                    canFireSearchCall = false;
+                    jq('#loadingImg').show();
+                    jq('#contentDiv').hide();
+                    paginationRequest = true;
+                    searchCCResults(searchString,true);                    
+                } else {
+                    var resultsObtained = '{!JSENCODE(result)}';
+                    resultsObtained = jq.evalJSON(resultsObtained);
+                    typeKeyToIdListMap = {};
+                    rewrittenResultsForDuplicates = {};
+                    createTable(resultsObtained);
+                }
+            var searchFrame = window.parent.document.getElementById("searchFrame");
+            searchFrame.style.visibility = "visible";         
+        }
+    </script>
+    <div id="recentlyViewedDiv" style="margin-bottom: 4px;display:none;">
+        <h1 id="recentlyViewedHeader" style="font-family:Helvetica,sans-serif,Arial;font-size:11pt;"></h1>
+        <br/>
+    </div>
+    <apex:pageBlock >
+        <div id="dataTableDiv" style="background-color: white;">
+            <div id="loadingImg" align="center" style="background-color: white;">
+                <apex:outputLabel style="padding:0 10px 0 0">{!$Label.cc_cs302__cccs_searchinglabel}</apex:outputLabel>
+            </div>
+            <apex:outputLabel rendered="{!displayLogs}">
+                <div id="queriesIssued"></div>
+            </apex:outputLabel>
+            <div id="contentDiv" style="background-color: white;">
+
+                <div id="labelDiv"></div>
+                <div id="lookupSearchResultsDiv"></div>
+            </div>
+        </div>
+    </apex:pageBlock>
+
+    <div id="logDiv"></div>
+    <div id="exceptionOccuredDiv" class="hidden">
+        <div id="exceptionMessageText"> </div>
+    </div>
+    <div id="noResultsFoundDiv" class="hidden">
+        <apex:pageblock >
+            <apex:outputPanel >
+                <apex:outputLabel escape="false">
+
+                    <div class="searchResultsTipsContainer">
+                        <div class="searchResultsTipsHeader">{!$Label.cccs_lookuptipheader}</div>
+                        <div id="tipDiv">
+                            <ul id="tipUl"></ul>
+                        </div>
+                    </div>
+
+                    <td class="noRows" colspan="7">
+                        {!$Label.cccs_norecordsfound_message1}:
+                        <ul>
+                            <li>{!$Label.cccs_norecordsfound_message2}</li>
+                            <li>{!$Label.cccs_norecordsfound_message3}</li>
+                        </ul>
+                    </td>
+
+                </apex:outputLabel>
+            </apex:outputPanel>
+        </apex:pageblock>
+    </div>
+
+    <script type="text/javascript" charset="UTF-8">
+        function createTable(data) {
+
+            jq('#loadingImg').hide();
+
+            if (data == null) {
+                return;
+            }
+            var typeKeys = data['typeKeys'];
+
+            if (typeKeys == null) {
+                return;
+            }
+
+            var exceptionOccured = typeKeys['exceptionOccured'];
+            if (exceptionOccured != null && exceptionOccured != '') {
+                jq('#exceptionOccuredDiv').show();
+                jq('#exceptionMessageText').html(exceptionOccured);
+                return;
+            }
+
+            var queriesIssued = typeKeys['queriesIssued'];
+            if (queriesIssued != null) {
+                queriesIssued = jq.base64Decode(queriesIssued);
+                queriesIssued = queriesIssued.replace(/\\'/g, "'");
+                var queryList = '<apex:pageBlock title="Queries Issued : ">';
+                queryList += queriesIssued;
+                queryList += '</apex:pageBlock>';
+                jq('#queriesIssued').html(queryList);
+            }
+
+            if ({!rightToLeftScripts}) {
+                jq("#recentlyViewedHeader").text(currentTableLabel + ' {!$Label.cc_cs302__cccs_recently_viewed} ');
+            } else {
+                jq("#recentlyViewedHeader").text('{!$Label.cc_cs302__cccs_recently_viewed} ' + currentTableLabel);
+            }
+            jq("#recentlyViewedDiv").show();
+
+            var noResultsFound = typeKeys['noResultsFound'];
+            if (noResultsFound != null && noResultsFound != '') {
+                jq('#noResultsFoundDiv').show();
+                var header = typeKeys['header'];
+                var label = typeKeys['label'];
+                label = '<h1 style=\"font-family:Helvetica,sans-serif,Arial;font-size:12pt\">' + label + ' (' + 0 + ') </h1><br/><br/>';
+                jq('#' + 'labelDiv').html(label);
+                jq('#noResultsFoundDiv').show();
+                jq('#lookupSearchResultsDiv').hide('');
+
+                jq("#tipUl").html('');
+                var str = '';
+                str += '<div class="horiz-container"><div class="content">';
+                str += '<table id="{!typeKeyApiName}TableDivTableID" class="list"  cellpadding="0" cellspacing="0" border="1px dotted black" border-spacing="0px">';
+                str += '<thead class="rich-table-thead"><tr class="headerRow">';
+
+                for (var i = 0; i < header.length; i++) {
+                    str += '<th scope="col">' + header[i] + '</th>';
+                }
+                str += '</tr></thead>';
+                str += '<tbody>';
+                str += '</tbody>'
+                str += '</table></div></div>';
+                jq('#' + 'lookupSearchResultsDiv').html(str);
+                return;
+            }
+            resultsFound = true;
+            renderSingleTable(data[typeKeys[0]]);
+        }
+
+        function renderSingleTable(data) {
+            var label = data['label'];
+            var labelDiv = data['labelDiv'];
+            var tableDiv = data['tableDiv'];
+            var results = data['resultsFound'];
+            results = jq.base64Decode(results);
+            results = jq.parseJSON(results);
+
+            var header = data['header'];
+            var status = data['status'];
+
+            if (label == null) {
+                return;
+            }
+
+            jq('#' + 'labelDiv').html(label);
+
+            var queriesIssued = data['queriesIssued'];
+            if (queriesIssued != null) {
+                queriesIssued = jq.base64Decode(queriesIssued);
+                queriesIssued = queriesIssued.replace(/\\'/g, "'");
+                var queryList = '<apex:pageBlock title="Queries Issued : ">';
+                queryList += queriesIssued;
+                queryList += '</apex:pageBlock>';
+                jq('#queriesIssued').html(queryList);
+            }
+
+            var str = '';
+            str += '<div class="horiz-container"><div class="content">';
+            str += '<table id="{!typeKeyApiName}TableDivTableID" class="list"  cellpadding="0" cellspacing="0" border="1px dotted black" border-spacing="0px">';
+            str += '<thead class="rich-table-thead"><tr class="headerRow">';
+
+            for (var i = 0; i < header.length; i++) {
+                str += '<th scope="col">' + header[i] + '</th>';
+            }
+            str += '</tr></thead>';
+            str += '<tbody id="resultsbody">';
+            for (var row = 0; row < results.length; row++) {
+                var focus = 'onfocus="if (window.hiOn){hiOn(this);}" onblur="if (window.hiOff){hiOff(this);}" onmouseout="if (window.hiOff){hiOff(this);} " onmouseover="if (window.hiOn){hiOn(this);} "';
+                str += (row % 2 == 0) ? '<tr ' + focus + 'class="dataRow even">' : '<tr ' + focus + 'class="dataRow odd">';
+
+                for (var col in results[row]) {
+                    var value = results[row][col];
+                    var match = regexForLinks.exec(value);
+                    if (match != null && match.length > 1) {} else {}
+                    str += '<td border="1px dotted black">' + <apex:outputText >value</apex:outputText>  + '</td > ';
+                }
+                str += '</tr>';
+            }
+            str += '</tbody>'
+            str += '</table></div></div>';
+
+            jq('#' + 'lookupSearchResultsDiv').html(str);
+
+            var oTable = jq('#' + '{!JSENCODE(typeKeyApiName)}TableDivTableID')
+                .dataTable({
+                    "sDom": sdomElement,
+                    "oLanguage": {
+                        "sSearch": "{!$Label.cccs_searchwithin}:",
+                        "oPaginate": {
+                            "sFirst": "{!$Label.cccs_first}",
+                            "sLast": "{!$Label.cccs_last}",
+                            "sNext": "{!$Label.cccs_next}",
+                            "sPrevious": "{!$Label.cccs_prev}"
+                        },
+                        "sEmptyTable": "{!$Label.cccs_nodataintable}",
+                        "sInfo": "{!$Label.cccs_showing} _START_ {!$Label.cccs_to} _END_ {!$Label.cccs_of} _TOTAL_ {!$Label.cccs_entries}",
+                        "sInfoEmpty": "{!$Label.cccs_showing} 0 {!$Label.cccs_to} 0 {!$Label.cccs_of} 0 {!$Label.cccs_entries}",
+                        "sInfoFiltered": "({!$Label.cccs_filteredfrom} _MAX_ {!$Label.cccs_total} {!$Label.cccs_entries})",
+                        "sLengthMenu": "{!$Label.cccs_show} _MENU_ {!$Label.cccs_entries}",
+                        "sLoadingRecords": "{!$Label.cccs_loading} ...",
+                        "sProcessing": "{!$Label.cccs_processing} ...",
+                        "sZeroRecords": "{!$Label.cccs_nomatchingrecords}"
+                    },
+                    "fnInitComplete": function(oSettings) {
+                        checkLastPage(oSettings, typeKey);
+                    },
+                    "sEcho": 3,
+                    "aoColumns": jq.parseJSON(displayColumns),
+                    "bSortClasses": false,
+                    "bJQueryUI": true,
+                    "sPaginationType": "full_numbers",
+                    "bProcessing": true,
+                    "bDestroy": true,
+                    "bFilter": showWithInResults,
+                    "bCC_JQueryUI": true,
+                    "bStateSave": false,
+                    "iDisplayLength": 5,
+                    "aaSorting": [],
+                    "aLengthMenu": [5, 10, 25, 50, 100],
+                    "oColVis": {
+                        "iOverlayFade": 100,
+                        "buttonText": "{!$Label.cccs_changecols}",
+                        "sRestore": "{!$Label.cccs_restoreoriginal}",
+                        "sSize": "auto",
+                        "bRestore": true
+                    }
+                });
+
+            oTable.bind('page', function() {
+                pagingFunction(oTable, currentTable);
+            });
+            jq('.rich-table-thead').css({
+                "font-size": "100%"
+            });
+            jq('#resultsbody').css({
+                "font-size": "90%"
+            });
+        }
+
+        function createPaginationTable(data, currentPage, argPaginationSize, argPaginationRequest) {
+            jq('#loadingImg').hide();
+
+            resultsContentPresent = false;
+            entitySearchResultResponseList = data['entitySearchResultResponseList'];
+            var queriesIssued = data['queriesIssued'];
+            if ({!displayLogs}) {
+                if (queriesIssued) {
+                    queriesIssued = jq.base64Decode(queriesIssued);
+                    queriesIssued = queriesIssued.replace(/\\'/g, "'");
+                    jq('#queriesIssued').append(queriesIssued);
+                }
+            }
+
+            var typeKeys = data['typeKeys'];
+            if (typeKeys != null) {
+                var exceptionOccured = typeKeys['exceptionOccured'];
+                if (exceptionOccured != null && exceptionOccured != '') {
+                    jq('#exceptionOccuredDiv').show();
+                    jq('#exceptionMessageText').html(exceptionOccured);
+                    return;
+                }
+            }
+
+            if (typeof entitySearchResultResponseList !== 'undefined') {
+                for (i = 0; i < entitySearchResultResponseList.length; i++) {
+                    renderPaginationSingleTable(entitySearchResultResponseList[i], currentPage, argPaginationSize, argPaginationRequest);
+
+                }
+            }
+            canFireSearchCall = true;
+        }
+
+
+        function renderPaginationSingleTable(data, currentPage, currentPaginationSize, argPaginationRequest) {
+            var label = data['label'];
+
+            var entityName = data['entityName'];
+            var results = data['resultsFound'];
+            var recordCount = data['recordsCount'];
+            var searchStringConfig = data['searchStringConfig'];
+            paramConfigMap[entityName] = searchStringConfig;
+            if ({!displayLogs}) {
+                jq('.logDiv').append('entityName found is : ' + entityName + '<br/>');
+            }
+
+            if (recordCount == 0) {
+                if (searchStringConfig != null && searchStringConfig == '[]') {
+                    finishedTypeKeys.push(entityName);
+                }
+                //jq('#noResultsFoundDiv').show();
+                    
+                try {
+                    var dTable = jq('#' + entityName + 'TableDivTableID').dataTable();
+                    var recordsInTable = 0;
+                    if (dTable) {
+                        recordsInTable = dTable.fnGetData().length;
+                    }
+                    if (recordsInTable == 0) {
+                        if (dTable) {
+                            dTable.fnClearTable();
+                        }
+                    }
+                } catch (e) {
+                    var str = '';
+                    str += '<div class="horiz-container"><div class="content">';
+                    str += '<table id="{!typeKeyApiName}TableDivTableID" class="list"  cellpadding="0" cellspacing="0" border="1px dotted black" border-spacing="0px">';
+                    str += '<thead class="rich-table-thead"><tr class="headerRow">';
+
+                    headerList = jq.evalJSON(headerList);
+                    for (var i = 0; i < headerList.length; i++) {
+                        str += '<th scope="col">' + headerList[i] + '</th>';
+                    }
+                    str += '</tr></thead>';
+                    str += '<tbody id="resultsbody">';
+                    str += '</tbody>'
+                    str += '</table></div></div>';
+
+                    jq('#' + 'lookupSearchResultsDiv').html(str);
+
+                    var oTable = jq('#' + '{!JSENCODE(typeKeyApiName)}TableDivTableID')
+                        .dataTable({
+                            "sDom": sdomElement,
+                            "aaSorting": [],
+                            "oLanguage": {
+                                "sSearch": "{!$Label.cccs_searchwithin}:",
+                                "oPaginate": {
+                                    "sFirst": "{!$Label.cccs_first}",
+                                    "sLast": "{!$Label.cccs_last}",
+                                    "sNext": "{!$Label.cccs_next}",
+                                    "sPrevious": "{!$Label.cccs_prev}"
+                                },
+                                "sEmptyTable": "{!$Label.cccs_nodataintable}",
+                                "sInfo": "{!$Label.cccs_showing} _START_ {!$Label.cccs_to} _END_ {!$Label.cccs_of} _TOTAL_ {!$Label.cccs_entries}",
+                                "sInfoEmpty": "{!$Label.cccs_showing} 0 {!$Label.cccs_to} 0 {!$Label.cccs_of} 0 {!$Label.cccs_entries}",
+                                "sInfoFiltered": "({!$Label.cccs_filteredfrom} _MAX_ {!$Label.cccs_total} {!$Label.cccs_entries})",
+                                "sLengthMenu": "{!$Label.cccs_show} _MENU_ {!$Label.cccs_entries}",
+                                "sLoadingRecords": "{!$Label.cccs_loading} ...",
+                                "sProcessing": "{!$Label.cccs_processing} ...",
+                                "sZeroRecords": "{!$Label.cccs_nomatchingrecords}"
+                            },
+                            "fnInitComplete": function(oSettings) {
+                                checkLastPage(oSettings, typeKey);
+                            },
+                            "sEcho": 3,
+                            "bSortClasses": false,
+                            "bJQueryUI": true,
+                            "sPaginationType": "full_numbers",
+                            "bProcessing": true,
+                            "bDestroy": true,
+                            "bFilter": showWithInResults,
+                            "bCC_JQueryUI": true,
+                            "bStateSave": false,
+                            "iDisplayLength": 5,
+                            "aLengthMenu": [5, 10, 25, 50, 100],
+                            "oColVis": {
+                                "iOverlayFade": 100,
+                                "buttonText": "{!$Label.cccs_changecols}",
+                                "sRestore": "{!$Label.cccs_restoreoriginal}",
+                                "sSize": "auto",
+                                "bRestore": true
+                            }
+                        });
+
+                    oTable.bind('page', function() {
+                        pagingFunction(oTable, currentTable);
+                    });
+
+                }
+                if (recordsInTable == 0) {
+                    jq('.rich-table-thead').css({
+                        "font-size": "100%"
+                    });
+                    jq('#resultsbody').css({
+                        "font-size": "90%"
+                    });
+                    jq('#' + 'labelDiv').html('');
+                    jq('#noResultsFoundDiv').show();
+                    jq("#tipUl").html('');
+                    jq('#lookupSearchResultsDiv').hide();
+                }
+
+                var searchStringConfig = data['searchStringConfig'];
+                var finished = true;
+                var searchStringArrayObj = jq.evalJSON(searchStringConfig);
+                var modifiedSearchStringConfig = [];
+                if (searchStringArrayObj) {
+                    for (var i = 0; i < searchStringArrayObj.length; i++) {
+                        var sstringConfig = searchStringArrayObj[i];
+                        if (sstringConfig && (finished == true)) {
+                            var ccgStateList = sstringConfig.ccgStateList;
+                            if (ccgStateList && (finished == true)) {
+                                for (var j = 0; j < ccgStateList.length; j++) {
+                                    var ccgState = ccgStateList[j];
+                                    if (ccgState.completedProcessOnCCgateway == false || sstringConfig.completedProcessing == false) {
+                                        finished = false;
+                                        break;
+                                    }
+                                }
+                            } else {
+                                break;
+                            }
+                        } else {
+                            break;
+                        }
+                    }
+                }
+                paramConfigMap[entityName] = searchStringConfig;
+
+                if (finished == false) {
+                    makeSearchRequest(entityName, currentPage, paginationSize, false);
+                }
+
+                return;
+            }
+            jq('#contentDiv').show();
+
+            jq('#lookupSearchResultsDiv').show();
+
+            resultsFound = true;
+            resultsContentPresent = true
+            try {
+                var paginationDiv = data['paginationDiv'];
+                var fieldLevelFilterDiv = data['fieldLevelFilterDiv'];
+                var recordsCountMessage = data['recordsCountMessage'];
+
+                jq('#' + entityName + 'TableDivTableID_last').show();
+                jq("#" + entityName + 'fieldLevelFilterDiv').html(fieldLevelFilterDiv);
+                jq("#" + entityName + 'paginationDiv').html(paginationDiv);
+                paramConfigMap[entityName] = searchStringConfig;
+
+                if (recordCount >= 200) {
+                    jq("#" + entityName + 'SuggestionDiv').html(recordsCountMessage);
+                }
+
+                jq("#" + entityName + 'Div').css("display", "block");
+                jq("#" + entityName + 'Div').css("visibility", "visible");
+                jq("#" + entityName + 'tableResultsCount').html(recordCount);
+
+                jq('#searchingMessage').hide();
+                results = jq.base64Decode(results);
+                if ({!displayLogs}) {
+                }
+                jq('#noResultsFoundDiv').hide();
+                var totalDpsFinishedCount = data['totalDpsCount'];
+                typeKeyToDpsMaxCountMap[entityName] = totalDpsFinishedCount;
+                var totalRecordCount = 0;
+                if (argPaginationRequest == true) {
+                    results = '[' + results + ']';
+                    var parsedResults = '';
+                    var dTable = jq('#' + entityName + 'TableDivTableID').dataTable();
+                    var colNum = dTable.fnGetData(0).length;
+                    try {
+                        parsedResults = jq.evalJSON(results);
+                        resultsOriginalLength = parsedResults.length;
+                        rewrittenParsedResults = checkForDuplicatesInPagination(parsedResults, colNum, entityName);
+                        parsedResults = rewrittenParsedResults;
+
+                        if (rewrittenParsedResults.length < resultsOriginalLength) {
+                            rewrittenResultsForDuplicates[entityName] = [];
+                            rewrittenResultsForDuplicates[entityName] = rewrittenResultsForDuplicates[entityName].concat(rewrittenParsedResults);
+                            makeSearchRequestForDuplicates(entityName, currentPage, resultsOriginalLength - rewrittenParsedResults.length);
+                        } else {
+                            paramConfigMap[entityName] = data['searchStringConfig'];
+                            if (sortedByRelevancy) {
+                                var searchBoxQuery = window.parent.document.getElementById("searchFrame").contentWindow.document.getElementById('lksrch').value;
+                                parsedResults = relevantSortedArray(searchBoxQuery, parsedResults);
+                            } else {
+                                parsedResults = sortByDate(parsedResults, sortedBy);
+                            }
+                            dTable.fnAddData(
+                                parsedResults
+                            );
+                            var previousRecordsCount = dTable.fnGetData().length;
+
+                            totalRecordCount = previousRecordsCount;
+                            if (currentPage != 0) {
+                                dTable.fnPageChange(currentPage);
+                            }
+                        }
+                    } catch (e) {
+                        var previousRecordsCount = dTable.fnGetData().length;
+                        totalRecordCount = previousRecordsCount;
+                        if ({!displayLogs}) {
+                            jq('.logDiv').append('Exception Occured is : ' + e + '<br/>');
+                        }
+                        if (currentPage != 0) {
+                            dTable.fnPageChange(currentPage);
+                        }
+                    };
+                } else {
+                    var str = '';
+                    str += '<div class="horiz-container"><div class="content">';
+                    str += '<table id="{!typeKeyApiName}TableDivTableID" class="list"  cellpadding="0" cellspacing="0" border="1px dotted black" border-spacing="0px">';
+                    str += '</table></div>';
+                    jq('#' + 'lookupSearchResultsDiv').html(str);
+
+                    totalRecordCount = recordCount;
+                    var tableStart = data['tableStart'];
+                    var tableEnd = data['tableEnd'];
+                    typeKeyToIdListMap[entityName] = [];
+                    var rewrittenResults = [];
+                    var resultsArray = '[' + results + ']';
+                    resultsArray = jq.evalJSON(resultsArray);
+                    var recordIDColNum = resultsArray[0].length - 1;
+                    for (var i = 0; i < resultsArray.length; i++) {
+                        var recordID = resultsArray[i][recordIDColNum];
+                        if (jQuery.inArray(recordID, typeKeyToIdListMap[entityName]) == -1) {
+                            typeKeyToIdListMap[entityName].push(recordID);
+                            rewrittenResults.push(resultsArray[i]);
+                        }
+                    }
+                    resultsArray = rewrittenResults;
+                    if (sortedByRelevancy) {
+                        var searchBoxQuery = window.parent.document.getElementById("searchFrame").contentWindow.document.getElementById('lksrch').value;
+                        resultsArray = relevantSortedArray(searchBoxQuery, resultsArray);
+                    } else {
+                        resultsArray = sortByDate(resultsArray, sortedBy);
+                    }
+                    results = jq.toJSON(resultsArray);
+
+                    results = results.substring(1, results.length - 1);
+                    var tabletoRender = tableStart + results + tableEnd;
+                    totalRecordCount = resultsArray.length;
+                    try {
+                        eval(tabletoRender);
+                    } catch (e) {
+                        if (displayLogs) {
+                            jq('.logDiv').append('Error occurred while creating NON pagination datatable for ' + entityName + ' with error : ' + e + '<br/>');
+                        }
+                    }
+                    try {
+                        var parsedResults = '';
+                        parsedResults = results;
+                        if (resultsArray.length < currentPaginationSize) {
+
+                            var searchStringConfig = paramConfigMap[entityName];
+                            var finished = true;
+                            var searchStringArrayObj = jq.evalJSON(searchStringConfig);
+                            var modifiedSearchStringConfig = [];
+                            if (searchStringArrayObj) {
+                                for (var i = 0; i < searchStringArrayObj.length; i++) {
+                                    var sstringConfig = searchStringArrayObj[i];
+                                    if (sstringConfig && (finished == true)) {
+                                        var ccgStateList = sstringConfig.ccgStateList;
+                                        if (ccgStateList && (finished == true)) {
+                                            for (var j = 0; j < ccgStateList.length; j++) {
+                                                var ccgState = ccgStateList[j];
+                                                if (ccgState.completedProcessOnCCgateway == false || sstringConfig.completedProcessing == false) {
+                                                    finished = false;
+                                                    break;
+                                                }
+                                            }
+                                        } else {
+                                            break;
+                                        }
+                                    } else {
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if (finished == false) {
+                                makeSearchRequest(entityName, currentPage, currentPaginationSize - resultsArray.length, true);
+                                var searchRequestMade = true;
+                            } else {
+                                finishedTypeKeys.push(entityName);
+                            }
+
+                        }
+
+
+                    } catch (e) {
+                    }
+                    jq('#' + entityName + 'TableDivTableID > thead').css({
+                        "font-size": "100%"
+                    });
+                    jq('#' + entityName + 'TableDivTableID > tbody').css({
+                        "font-size": "90%"
+                    });
+                }
+
+
+                var searchStringConfig = paramConfigMap[entityName];
+                var finished = true;
+                var searchStringArrayObj = jq.evalJSON(searchStringConfig);
+                if (searchStringArrayObj) {
+                    for (var i = 0; i < searchStringArrayObj.length; i++) {
+                        var sstringConfig = searchStringArrayObj[i];
+                        if (sstringConfig && (finished == true)) {
+                            var ccgStateList = sstringConfig.ccgStateList;
+                            if (ccgStateList && (finished == true)) {
+                                for (var j = 0; j < ccgStateList.length; j++) {
+                                    var ccgState = ccgStateList[j];
+                                    if (ccgState.completedProcessOnCCgateway == false || sstringConfig.completedProcessing == false) {
+                                        finished = false;
+                                        break;
+                                    }
+                                }
+                            } else {
+                                break;
+                            }
+                        } else {
+                            break;
+                        }
+                    }
+                }
+
+                var allRecordsRenedered = false;
+                if (finished == true) {
+                    finishedTypeKeys.push(entityName);
+                    for (var i = 0; i < finishedTypeKeys.length; i++) {
+                        if (entityName == finishedTypeKeys[i]) {
+                            allRecordsRenedered = true;
+                        }
+                    }
+                }
+                if (typeof totalRecordCount === 'undefined') {
+                    totalRecordCount = recordCount;
+                }
+                if ((argPaginationRequest == false || rewrittenParsedResults.length >= resultsOriginalLength) && allRecordsRenedered == false) {
+                    label = '<h1 style=\"font-family:Helvetica,sans-serif,Arial;font-size:12pt\">' + label + ' (' + totalRecordCount + '+) </h1><br/><br/>';
+                    jq('#' + 'labelDiv').html(label);                    jq("#" + entityName + 'SuggestionDiv').html('There may be Many Records..Please click on the Next/Last button to get next set of records..');
+                } else if (argPaginationRequest == false || rewrittenParsedResults.length >= resultsOriginalLength) {
+                    label = '<h1 style=\"font-family:Helvetica,sans-serif,Arial;font-size:12pt\">' + label + ' (' + totalRecordCount + ') </h1><br/><br/>';
+                    jq('#' + 'labelDiv').html(label);
+                    jq("#" + entityName + 'SuggestionDiv').hide();
+                }
+
+                if ((argPaginationRequest == false || rewrittenParsedResults.length >= resultsOriginalLength) && allRecordsRenedered == false && !searchRequestMade) {
+                    jq('#' + entityName + 'TableDivTableID_next').removeClass('ui-state-disabled');
+                    jq('#' + entityName + 'TableDivTableID_next').show();
+                    jq('#' + entityName + 'TableDivTableID_last').show();
+                }
+
+                jq('#noResultsFoundDiv').hide();
+                var afterDataTableGeneration = new Date().getTime();
+                if (displayLogs) {
+                    jq('.logDiv').append("time taken for generating datatable : (nano precision) " + (afterDataTableGeneration - afterBase64Decode) + '<br/>');
+                }
+            } catch (e) {
+                if ({!displayLogs}) {
+                    jq('.logDiv').append('Error occurred while creating datatable for ' + entityName + ' with error : ' + e + '<br/>');
+                }
+            }
+        }
+    
+        function searchCCResults(searchString,onloadSearch) {
+            if (searchString) {
+                var enabledTypeKeys = getParameter('lktp');
+                if ({!displayLogs}) {
+                    jq('.logDiv').append('in searchCCResults enabledTypeKeys is : ' + enabledTypeKeys);
+                }
+                paginationRequest = true;
+                jq('#lookupSearchResultsDiv').show();
+                jq('#noResultsFoundDiv').hide();
+
+                var rewrittenLabel = '<h1 style=\"font-family:Helvetica,sans-serif,Arial;font-size:12pt\">' + currentTableLabel + ' (' + 0 + ') </h1><br/><br/>';
+                jq('#' + 'labelDiv').html(rewrittenLabel);
+                if ({!displayLogs}) {
+                   jq('.logDiv').append('rewrittenLabel : ' + rewrittenLabel + ' currentTableLabel : ' + currentTableLabel + ' currentTableDivId is : ' + currentTableDivId);
+                }            
+                if(!onloadSearch){
+                    var dTable = jq('#' + currentTableDivId).dataTable();
+                    dTable.fnClearTable();                
+                }
+                
+                finishedTypeKeys = [];
+                searchForResults(enabledTypeKeys, searchString, ccSearchType, searchString, lookupSearchFields, false);
+            }
+        }
+
+        function searchForResults(argSearchTypeKeys, argQueryText, argCCSearchType, argQueryText, argQueryFields, argPaginationRequest) {
+            jq("#recentlyViewedDiv").hide();
+            // Make the Ajax Request
+            jq('#queriesIssued').html('');
+            typeKeyToIdListMap = {};
+            rewrittenResultsForDuplicates = {};
+            var lkfm = getParameter('lkfm');
+            var lknm = getParameter('lknm');
+            var addToCampaign = getParameter('addToCampaign');
+            var lkpr = getParameter('lkpr');
+            var leadconv = getParameter('leadconv');
+            originalQueryString = argQueryText;
+            searchString = argQueryText;
+            var searchStringConfigJson = getSearchStringConfigAsJson(argQueryText);
+            var maxDpsCount = getDpsMaxCountPerEntity(argSearchTypeKeys);
+            jq.post("{!$Page.ccLookupsearchperentity}", {
+                "searchStringConfig": searchStringConfigJson,
+                "core.apexpages.devmode.url": '1',
+                "typeKey": argSearchTypeKeys,
+                "searchState": 'Lookup',
+                "lkfm": lkfm,
+                "lknm": lknm,
+                "leadconv": leadconv,
+                "dateFormat": dateFormat,
+                "searchState": 'Lookup',
+                "defaultRows": defaultRows,
+                "finishedDpsMaxCount": maxDpsCount,
+                "ccPlainValue": argQueryText,
+                "ccSearchType": argCCSearchType,
+                "paginationSize": paginationSize,
+                "displayLogs": displayLogs,
+                "queryFields": argQueryFields,
+                "lktp": argSearchTypeKeys,
+                "typeKey": typeKey,
+                "sortedByClause": sortedBy,
+                "lksrch": argQueryText,
+                "lkpr": lkpr,
+                "addToCampaign": addToCampaign
+
+            }, function(data) {
+                createPaginationTable(data, 0, paginationSize, argPaginationRequest);
+            }, "json");
+        }
+
+        function getSearchStringConfigAsJson(searchString) {
+            var searchStringArrayObj = new Array();
+            var searchStringConfigObj = new Object();
+
+            searchStringConfigObj.ccOrder = -1;
+            searchStringConfigObj.paramName = "lksrch";
+            searchStringConfigObj.searchString = "";
+            searchStringConfigObj.searchResultsCountObtained = 0;
+            searchStringConfigObj.processedSearchResults = 0;
+            searchStringConfigObj.startIndex = 0;
+            searchStringConfigObj.endIndex = 0;
+            searchStringConfigObj.completedProcessing = false;
+            searchStringConfigObj.queryType = 'plain';
+            searchStringConfigObj.dpsIds = 'plain';
+            searchStringConfigObj.requestNumber = 0;
+            var ccgStateList = new Array();
+            var ccgState = new Object();
+            ccgState.dpsType = 0;
+            ccgState.ccStartIndex = 0;
+            ccgState.ccEndIndex = paginationSize;
+            ccgState.completedProcessOnCCgateway = true;
+            ccgStateList.push(ccgState);
+            searchStringConfigObj.ccgStateList = ccgStateList;
+
+            searchStringArrayObj.push(searchStringConfigObj);
+            return jq.toJSON(searchStringArrayObj);
+        }
+
+        function getParameter(paramName) {
+            var name = paramName.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+            var regexS = "[\\?&]" + name + "=([^&#]*)";
+            var regex = new RegExp(regexS);
+            var results = regex.exec(parentUrl);
+            if (results == null)
+                return "";
+            else
+                return decodeURIComponent(results[1].replace(/\+/g, " "));
+        }
+
+
+        function makeSearchRequest(typeKeyEntity, currentPage, argPaginationSize, argPaginationRequest) {
+            if (searchString != 'null' && searchString != null && searchString != '') {
+                jq('#' + typeKeyEntity + 'TableDivTableID_next').addClass('ui-state-disabled');
+                var searchStringConfig = paramConfigMap[typeKeyEntity];
+                var enabledTypeKeys = getParameter('lktp');
+                var lkfm = getParameter('lkfm');
+                var lknm = getParameter('lknm');
+                var leadconv = getParameter('leadconv');
+                jq.post("{!$Page.ccLookupSearchPagination}", {
+                    "searchStringConfig": searchStringConfig,
+                    "core.apexpages.devmode.url": '1',
+                    "typeKey": typeKeyEntity,
+                    "lkfm": lkfm,
+                    "lknm": lknm,
+                    "leadconv": leadconv,
+                    "lktp": enabledTypeKeys,
+                    "searchState": 'Lookup',
+                    "defaultRows": defaultRows,
+                    "dateFormat": dateFormat,
+                    "finishedDpsMaxCount": getDpsMaxCountPerEntity(typeKeyEntity),
+                    "ccPlainValue": searchString,
+                    "ccSearchType": ccSearchType,
+                    "paginationSize": argPaginationSize,
+                    "displayLogs": displayLogs,
+                    "queryFields": lookupSearchFields,
+                    "sortedByClause": sortedBy,
+                    "lksrch": searchString
+                }, function(data) {
+                    createPaginationTable(data, currentPage, argPaginationSize, argPaginationRequest);
+                }, "json");
+            } else {
+                var searchBoxValue = window.parent.document.getElementById("searchFrame").contentWindow.document.getElementById('lksrch').value;
+                if (searchBoxValue != 'null' && searchBoxValue != null && searchBoxValue != '') {
+                    searchString = searchBoxValue;
+                    makeSearchRequest(typeKeyEntity, currentPage, argPaginationSize, argPaginationRequest);
+                }
+            }
+        }
+
+        function makeSearchRequestForDuplicates(typeKeyEntity, currentPage, numOfRecordsRequesting) {
+            if (searchString != 'null' && searchString != null && searchString != '') {
+                var searchStringConfig = paramConfigMap[typeKeyEntity];
+                var enabledTypeKeys = getParameter('lktp');
+                var lkfm = getParameter('lkfm');
+                var lknm = getParameter('lknm');
+                var leadconv = getParameter('leadconv');
+                jq.post("{!$Page.ccLookupSearchPagination}", {
+                    "searchStringConfig": searchStringConfig,
+                    "core.apexpages.devmode.url": '1',
+                    "typeKey": typeKeyEntity,
+                    "lkfm": lkfm,
+                    "lknm": lknm,
+                    "leadconv": leadconv,
+                    "lktp": enabledTypeKeys,
+                    "searchState": 'Lookup',
+                    "defaultRows": defaultRows,
+                    "dateFormat": dateFormat,
+                    "finishedDpsMaxCount": getDpsMaxCountPerEntity(typeKeyEntity),
+                    "ccPlainValue": searchString,
+                    "ccSearchType": ccSearchType,
+                    "paginationSize": paginationSize,
+                    "displayLogs": displayLogs,
+                    "queryFields": lookupSearchFields,
+                    "sortedByClause": sortedBy,
+                    "lksrch": searchString
+                }, function(data) {
+                    var entityName = typeKeyEntity;
+                    argCurrentPage = currentPage;
+                    var dataList = data['entitySearchResultResponseList'][0];
+                    var searchStringConfig = dataList['searchStringConfig'];
+                    var resultsForDuplicates = dataList['resultsFound'];
+                    resultsForDuplicates = jq.base64Decode(resultsForDuplicates);
+                    resultsForDuplicates = '[' + resultsForDuplicates + ']';
+                    resultsForDuplicates = jq.evalJSON(resultsForDuplicates);
+                    var finished = true;
+                    var label = dataList['label'];
+                    var searchStringArrayObj = jq.evalJSON(searchStringConfig);
+                    var modifiedSearchStringConfig = [];
+
+                    var dTable = jq('#' + entityName + 'TableDivTableID').dataTable();
+                    var colNum = dTable.fnGetData(0).length;
+                    var queriesIssued = data['queriesIssued'];
+                    if (displayLogs) {
+                        if (queriesIssued != null) {
+                            queriesIssued = jq.base64Decode(queriesIssued);
+                            queriesIssued = queriesIssued.replace(/\\'/g, "'");
+                            jq('#queriesIssued').append(queriesIssued);
+                        }
+                    }
+
+                    additionalRecordsForDuplicates = checkForDuplicatesInPagination(resultsForDuplicates, colNum, entityName);
+                    if (searchStringArrayObj) {
+                        for (var i = 0; i < searchStringArrayObj.length; i++) {
+                            var sstringConfig = searchStringArrayObj[i];
+                            if (sstringConfig && (finished == true)) {
+                                var ccgStateList = sstringConfig.ccgStateList;
+                                if (ccgStateList && (finished == true)) {
+                                    for (var j = 0; j < ccgStateList.length; j++) {
+                                        var ccgState = ccgStateList[j];
+                                        if (ccgState.completedProcessOnCCgateway == false || sstringConfig.completedProcessing == false) {
+                                            finished = false;
+                                            break;
+                                        }
+                                    }
+                                } else {
+                                    break;
+                                }
+                            } else {
+                                break;
+                            }
+                        }
+                    }
+                    paramConfigMap[entityName] = searchStringConfig;
+                    if (finished == false) {
+                        if (additionalRecordsForDuplicates) {
+                            if (additionalRecordsForDuplicates.length < numOfRecordsRequesting) {
+                                //recursiveRequestForDuplicates(data, numOfRecordsRequesting-additionalRecordsForDuplicates.length, entityName,argCurrentPage);
+                                if (additionalRecordsForDuplicates) {
+                                    rewrittenResultsForDuplicates[entityName] = rewrittenResultsForDuplicates[entityName].concat(additionalRecordsForDuplicates);
+                                }
+                                makeSearchRequestForDuplicates(entityName, argCurrentPage, numOfRecordsRequesting - additionalRecordsForDuplicates.length);
+                            } else {
+                                if (additionalRecordsForDuplicates) {
+                                    rewrittenResultsForDuplicates[entityName] = rewrittenResultsForDuplicates[entityName].concat(additionalRecordsForDuplicates);
+                                }
+                                parsedResults = rewrittenResultsForDuplicates[entityName];
+                                if (sortedByRelevancy) {
+                                    var searchBoxQuery = window.parent.document.getElementById("searchFrame").contentWindow.document.getElementById('lksrch').value;
+                                    parsedResults = relevantSortedArray(searchBoxQuery, parsedResults);
+                                } else {
+                                    parsedResults = sortByDate(parsedResults, sortedBy);
+                                }
+
+                                dTable.fnAddData(
+                                    parsedResults
+                                );
+                                var previousRecordsCount = dTable.fnGetData().length;
+                                totalRecordCount = previousRecordsCount;
+                                label = '<h1 style=\"font-family:Helvetica,sans-serif,Arial;font-size:12pt\">' + label + ' (' + totalRecordCount + '+) </h1><br/><br/>';
+                                jq('#' + 'labelDiv').html(label);
+                                if (currentPage != 0) {
+                                    dTable.fnPageChange(currentPage);
+                                }
+
+                            }
+                        } else {
+                            makeSearchRequestForDuplicates(entityName, argCurrentPage, numOfRecordsRequesting);
+                        }
+                    } else {
+                        if (additionalRecordsForDuplicates) {
+                            rewrittenResultsForDuplicates[entityName] = rewrittenResultsForDuplicates[entityName].concat(additionalRecordsForDuplicates);
+                        }
+
+                        parsedResults = rewrittenResultsForDuplicates[entityName];
+                        if (sortedByRelevancy) {
+                            var searchBoxQuery = window.parent.document.getElementById("searchFrame").contentWindow.document.getElementById('lksrch').value;
+                            parsedResults = relevantSortedArray(searchBoxQuery, parsedResults);
+                        } else {
+                            parsedResults = sortByDate(parsedResults, sortedBy);
+                        }
+                        dTable.fnAddData(
+                            parsedResults
+                        );
+                        var previousRecordsCount = dTable.fnGetData().length;
+                        totalRecordCount = previousRecordsCount;
+                        label = '<h1 style=\"font-family:Helvetica,sans-serif,Arial;font-size:12pt\">' + label + ' (' + totalRecordCount + ') </h1><br/><br/>';
+                        jq('#' + 'labelDiv').html(label);
+                        if (currentPage != 0) {
+                            dTable.fnPageChange(currentPage);
+                        }
+                    }
+                }, "json");
+            } else {
+                var searchBoxValue = window.parent.document.getElementById("searchFrame").contentWindow.document.getElementById('lksrch').value;
+                if (searchBoxValue != 'null' && searchBoxValue != null && searchBoxValue != '') {
+                    searchString = searchBoxValue;
+                    makeSearchRequestForDuplicates(typeKeyEntity, currentPage, numOfRecordsRequesting);
+                }
+            }
+        }
+
+        function returnData(data, typeKeyEntity, numOfRecordsRequesting, argCurrentPage) {
+            var entityName = typeKeyEntity;
+            var dataList = data['entitySearchResultResponseList'][0];
+            var searchStringConfig = dataList['searchStringConfig'];
+            var resultsForDuplicates = dataList['resultsFound'];
+            resultsForDuplicates = jq.base64Decode(resultsForDuplicates);
+            resultsForDuplicates = '[' + resultsForDuplicates + ']';
+            resultsForDuplicates = jq.evalJSON(resultsForDuplicates);
+            var finished = true;
+            var searchStringArrayObj = jq.evalJSON(searchStringConfig);
+            var modifiedSearchStringConfig = [];
+
+
+            var dTable = jq('#' + entityName + 'TableDivTableID').dataTable();
+            var colNum = dTable.fnGetData(0).length;
+
+            rewrittenResultsForDuplicates = checkForDuplicatesInPagination(resultsForDuplicates, colNum, entityName);
+            if (searchStringArrayObj) {
+                for (var i = 0; i < searchStringArrayObj.length; i++) {
+                    var sstringConfig = searchStringArrayObj[i];
+                    if (sstringConfig && (finished == true)) {
+                        var ccgStateList = sstringConfig.ccgStateList;
+                        if (ccgStateList && (finished == true)) {
+                            for (var j = 0; j < ccgStateList.length; j++) {
+                                var ccgState = ccgStateList[j];
+                                if (ccgState.completedProcessOnCCgateway == false || sstringConfig.completedProcessing == false) {
+                                    finished = false;
+                                    break;
+                                }
+                            }
+                        } else {
+                            break;
+                        }
+                    } else {
+                        break;
+                    }
+                }
+            }
+            paramConfigMap[entityName] = searchStringConfig;
+            if (finished == false) {
+                if (rewrittenResultsForDuplicates) {
+                    if (rewrittenResultsForDuplicates.length < numOfRecordsRequesting) {
+                        var additionalRecordsForDuplicates = makeSearchRequestForDuplicates(entityName, argCurrentPage, numOfRecordsRequesting - rewrittenResultsForDuplicates.length);
+                        if (additionalRecordsForDuplicates) {
+                            rewrittenResultsForDuplicates = rewrittenResultsForDuplicates.concat(additionalRecordsForDuplicates);
+                        }
+                    } else {
+                        return rewrittenResultsForDuplicates;
+                    }
+                } else {
+                    rewrittenResultsForDuplicates = makeSearchRequestForDuplicates(entityName, argCurrentPage, numOfRecordsRequesting - rewrittenResultsForDuplicates.length);
+                }
+                return rewrittenResultsForDuplicates;
+            } else {
+                return rewrittenResultsForDuplicates;
+            }
+        }
+
+        function getDpsMaxCountPerEntity(typeKeyEntity) {
+            return typeKeyToDpsMaxCountMap[typeKeyEntity];
+        }
+
+        function searchPageFormActionModify(event) {
+            if (event.preventDefault) {
+                event.preventDefault();
+            } else {
+                event.returnValue = false;
+            }
+            if (canFireSearchCall == true) {
+                var searchString = window.parent.document.getElementById("searchFrame").contentWindow.document.getElementById('lksrch').value;
+                if (searchString) {
+                    canFireSearchCall = false;
+                    jq('#loadingImg').show();
+                    jq('#contentDiv').hide();
+                    searchCCResults(searchString,false);
+                } else {
+                    window.parent.document.getElementById("searchFrame").contentWindow.document.getElementById("theForm").submit();
+                }
+            } else {}
+        }
+    </script>
+
+    <script type="text/javascript">
+        jq(document).ready(function() {
+            isCodeVsSymbolMap['ALL'] = 'Lek';
+            isCodeVsSymbolMap['ARS'] = '$';
+            isCodeVsSymbolMap['AWG'] = 'f';
+            isCodeVsSymbolMap['AUD'] = '$';
+            isCodeVsSymbolMap['BSD'] = '$';
+            isCodeVsSymbolMap['BYR'] = 'p.';
+            isCodeVsSymbolMap['BZD'] = 'BZ$';
+            isCodeVsSymbolMap['BMD'] = '$';
+            isCodeVsSymbolMap['BOB'] = '$b';
+            isCodeVsSymbolMap['BAM'] = 'KM';
+            isCodeVsSymbolMap['BWP'] = 'P';
+            isCodeVsSymbolMap['BRL'] = 'R$';
+            isCodeVsSymbolMap['BND'] = '$';
+            isCodeVsSymbolMap['CAD'] = '$';
+            isCodeVsSymbolMap['KYD'] = '$';
+            isCodeVsSymbolMap['CLP'] = '$';
+            isCodeVsSymbolMap['CNY'] = '&yen;';
+            isCodeVsSymbolMap['COP'] = '$';
+            isCodeVsSymbolMap['CRC'] = 'c';
+            isCodeVsSymbolMap['HRK'] = 'kn';
+            isCodeVsSymbolMap['CZK'] = 'Kc';
+            isCodeVsSymbolMap['DKK'] = 'kr';
+            isCodeVsSymbolMap['DOP'] = 'RD$';
+            isCodeVsSymbolMap['XCD'] = '$';
+            isCodeVsSymbolMap['EGP'] = '&pound;';
+            isCodeVsSymbolMap['SVC'] = '$';
+            isCodeVsSymbolMap['EEK'] = 'kr';
+            isCodeVsSymbolMap['EUR'] = '&euro;';
+            isCodeVsSymbolMap['FKP'] = '&pound;';
+            isCodeVsSymbolMap['FJD'] = '$';
+            isCodeVsSymbolMap['GBP'] = '&pound;';
+            isCodeVsSymbolMap['GHC'] = 'c';
+            isCodeVsSymbolMap['GIP'] = '&pound;';
+            isCodeVsSymbolMap['GTQ'] = 'Q';
+            isCodeVsSymbolMap['GGP'] = '&pound;';
+            isCodeVsSymbolMap['GYD'] = '$';
+            isCodeVsSymbolMap['HNL'] = 'L';
+            isCodeVsSymbolMap['HKD'] = '$';
+            isCodeVsSymbolMap['HUF'] = 'Ft';
+            isCodeVsSymbolMap['ISK'] = 'kr';
+            isCodeVsSymbolMap['IDR'] = 'Rp';
+            isCodeVsSymbolMap['IMP'] = '&pound;';
+            isCodeVsSymbolMap['JMD'] = 'J$';
+            isCodeVsSymbolMap['JPY'] = '&yen;';
+            isCodeVsSymbolMap['JEP'] = '&pound;';
+            isCodeVsSymbolMap['LVL'] = 'Ls';
+            isCodeVsSymbolMap['LBP'] = '&pound;';
+            isCodeVsSymbolMap['LRD'] = '$';
+            isCodeVsSymbolMap['LTL'] = 'Lt';
+            isCodeVsSymbolMap['MYR'] = 'RM';
+            isCodeVsSymbolMap['MXN'] = '$';
+            isCodeVsSymbolMap['MZN'] = 'MT';
+            isCodeVsSymbolMap['NAD'] = '$';
+            isCodeVsSymbolMap['ANG'] = 'f';
+            isCodeVsSymbolMap['NZD'] = '$';
+            isCodeVsSymbolMap['NIO'] = 'C$';
+            isCodeVsSymbolMap['NOK'] = 'kr';
+            isCodeVsSymbolMap['PAB'] = 'B/.';
+            isCodeVsSymbolMap['PYG'] = 'Gs';
+            isCodeVsSymbolMap['PEN'] = 'S/.';
+            isCodeVsSymbolMap['PLN'] = 'zl';
+            isCodeVsSymbolMap['RON'] = 'lei';
+            isCodeVsSymbolMap['SHP'] = '&pound;';
+            isCodeVsSymbolMap['SGD'] = 'S$';
+            isCodeVsSymbolMap['SBD'] = '$';
+            isCodeVsSymbolMap['SOS'] = 'S';
+            isCodeVsSymbolMap['ZAR'] = 'R';
+            isCodeVsSymbolMap['SEK'] = 'kr';
+            isCodeVsSymbolMap['CHF'] = 'CHF';
+            isCodeVsSymbolMap['SRD'] = '$';
+            isCodeVsSymbolMap['SYP'] = '&pound;';
+            isCodeVsSymbolMap['TWD'] = 'NT$';
+            isCodeVsSymbolMap['TTD'] = 'TT$';
+            isCodeVsSymbolMap['TRY'] = 'TL';
+            isCodeVsSymbolMap['TRL'] = '&pound;';
+            isCodeVsSymbolMap['TVD'] = '$';
+            isCodeVsSymbolMap['GBP'] = '&pound;';
+            isCodeVsSymbolMap['USD'] = '$';
+            isCodeVsSymbolMap['UYU'] = '$U';
+            isCodeVsSymbolMap['VEF'] = 'Bs';
+            isCodeVsSymbolMap['ZWD'] = 'Z$';
+            isCodeVsSymbolMap['KWD'] = 'ÃƒËœÃ‚Â¯.Ãƒâ„¢Ã†â€™.';
+            isCodeVsSymbolMap['INR'] = 'Rs.';
+            isCodeVsSymbolMap['BBD'] = 'BBD';
+
+            var searchPageForm = window.parent.document.getElementById("searchFrame").contentWindow.document.getElementById('theForm');
+            if (searchPageForm.addEventListener) {
+                searchPageForm.addEventListener('submit', searchPageFormActionModify, false);
+            } else if (searchPageForm.attachEvent) {
+                searchPageForm.attachEvent('onsubmit', searchPageFormActionModify);
+            }
+
+            checkLastPage = function(oSettings, tableId) {
+                var currentPage = Math.ceil(oSettings._iDisplayStart / oSettings._iDisplayLength);
+                var totalPages = Math.ceil(oSettings.fnRecordsDisplay() / oSettings._iDisplayLength);
+
+                jq('#' + tableId + 'TableDivTableID_length select').live('change', function(e) {
+                    var allRecordsRenedered = false;
+                    for (var i = 0; i < finishedTypeKeys.length; i++) {
+                        if (tableId == finishedTypeKeys[i]) {
+                            allRecordsRenedered = true;
+                        }
+                    }
+                    if (allRecordsRenedered == true) {
+                        //Do Default execution.
+                    } else {
+                        e.preventDefault();
+                        jq('#' + tableId + 'TableDivTableID_next').removeClass('ui-state-disabled');
+                        jq('#' + tableId + 'TableDivTableID_last').show();
+                        jq('#' + tableId + 'TableDivTableID_next').show();
+                    }
+                });
+                //listen for when the Next button is clicked.
+            }
+        });
+
+        function pagingFunction(oTable, tableId) {
+            var oSettings = oTable.fnSettings();
+            var currentPage = Math.ceil(oSettings._iDisplayStart / oSettings._iDisplayLength);
+            var totalPages = Math.ceil(oSettings.fnRecordsDisplay() / oSettings._iDisplayLength);
+            if ((currentPage + 1) == totalPages) {
+                var allRecordsRenedered = false;
+                for (var i = 0; i < finishedTypeKeys.length; i++) {
+                    if (tableId == finishedTypeKeys[i]) {
+                        allRecordsRenedered = true;
+                    }
+                }
+
+                if (allRecordsRenedered != true) { //reached last of cached data
+                    paginationRequest = true;
+                    makeSearchRequest(tableId, currentPage, paginationSize, true);
+                    for (var i = 0; i < finishedTypeKeys.length; i++) {
+                        if (tableId == finishedTypeKeys[i]) {
+                            jq('#' + tableId + 'TableDivTableID_last').hide();
+                        }
+                    }
+                } else {
+                    jq('#' + tableId + 'TableDivTableID_last').show();
+                }
+            }
+        }
+    </script>
+
+</apex:page>

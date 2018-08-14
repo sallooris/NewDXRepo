@@ -1,0 +1,85 @@
+<apex:page standardController="Account" extensions="VFCE02_HouseHoldSplit">
+ 
+<apex:form id="resultBlock">
+        <apex:sectionHeader title="Primary Insured"/>
+        <apex:pageBlock >
+                <apex:repeat first="0" rows="1" value="{!HouseHoldList}" var="h">
+                <apex:pageBlockSection columns="2">
+                    <apex:pageblockSectionItem >
+                    <apex:outputLabel value="First Name :" style="font-weight:bold;width:50px"> </apex:outputLabel>
+                    <apex:outputtext value="{!h.firstName}"></apex:outputtext>
+                    </apex:pageblockSectionItem>
+                    <apex:pageblockSectionItem >
+                    <apex:outputLabel value="Last Name :" style="font-weight:bold"> </apex:outputLabel>
+                    <apex:outputtext value="{!h.lastName}"></apex:outputtext>
+                    </apex:pageblockSectionItem>
+                    <apex:pageblockSectionItem >
+                    <apex:outputLabel value="Date of Birth :" style="font-weight:bold"> </apex:outputLabel>
+                    <apex:outputtext value="{!h.dob}"></apex:outputtext>
+                    </apex:pageblockSectionItem>
+                    <apex:pageblockSectionItem >
+                    <apex:outputLabel value="Age :" style="font-weight:bold"> </apex:outputLabel>
+                    <apex:outputtext value="{!h.Age}"></apex:outputtext>
+                    </apex:pageblockSectionItem>
+                    <apex:pageblockSectionItem >
+                    <apex:outputLabel value="Gender :" style="font-weight:bold"> </apex:outputLabel>
+                    <apex:outputtext value="{!h.gender}"></apex:outputtext>
+                    </apex:pageblockSectionItem>
+                    <apex:pageblockSectionItem >
+                    <apex:outputLabel value="Tobacco User :" style="font-weight:bold"> </apex:outputLabel>
+                    <apex:outputtext value="{!h.tobaccoUser}"></apex:outputtext>
+                    </apex:pageblockSectionItem>
+                </apex:pageBlockSection>
+            </apex:repeat>
+        </apex:pageBlock>  
+        <apex:sectionHeader title="Household Members"/>
+        <apex:pageBlock > 
+           <apex:pagemessages />
+             <apex:pageBlockTable value="{!HouseHoldList}" var="houseHoldWrapp" first="1">
+                   <apex:column headerValue="Relationship Type" style="width:125px">
+                         <apex:image value="{!If(houseHoldWrapp.relationShipType == "Domestic Partner", $Resource.DomesticPartnerImage, If(houseHoldWrapp.relationShipType =="Spouse", $Resource.SpouceImage,If(houseHoldWrapp.relationShipType =="Dependent", $Resource.DependentImage,'')))}" width="25" height="15"/>{!houseHoldWrapp.relationShipType}
+                   </apex:column>
+                 <!--  <apex:column headerValue="Primary Contact" style="width:50px">                 
+                        <input type="radio" id="selectedRecord" name="selectedRecord" value="{!houseHoldWrapp.recordId}" onclick="changeValue(this,'{!$Component.RadioButtonValue}');" />
+                        
+                   </apex:column> -->
+                
+                  <apex:column headerValue="Select for Household Member" id="role" style="width:50px" >
+                 <apex:selectList size="1" id="roles"  value="{!houseHoldWrapp.role}">
+                       <apex:selectoptions value="{!relatedParties}"></apex:selectoptions>
+                  </apex:selectList>
+                
+                  </apex:column>
+                  <apex:column headerValue="First Name" value="{!houseHoldWrapp.firstname}" style="width:90px"/>
+                  <apex:column headerValue="Last Name" value="{!houseHoldWrapp.lastname}" style="width:90px"/>
+                  <apex:column headerValue="Age" value="{!houseHoldWrapp.age}" style="width:80px"/>
+                  <apex:column headerValue="Tobacco User?" value="{!houseHoldWrapp.tobaccoUser}" style="width:90px"/>
+               </apex:pageBlockTable>
+               <apex:pageBlockButtons location="Bottom">
+                    <apex:actionStatus id="status" >
+                        <apex:facet name="start">
+                            <apex:outputPanel >
+                                Processing... <apex:image value="{!URLFOR($Resource.AjaxLoaderImage)}" height="20px" width="20px"/>
+                            </apex:outputPanel>
+                         </apex:facet>
+                        <apex:facet name="stop">
+                            <apex:outputPanel >
+                                <apex:commandButton value="Split Household" onclick="if(!confirm('Are you sure?')){return false};" action="{!splitHouseHold}" reRender="resultBlock" status="status"/>
+                                <apex:commandButton id="backid" value="Back" action="{!backMethod}" immediate="true"/>   
+                            </apex:outputPanel>
+                        </apex:facet>
+                    </apex:actionStatus>
+              </apex:pageBlockButtons>
+       </apex:pageBlock>
+       <apex:inputHidden value="{!selectedRecord}" id="RadioButtonValue" />
+    </apex:form>
+    <script>
+        function changeValue(input, textid) {
+           document.getElementById(textid).value = input.value;
+          
+        }
+        function disableBack(){
+             document.getElementById('{!$Component.backid}').disabled = true;
+        }
+    </script>
+</apex:page>

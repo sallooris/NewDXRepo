@@ -1,0 +1,211 @@
+<apex:page standardController="vlocity_ins__Application__c" extensions="SGA_AP06_FileUploadController" showHeader="false" sidebar="false" action="{!loadApplicationandDocuments}">
+<html xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    
+    
+    <apex:stylesheet value="{!URLFOR($Resource.SLDSResource, 'assets/styles/salesforce-lightning-design-system.css')}"/>
+    <apex:includeScript value="https://code.jquery.com/jquery-1.12.4.js"/>
+    <apex:includeScript value="https://code.jquery.com/ui/1.12.1/jquery-ui.js"/>
+    <apex:stylesheet value="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"/>
+    
+    <style>
+        .broker-search-main {
+        padding: 20px;
+        }
+        
+        .basic-search {
+        padding: 0px 20px 15px 0px;
+        }
+        
+        .basic-search-tbl {
+        padding: 20px;
+        border: solid 1px lightgrey;
+        }
+        .requiredField{
+        /*border-left: 4px solid red;*/
+        border-left: 3px solid #cc0000;
+        }
+        .disabled {
+           pointer-events: none;
+           cursor: default;
+           background-color: #cccccc;
+        }
+    </style>
+    <script type='text/javascript'>
+     
+    var $j = jQuery.noConflict();
+    $j( document ).ready(function() {
+        var w = $j(window).width();
+        var h = $j(window).height();
+        var val ='{!confirmMessage}';
+        if(val != null && val != ''){
+            $j("#dialog").dialog({
+                modal: true,
+                maxWidth:550,
+                maxHeight: 500,
+                width: 700,
+                height: 200,
+                buttons: {
+                    "Ok": function() {
+                        $j(this).dialog("close");
+                    }
+                }
+            });
+        }
+    } );
+   
+    function showSpinner(){
+        $j('.slds-spinner_container').removeClass('slds-hide');
+        $j('.slds-spinner_container').addClass('slds-show');    
+        
+        var winWidth = $j(document).width();
+        var winHeight = $j(document).height();
+        
+        $j('.slds-spinner_container').css({ 'width': winWidth,'height': winHeight });                   
+    }
+    
+    function hideSpinner(){                 
+        $j('.slds-spinner_container').removeClass('slds-show');
+        $j('.slds-spinner_container').addClass('slds-hide');    
+    }
+    </script>
+    <apex:form id="docForm">
+        <div class="slds-scope">
+            <div class="slds-spinner_container slds-hide">
+                <div class="slds-spinner--brand slds-spinner slds-spinner--medium" aria-hidden="false" role="alert">
+                    <div class="slds-spinner__dot-a"></div>
+                    <div class="slds-spinner__dot-b"></div>
+                </div>
+            </div>
+            <div class="row broker-search-main">
+                <div class="basic-search-tbl">
+                    <div class="slds-page-header">
+                        <div class="slds-grid">
+                            <div class="slds-col slds-has-flexi-truncate">
+                                <div class="slds-media slds-no-space slds-grow">
+                                    <div class="slds-media__figure">
+                                        <span class="slds-icon_container slds-icon--medium slds-icon-standard-document" title="description of icon when needed">
+                                        <svg aria-hidden="true" class="slds-icon">
+                                            <use xlink:href="{!URLFOR($Asset.SLDS, 'assets/icons/standard-sprite/svg/symbols.svg#document')}"></use>
+                                        </svg>
+                                        </span>
+                                    </div>
+                                    <div class="slds-media__body">
+                                        <h1 class="slds-page-header__title slds-m-right--small slds-align-middle slds-truncate" title="Upload Documents">Upload Documents</h1>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <apex:pageMessages id="error"></apex:pageMessages>
+                        <table class="table table-striped">
+                            <tr>&nbsp;</tr>
+                            <tr>
+                                <td>
+                                    <center>
+                                        <apex:actionRegion >
+                                            <apex:outputPanel rendered="{!NOT(saveBtndisable)}">
+                                                <apex:commandLink id="btn2" action="{!saveFiles}" styleClass="slds-button slds-button--brand slds-not-selected" value="Upload Documents" onclick="showSpinner();" >        
+                                                </apex:commandLink>
+                                            </apex:outputPanel>
+                                            <apex:outputPanel rendered="{!saveBtndisable}">
+                                                <apex:commandLink id="disableBtn1" styleClass="slds-button slds-button--brand slds-not-selected disabled" value="Upload Documents"/>
+                                            </apex:outputPanel>
+                                        </apex:actionRegion>
+                                    </center>
+                                </td>
+                            </tr>
+                            <tr>&nbsp;</tr>
+                        </table>
+                    </div>
+                    <table class="slds-table slds-table--bordered slds-table--cell-buffer nobordertop">
+                        <thead>
+                            <tr class="slds-text-heading--label">
+                                <th scope="col" class="nobordertop" title="Document Name">
+                                    <div class="th-font"><b>Document Name</b></div>
+                                </th>
+                                <th scope="col" class="nobordertop" title="Status">
+                                    <div class="th-font"><b>Status</b></div>
+                                </th>
+                                <th scope="col" class="nobordertop" title="Status">
+                                    <div class="th-font"><b>File Size</b></div>
+                                </th>
+                                <th scope="col" class="nobordertop" title="Choose File">
+                                    <div class="th-font"><b>Choose File</b></div>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <apex:repeat var="wrapFileObj" value="{!wrapFileUploadHolderList}">
+                                <tr>
+                                    <td class="nobordertop" data-label="Document Name" title="Document Name">
+                                        <apex:outputText rendered="{!wrapFileObj.documentCheckObj.Required__c}">
+                                            <div class="requiredField">{!wrapFileObj.documentCheckObj.Document_Name__c}</div>
+                                        </apex:outputText>
+                                        <apex:outputText rendered="{!NOT(wrapFileObj.documentCheckObj.Required__c)}">
+                                            <div>{!wrapFileObj.documentCheckObj.Document_Name__c}</div>
+                                        </apex:outputText>
+                                    </td>
+                                    <td>
+                                        <apex:outputText id="status" value="{!wrapFileObj.documentCheckObj.Status__c}"/>
+                                    </td>
+                                    <td>
+                                        <apex:outputText id="fileSize" value="{!wrapFileObj.documentCheckObj.File_Size__c}"/>
+                                    </td>
+                                    <td>
+                                        <apex:inputFile id="file1" fileSize="{!wrapFileObj.documentCheckObj.File_Size__c}"  value="{!wrapFileObj.fileContent}" contentType="{!wrapFileObj.contentType}" fileName="{!wrapFileObj.fileName}" />
+                                    </td>
+                                </tr>
+                            </apex:repeat>
+                        </tbody>
+                    </table>
+                    <div>
+                        <table class="table table-striped">
+                            <tr>&nbsp;</tr>
+                            <tr>
+                                <td>
+                                    <center>
+                                        <apex:actionRegion >
+                                           <apex:outputPanel rendered="{!NOT(saveBtndisable)}">
+                                                <apex:commandLink id="btn1" action="{!saveFiles}" styleClass="slds-button slds-button--brand slds-not-selected" value="Upload Documents" onclick="showSpinner();">        
+                                                </apex:commandLink>
+                                           </apex:outputPanel>
+                                            <apex:outputPanel rendered="{!saveBtndisable}">
+                                                <apex:commandLink id="disableBtn2" styleClass="slds-button slds-button--brand slds-not-selected disabled" value="Upload Documents"/>
+                                            </apex:outputPanel>
+                                        </apex:actionRegion>
+                                    </center>
+                                </td>
+                            </tr>    
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="dialog">
+            <apex:outputPanel rendered="{!IF(confirmMessage != null, true, false)}">
+                <div class="slds-scope">
+                    <div class="row broker-search-main">
+                        <div class="slds-grid">
+                            <div class="slds-col slds-has-flexi-truncate">
+                                <div class="slds-media slds-no-space slds-grow">
+                                    <div class="slds-media__figure">
+                                        <span class="slds-icon_container slds-icon--medium slds-icon-action-approval" title="description of icon when needed">
+                                            <svg aria-hidden="true" class="slds-icon">
+                                                <use xlink:href="{!URLFOR($Asset.SLDS, 'assets/icons/action-sprite/svg/symbols.svg#approval')}"></use>
+                                            </svg>
+                                        </span>
+                                    </div>
+                                    <div class="slds-media__body">
+                                        <apex:outputText title="Confirm Message" value="{!confirmMessage}" escape="false" styleClass="slds-page-header__title slds-m-right--small slds-align-middle slds-truncate"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </apex:outputPanel>
+        </div>
+    </apex:form>
+    </html>
+</apex:page>

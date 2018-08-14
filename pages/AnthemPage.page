@@ -1,0 +1,50 @@
+<apex:page standardStylesheets="false"
+    showHeader="false"
+    sidebar="false"
+    docType="html-5.0"
+    applyHtmlTag="false"
+    applyBodyTag="false">
+    <!-- controller="AP_UserController" -->
+    <html>
+        <head>
+            <link rel="shortcut icon" href="https://www.anthem.com/favicon.ico" type="image/x-icon" />
+            <title>Anthem</title>
+            
+            <!-- AngularJS Material CSS using GitCDN to load directly from `bower-material/master` -->
+            <link rel="stylesheet" href="https://cdn.gitcdn.link/cdn/angular/bower-material/master/angular-material.css"/>
+        </head>
+        <body>
+            <div class="header-static">
+                <apex:image url="{!$Resource.HeaderImage}" width="100%" height="89"/>
+            </div>
+            <div class="vlocity via-slds ap"
+                xmlns="http://www.w3.org/2000/svg"
+                xmlns:xlink="http://www.w3.org/1999/xlink"
+                ng-app="AnthemPlanBuilder">
+                <vlocity_ins:BusinessProcessComponent strOmniScriptType="Anthem"
+                    strOmniScriptSubType="Benefits"
+                    strOmniScriptLang="English"
+                    previewMode="{!$CurrentPage.parameters.previewEmbedded}"
+                    verticalMode="{!$CurrentPage.parameters.verticalMode}"
+                    strOmniScriptId="{!$CurrentPage.parameters.designerPreviewId}"/>
+                
+                <!--<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular-animate.js"></script>
+                <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular-aria.js"></script>
+                <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular-messages.min.js"></script>-->
+            
+                <!-- AngularJS Material Javascript using GitCDN to load directly from `bower-material/master` -->
+                <script src="https://cdn.gitcdn.link/cdn/angular/bower-material/master/angular-material.js"></script>
+                <script type="text/javascript">
+                    var modules = ['vlocity-business-process', 'ngMaterial'];
+                    var myModule = angular.module('AnthemPlanBuilder', modules);
+                </script>
+
+              
+
+            </div>
+            
+        </body>
+
+    <vlocity_ins:VFActionFunction /> 
+    </html>
+</apex:page>

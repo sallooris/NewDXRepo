@@ -1,0 +1,83 @@
+<apex:page controller="ManageSalesRepController" >
+    <style>
+        div[id$=block].bPageBlock .pbBody .dataCol { width: 66%;}
+        div[id$=block].bPageBlock .pbBody .dataCol:first-child { width: 33%;}
+    </style> 
+    <apex:form > 
+        <apex:sectionHeader title="Manage my Sales Reps."/>  
+        <apex:outputPanel id="pageblock" >
+            <apex:pageBlock id="block"   >
+            
+                <apex:pageBlockButtons location="top" >
+                    <apex:actionStatus id="SaveButtonStatus">
+                        <apex:facet name="stop">
+                            <apex:outputPanel >
+                                <apex:commandButton action="{!save}" value="Save" status="SaveButtonStatus" reRender="pageblock"/>
+                                <apex:commandButton action="{!cancel}" value="Cancel" immediate="true" reRender="pageblock"/>
+                            </apex:outputPanel>
+                        </apex:facet>
+                        <apex:facet name="start">
+                            <apex:outputPanel >
+                                <apex:commandButton value="Saving..." disabled="true" />
+                                <apex:commandButton value="Saving..." disabled="true" />
+                            </apex:outputPanel>
+                        </apex:facet>
+                    </apex:actionStatus>  
+                </apex:pageBlockButtons> 
+                          
+                <apex:pageBlockSection title="Sale Reps." columns="2" collapsible="false" >
+                
+                    <apex:panelGrid columns="1"  border="0" styleClass="tableStyle" width="100%" columnClasses="colStyle5" >
+                        <apex:outputPanel rendered="{!adminProf}" >
+                            <apex:outputLabel >Filter by State: </apex:outputLabel>
+                            <apex:selectList value="{!statesMultiPickList}" multiselect="false" size="1">
+                                <apex:selectOptions value="{!statesMultiPickListOptions}"/>
+                            </apex:selectList>
+                            
+                            
+                                 <apex:actionStatus id="filterStatus">
+                                    <apex:facet name="stop">
+                                        <apex:outputPanel >
+                                            <apex:commandButton action="{!filterSR}" value="Filter"  reRender="pageblock" status="filterStatus"/>
+                                        </apex:outputPanel>
+                                    </apex:facet>
+                                    <apex:facet name="start">
+                                        <apex:outputPanel >
+                                            <apex:commandButton value="Searching.." disabled="true" />
+                                        </apex:outputPanel>
+                                    </apex:facet>
+                                </apex:actionStatus>                             
+                            
+                        </apex:outputPanel>                
+                        <apex:outputPanel >
+                            <apex:selectRadio value="{!salesRep}" layout="pageDirection" >
+                                <apex:actionSupport event="onchange" action="{!updateBrokers}" reRender="pageblock"/>
+                                <apex:selectOptions value="{!salesRepOpt}"/>
+                            </apex:selectRadio>
+                            <apex:pageMessage summary="There are no Sales Rep. assigned to {!statesMultiPickList}"  severity="INFO" rendered="{!if(salesRepOpt.size==0, true,false)}" strength="1"/>
+                            <br/>
+                            <apex:outputText >States: {!salesRepStates}   </apex:outputText> <br/>
+                            <apex:outputText >Territories: {!salesRepTerritories}   </apex:outputText>  
+                        </apex:outputPanel>
+                    
+                    </apex:panelGrid>
+                    
+                    <apex:pageBlockSection id="brokers" title="Brokers" columns="1"  collapsible="false" >
+
+                        <apex:selectCheckboxes disabled="{!selectBroker}"  value="{!brokers}" layout="pageDirection">
+                            <apex:selectOptions value="{!brokerOpts}"/>
+                        </apex:selectCheckboxes> 
+                        <apex:pageMessages rendered="{!noBrokers}" /> 
+                    </apex:pageBlockSection> 
+
+                </apex:pageBlockSection>    
+                 
+            </apex:pageBlock>
+            <apex:pageMessages rendered="{!!noBrokers}" />
+          </apex:outputPanel> 
+    </apex:form> 
+     
+
+
+
+</apex:page>

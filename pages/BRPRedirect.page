@@ -1,0 +1,2 @@
+<apex:page standardController="vlocity_ins__Application__c" extensions="BRPRedirectController" action="{!redirectToPage}" >
+</apex:page>

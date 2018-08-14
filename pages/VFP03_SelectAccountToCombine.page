@@ -1,0 +1,50 @@
+<apex:page StandardController="Account" extensions="VFCE03_CombineHouseHold">
+<apex:form id="combinePage">
+<apex:sectionHeader title="Household1"/>
+  <apex:pageBlock > 
+             <apex:pageBlockTable value="{!HouseHoldList}" var="houseHoldWrapp">
+                   <apex:column headerValue="Relationship Type" style="width:125px">
+                         <apex:image value="{!If(houseHoldWrapp.relationShipType == "Primary Insured", $Resource.PrimaryInsured,If(houseHoldWrapp.relationShipType == "Domestic Partner", $Resource.DomesticPartnerImage, If(houseHoldWrapp.relationShipType =="Spouse", $Resource.SpouceImage,If(houseHoldWrapp.relationShipType =="Dependent", $Resource.DependentImage,''))))}" width="25" height="15"/>{!houseHoldWrapp.relationShipType}
+                   </apex:column>
+
+                  <apex:column headerValue="First Name" value="{!houseHoldWrapp.firstname}" style="width:90px"/>
+                  <apex:column headerValue="Last Name" value="{!houseHoldWrapp.lastname}" style="width:90px"/>
+                  <apex:column headerValue="Age" value="{!houseHoldWrapp.age}" style="width:80px"/>
+                  <apex:column headerValue="Tobacco User?" value="{!houseHoldWrapp.tobaccoUser}" style="width:90px"/>
+               </apex:pageBlockTable>
+               <apex:pageBlockButtons location="Bottom">
+              </apex:pageBlockButtons>
+    </apex:pageBlock>
+    <apex:pageBlock >
+        <apex:pagemessages />
+        <apex:panelGroup >
+                <apex:outputLabel style="font-weight:bold;" value="Search Household By Name:" title="Enter first name or last name"/>
+                <apex:inputText value="{!houseSearchText}" html-placeholder="Enter first name or last name"/>
+                <apex:commandButton value="Search Household" action="{!searchHouseHold}" reRender="combinePage"/>
+        </apex:panelGroup> <br/><br/> 
+             <apex:pageBlockTable value="{!HouseHoldSearchList}" var="houseHoldWrapp" rendered="{!NOT(ISBLANK(HouseHoldSearchList))}">
+               <apex:column headerValue="Select to Combine" style="width:50px">                 
+                    <input type="radio" id="selectedRecord" name="selectedRecord" value="{!houseHoldWrapp.recordId}" onclick="changeValue(this,'{!$Component.RadioButtonValue}');" />
+               </apex:column>
+                  <apex:column headerValue="First Name" value="{!houseHoldWrapp.firstname}" style="width:90px"/>
+                  <apex:column headerValue="Last Name" value="{!houseHoldWrapp.lastname}" style="width:90px"/>
+                  <apex:column headerValue="Date of Birth" value="{!houseHoldWrapp.dob}" style="width:90px"/>
+                  <apex:column headerValue="Age" value="{!houseHoldWrapp.age}" style="width:80px"/>
+                  <apex:column headerValue="Tobacco User?" value="{!houseHoldWrapp.tobaccoUser}" style="width:90px"/>
+               </apex:pageBlockTable>
+               <apex:pageBlockButtons location="Bottom">
+                    <apex:commandButton value="Back" action="{!backMethod}" />            
+                    <apex:commandButton value="Next" action="{!next}"/>
+              </apex:pageBlockButtons>
+    </apex:pageBlock>
+     <apex:inputHidden value="{!selectedRecord}" id="RadioButtonValue" />
+</apex:form>  
+<script>
+        function changeValue(input, textid) {
+           document.getElementById(textid).value = input.value;
+          // alert(document.getElementById(textid).value);
+          
+        }
+        
+    </script>     
+</apex:page>

@@ -1,0 +1,18 @@
+<apex:page title="New"  controller="UpdateUserInfoController"  sidebar="false" showHeader="false">
+    <apex:form >
+        <apex:pageBlock title="Profile settings" mode="edit">
+            <apex:pageBlockButtons location="bottom">
+                <apex:commandButton action="{!saveUser}" value="Save"/>
+            </apex:pageBlockButtons>
+            <apex:pageMessages />
+            <apex:pageBlockSection id="settings" columns="1">
+                <apex:inputfield value="{!currentUser.Out_of_office__c}" />
+                <apex:inputfield value="{!currentUser.Language__c}" />
+                <apex:inputCheckbox label="Share with Back-up" value="{!checkBox}"  rendered="{!if(currentUser.profileID=brokerProfile, false, true)}">
+                    <apex:actionSupport event="onchange" reRender="settings" action="{!showBackup}"/>
+                </apex:inputCheckbox>
+                <apex:inputfield label=" " value="{!currentUser.Back_up__c}" rendered="{!showBackUpField }" />
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+    </apex:form> 
+</apex:page>

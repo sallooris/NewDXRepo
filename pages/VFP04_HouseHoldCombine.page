@@ -1,0 +1,72 @@
+<apex:page standardController="Account" extensions="VFCE03_CombineHouseHold">
+<apex:form id="householdsinfo">
+<apex:pagemessages />
+    <apex:sectionHeader title="Combine Households"/> 
+        <apex:pageBlock title="Household1"> 
+
+             <apex:pageBlockTable value="{!HouseHoldList1}" var="houseHoldWrapp">
+                   <apex:column headerValue="Relationship Type" style="width:125px">
+                          <apex:image value="{!If(houseHoldWrapp.relationShipType == "Primary Insured", $Resource.PrimaryInsured,If(houseHoldWrapp.relationShipType == "Domestic Partner", $Resource.DomesticPartnerImage, If(houseHoldWrapp.relationShipType =="Spouse", $Resource.SpouceImage,If(houseHoldWrapp.relationShipType =="Dependent", $Resource.DependentImage,''))))}" width="25" height="15"/>{!houseHoldWrapp.relationShipType}
+                   </apex:column>
+                 <apex:column headerValue="Household Member Type" id="role" style="width:50px" >
+                 <apex:selectList size="1" id="roles"  value="{!houseHoldWrapp.role}">
+                       <apex:selectoptions value="{!IF(houseHoldWrapp.relationShipType == "Primary Insured",relatedPartiesPrimary,relatedParties)}"></apex:selectoptions>
+                 </apex:selectList>
+                  </apex:column>
+                  <apex:column headerValue="First Name" value="{!houseHoldWrapp.firstname}" style="width:90px"/>
+                  <apex:column headerValue="Last Name" value="{!houseHoldWrapp.lastname}" style="width:90px"/>
+                  <apex:column headerValue="Age" value="{!houseHoldWrapp.age}" style="width:80px"/>
+                  <apex:column headerValue="Tobacco User?" value="{!houseHoldWrapp.tobaccoUser}" style="width:90px"/>
+               </apex:pageBlockTable>
+        </apex:pageBlock>
+    
+        <apex:pageBlock title="Household2"> 
+             <apex:pageBlockTable value="{!HouseHoldList2}" var="houseHoldWrapp">
+                   <apex:column headerValue="Relationship Type" style="width:125px">
+                          <apex:image value="{!If(houseHoldWrapp.relationShipType == "Primary Insured", $Resource.PrimaryInsured,If(houseHoldWrapp.relationShipType == "Domestic Partner", $Resource.DomesticPartnerImage, If(houseHoldWrapp.relationShipType =="Spouse", $Resource.SpouceImage,If(houseHoldWrapp.relationShipType =="Dependent", $Resource.DependentImage,''))))}" width="25" height="15"/>{!houseHoldWrapp.relationShipType}
+                   </apex:column>
+                 <apex:column headerValue="Household Member Type" id="role" style="width:50px" >
+                 <apex:selectList size="1" id="roles"  value="{!houseHoldWrapp.role}" >
+                        <apex:selectoptions value="{!IF(houseHoldWrapp.relationShipType == "Primary Insured",relatedPartiesPrimary,relatedParties)}"></apex:selectoptions>
+                  </apex:selectList>
+                
+                  </apex:column>
+                  <apex:column headerValue="First Name" value="{!houseHoldWrapp.firstname}" style="width:90px"/>
+                  <apex:column headerValue="Last Name" value="{!houseHoldWrapp.lastname}" style="width:90px"/>
+                  <apex:column headerValue="Age" value="{!houseHoldWrapp.age}" style="width:80px"/>
+                  <apex:column headerValue="Tobacco User?" value="{!houseHoldWrapp.tobaccoUser}" style="width:90px"/>
+               </apex:pageBlockTable><br/><br/>
+                &nbsp;&nbsp;&nbsp;&nbsp;<apex:outputPanel id="HouseholdDemoGraphics" layout="none">
+                 <b> <apex:outputLabel value="Select the Demographics"/></b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                  <apex:outputLabel value="Household1"/>
+                  <input type="radio" id="selectedHousehold" name="selectedHousehold" value="{!$Label.FirstAccount}" onclick="changeValue(this,'{!$Component.selectedHousehold}');" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                  <apex:outputLabel value="Household2"/>
+                  <input type="radio" id="selectedHousehold" name="selectedHousehold" value="{!$Label.SecondAccount}" onclick="changeValue(this,'{!$Component.selectedHousehold}');" />
+              </apex:outputPanel>
+               <apex:pageBlockButtons location="Bottom">
+                    <apex:actionStatus id="status" >
+                        <apex:facet name="start">
+                            <apex:outputPanel >
+                                Processing... <apex:image value="{!URLFOR($Resource.AjaxLoaderImage)}" height="20px" width="20px"/>
+                            </apex:outputPanel>
+                         </apex:facet>
+                        <apex:facet name="stop">
+                            <apex:outputPanel >
+                                <apex:commandButton value="Combine Household" onclick="if(!confirm('Are you sure?')){return false};" action="{!combineHousehold}" reRender="householdsinfo" status="status"/>
+                                <apex:commandButton id="backid" value="Back" action="{!backMethod}" immediate="true"/>   
+                            </apex:outputPanel>
+                        </apex:facet>
+                    </apex:actionStatus>
+              </apex:pageBlockButtons><br/><br/>
+             
+       </apex:pageBlock>
+       <apex:inputHidden value="{!selectedHousehold}" id="selectedHousehold" />
+</apex:form>
+<script>
+        function changeValue(input, textid) {
+           document.getElementById(textid).value = input.value;
+        
+        }
+       
+</script>
+</apex:page>

@@ -1,0 +1,10 @@
+<apex:page standardcontroller="Issue__c">
+	<apex:outputText value="Issues" style="font-weight:bold;font-size:18px"/>
+	<apex:pageBlock mode="maindetail">
+		<apex:ListViews type="Issue__c" />
+	<apex:pageBlockSection >
+		<c:Issues_MyAssigned />
+		<c:Issues_Recent />
+	</apex:pageBlockSection>
+	</apex:pageBlock>
+</apex:page>

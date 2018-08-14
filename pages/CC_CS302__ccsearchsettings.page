@@ -1,0 +1,472 @@
+<apex:page standardStylesheets="true" controller="CC_CS302.CCSearchController" sidebar="false" showHeader="{!showHeader}">
+  <head>
+  <meta http-equiv="X-UA-Compatible" content="IE=9; IE=8; IE=7; IE=EDGE" />
+  </head>
+ 
+ 
+    <!--Minified and consolidated JS files -->
+    <apex:includeScript value="{!URLFOR($Resource.CC_CS302__CC_JS_CSS, '/js/js.build.min.js')}" />
+
+    <!--Minified and consolidated CSS files -->
+    <apex:stylesheet value="{!URLFOR($Resource.CC_CS302__CC_JS_CSS,'/css/minified_css_file.css')}" />
+    
+    <apex:includeScript value="/support/console/22.0/integration.js"/>
+    <apex:includeScript value="/soap/ajax/17.0/connection.js" />
+
+
+
+
+<style>
+    .ui-dialog-titlebar-close .hidden {
+      display: none;
+    }
+    
+    .bPageBlock .pbBody .labelCol,body .bPageBlock .pbBody .dataCol,body .bPageBlock .pbBody .data2Col {
+      padding-left: 0px;
+    }
+</style>
+  <script type="text/javascript" charset="UTF-8">
+
+            var jq = jQuery.noConflict();
+            var tabMap = {};
+            var typeKeysAsJSON ;
+            var cacheSynchronized = false;
+            var message = '';
+            jq(document).ready(function()
+            {
+                jq('.hidden').hide();
+                jq('.searchableObject').hide();
+                jq('.actionButtons').hide();
+                jq('.label').hide();
+                
+                
+                message = "<p>{!$Label.cccs_queryingschema}</p>";
+                showLatestMessage();
+                doSynchronizeCache();
+            });
+
+            function isEmpty(value){
+                return (value == null || value.length === 0);
+            }
+
+            
+            function showLatestMessage()
+            {
+                showDialog("{!$Label.cccs_pleasewait} ...",message,false);
+            }
+
+            function showDialog(title_val,msg_val,showOverlay_val)
+            {
+                jq.blockUI({
+                    theme : true,
+                    title : title_val,
+                    message : msg_val,
+                    showOverlay : showOverlay_val,
+                    overlayCSS : {
+                        backgroundColor : '#000',
+                        opacity : 0.0,
+                        cursor : 'wait'
+                    },
+                    timeout : 0
+                });
+            }
+
+            function closeDialog()
+            {
+                jq.unblockUI();
+            }
+
+            function esc(id)
+            {
+                return '#' + id.replace(/(:|\.)/g,'\\\\$1');
+            }
+
+            function onCacheSynchronized()
+            {
+                layoutOptions();
+                configureToggling();
+                showConfigurationBlock();
+            }
+
+            function showConfigurationBlock()
+            {
+                message = "<p>{!$Label.cccs_processingresults}</p>";
+                showLatestMessage();
+                jq('#searchConfigurationBlock').show();
+                jq(esc(searchConfigurationId)).dataTable({
+                    "bPaginate" : false,
+                    "sScrollY" : "200px",
+                    "sDom" : 'rtp',
+                    "bProcessing" : true,
+                    "bScroll" : true,
+                    "bDestroy" : true,
+                    "bFilter" : true,
+                    "bJQueryUI" : true,
+                    "bStateSave" : false
+                });
+                closeDialog();
+            }
+
+            function layoutOptions()
+            {
+                jq('.searchableObject').each(function()
+                {
+                    makeRows(this,4);
+                });
+                showHidden();
+            }
+
+            function showSavingMessage()
+            {
+
+                message = "<p>{!$Label.cccs_savingsettingsmsg} ...</p>";
+            }
+
+            function showHidden()
+            {
+                jq('.searchableObject').show();
+            }
+
+            function makeRows(table,columnCount)
+            {
+                cells = table.rows[0].cells;
+                cellCount = cells.length;
+                rowCount = Math.ceil(cellCount / columnCount);
+                for(i = 0;i < rowCount;i++)
+                {
+                    table.insertRow(0);
+                }
+                for(i = 0;i < cellCount;i++)
+                {
+                    row = Math.floor(i / columnCount);
+                    table.rows[row].appendChild(cells[i].cloneNode(true));
+                }
+                table.deleteRow(rowCount);
+            }
+
+            function disableAllEdits()
+            {
+                jq('.exclusiveAction').button({
+                    disabled : true
+                });
+            }
+
+            function enableAllEdits()
+            {
+                jq('.exclusiveAction').button({
+                    disabled : false
+                });
+            }
+
+            function configureToggling()
+            {
+                return;
+                if(jq('.searchableObject :checked').length > 0)
+                {
+                    jq('.toggle').button({
+                        disabled : false
+                    });
+                }
+                else
+                {
+                    jq('.toggle').button({
+                        disabled : true
+                    });
+                }
+            }
+
+            function selectAll()
+            {
+                jq('.searchableObject :not(:checked)').each(function()
+                {
+                    this.checked = true;
+                });
+                configureToggling();
+            }
+
+            function deselectAll()
+            {
+                jq('.searchableObject :checked').each(function()
+                {
+                    this.checked = false;
+                });
+                configureToggling();
+            }
+
+            function selectFields()
+            {
+                var left = jq(esc(leftList))[0];
+                var right = jq(esc(rightList))[0];
+                moveFields(left,right);
+                if(right.options.length > 0)
+                {
+                    jq("#applyEditButton").button({
+                        disabled : false
+                    });
+                }
+
+
+            }
+
+            function deselectFields()
+            {
+                var left = jq(esc(leftList))[0];
+                var right = jq(esc(rightList))[0];
+                moveFields(right,left);
+                sortLeft();
+                if(right.options.length == 0)
+                {
+                    jq("#applyEditButton").button({
+                        disabled : true
+                    });
+                }
+            }
+
+            function moveFields(src,dest)
+            {
+                for( var i = 0;i < src.options.length;i++)
+                {
+                    if((src.options[i]).selected)
+                    {
+                        var o = src.options[i];
+                        dest.options[dest.options.length] = new Option(o.innerHTML,o.value);
+                        src.options[i] = null;
+                        i--;
+                    }
+                }
+            }
+
+
+            function sortLeft()
+            {
+                var left = jq(esc(leftList))[0];
+                var tmp = "";
+                for(i = 0;i < left.options.length;i++)
+                {
+                    if(tmp > "")
+                    {
+                        tmp += ",";
+                    }
+                    tmp +=  left.options[i].innerHTML + "~" +left.options[i].value;
+                }
+
+
+                var atmp = tmp.split(",")
+
+                atmp = atmp.sort();
+
+                left.options.length = 0
+                for(i = 0;i < atmp.length;i++)
+                {
+                    var opt = atmp[i].split("~");
+                    left.options[i] = new Option(opt[0],opt[1]);
+                }
+            }
+
+            function moveUp()
+            {
+                var right = jq(esc(rightList))[0];
+                var sel = right.selectedIndex;
+                if(sel > 0)
+                {
+                    var optHTML = right.options[sel].innerHTML;
+                    var optVal = right.options[sel].value;
+                    var opt1HTML = right.options[sel - 1].innerHTML;
+                    var opt1Val = right.options[sel - 1].value;
+                    right.options[sel] = new Option(opt1HTML,opt1Val);
+                    right.options[sel - 1] = new Option(optHTML,optVal);
+                    right.options.selectedIndex = sel - 1;
+                }
+            }
+
+            function moveDown()
+            {
+                var right = jq(esc(rightList))[0];
+                var sel = right.selectedIndex;
+                if(sel >= 0 && sel < right.options.length - 1)
+                {
+                    var optHTML = right.options[sel].innerHTML;
+                    var optVal = right.options[sel].value;
+                    var opt1HTML = right.options[sel + 1].innerHTML;
+                    var opt1Val = right.options[sel + 1].value;
+                    right.options[sel] = new Option(opt1HTML,opt1Val);
+                    right.options[sel + 1] = new Option(optHTML,optVal);
+                    right.options.selectedIndex = sel + 1;
+                }
+            }
+
+            function applyEdits()
+            {
+
+                var left = jq(esc(leftList))[0];
+                var right = jq(esc(rightList))[0];
+                left.options.selectedIndex = -1;
+                right.options.selectedIndex = -1;
+                var selected = [];
+                var j = 0;
+
+                for( var i = 0;i < right.options.length;i++)
+                {
+                    selected[j++] = right.options[i].value;
+                }
+                if(selected.length > maxColumnSize ){
+                    warningMessageWithOK("{!$Label.cccs_status}", "<p><h1>"
+                                + "{!$Label.cccs_maxColomns} " + maxColumnSize 
+                                + '</h1></p></br><input type="button" id="errorOk" value="{!$Label.cccs_ok}"/>'
+                                ,false);
+                    canSearch = false;
+                    return;
+                }
+                jq('#applyEditButton').attr('disabled', true);                
+                doApplyEdit(jq.toJSON(selected));
+            }
+
+             function warningMessageWithOK(argTitle,argMsg,argIsModal)
+            {
+                showDialog(argTitle,argMsg,argIsModal);
+                jq('#errorOk').click(function()
+                {
+                    closeDialog();
+                });
+            }
+            
+
+
+            function save()
+            {
+                message = jq.base64Decode(message );
+                try
+                {
+                  jq('#saveButton').attr('disabled', true);
+                  message = jq.evalJSON(message );
+                          showDialog( "{!$Label.cccs_pleasewait} ... {!$Label.cccs_allobjectsmustbeexamined}", "<p><h1>" + message + "</h1></p>",false);
+                }
+                catch(err)
+                {
+
+                } 
+
+
+                doSave(typeKeysAsJSON);
+
+            }
+
+
+            function saveDone()
+            {
+                closeDialog();
+                jq('#saveButton').attr('disabled', 'disabled');
+                
+
+                showDialog("{!$Label.cccs_status}","<p><h1>"
+                        + "{!$Label.cccs_savedone}.</h1></p></br>"
+                        + '<input type="button" id="ok" value="' + "{!$Label.cccs_ok}" + '"/>',
+                        false);
+
+                jq('#ok').click(function()
+                {
+                    doSaveDone();
+                    closeDialog();
+                });
+            }
+
+            function disableButton(button){
+                jq(button).attr('disabled', true);
+            }
+        </script>
+        <br/><br/>
+  <h1><Label style="font-size:20px">{!$Label.cccs_customsearch}</Label></h1>  <br/><br/>
+  <Label>{!$Label.cccs_settingsMessage}</Label>  <br/><br/>
+
+  <apex:form id="configurationForm">
+  <div id="apiDisabledError"></div>
+    <div id="searchConfigurationBlock" class="hidden">
+      <apex:pageblock id="configurationBlock" title="{!$Label.cc_cs302__cccs_searchconfiguration}">
+        <apex:actionFunction name="doSynchronizeCache" action="{!synchronizeCacheSettings}" rerender="configurationBlock"
+          oncomplete="cacheSynchronized = {!cacheSettingsSynchronized};message='{!settingsMessage}';maxColumnSize ={!maxColumns}; if(!cacheSynchronized){showLatestMessage();doSynchronizeCache();}else{onCacheSynchronized();}" />
+        <apex:actionFunction name="doSave" action="{!save}" oncomplete="persisted = {!settingsPersisted};message='{!settingsMessage}';if(!persisted){save();}else{saveDone();}" rerender="actionButtons" >
+          <apex:param name="typeKeysAsJSON" value="" />
+        </apex:actionFunction>
+        <apex:actionFunction name="doSaveDone" action="{!saveDone}" />
+        <apex:actionFunction name="doApplyEdit" action="{!applyEdit}" oncomplete="enableAllEdits();" rerender="fieldConfigurationPanel,changesSection,actionButtons">
+          <apex:param name="fieldNames" value="" />
+        </apex:actionFunction>
+        <apex:pageBlockSection columns="1" collapsible="false">
+          <apex:pageBlockTable id="searchConfiguration" value="{!allObjectTypes}" var="type" rendered="{!selectionShown}">
+            <apex:column width="70%" value="{!type.labelPlural}">
+              <apex:facet name="header">{!$Label.cc_cs302__cccs_name}</apex:facet>
+            </apex:column>
+            <apex:column width="15%">
+              <apex:facet name="header">{!$Label.cc_cs302__cccs_searchable}?</apex:facet>
+              <apex:inputCheckbox value="{!type.selected}" />
+            </apex:column>
+            <apex:column width="15%">
+              <apex:facet name="header">{!$Label.cc_cs302__cccs_actions}</apex:facet>
+              <apex:commandButton action="{!editType}" value="{!$Label.cc_cs302__cccs_edit}" styleClass="exclusiveAction" onclick="disableAllEdits();" rerender="fieldConfigurationPanel,actionButtons" style="position:static;">
+                <apex:param name="selectedTypeName" value="{!type.name}" />
+              </apex:commandButton>
+            </apex:column>
+          </apex:pageBlockTable>
+          <script>
+            var searchConfigurationId = "{!$Component.searchConfiguration}";
+          </script>
+
+        </apex:pageBlockSection>
+        <apex:outputPanel id="fieldConfigurationPanel">
+          <apex:panelGrid id="fieldConfiguration" columns="4" rendered="{!fieldConfigurationShown}">
+            <apex:outputPanel style="width:45%">
+              <apex:selectList id="leftList" multiselect="true" size="10" value="{!leftSelectedFields}" style="width:300px">
+                <apex:selectOptions value="{!unselectedFields}" />
+              </apex:selectList>
+              <script>
+                var leftList = "{!$Component.leftList}";
+              </script>
+            </apex:outputPanel>
+            <apex:outputPanel style="width:5%">
+              <apex:panelGrid columns="1">
+                <input type="button" onclick="selectFields();" style="width: 100%" class="btn" value="{!$Label.cccs_select}" />
+                <input type="button" onclick="deselectFields();" style="width: 100%" class="btn" value="{!$Label.cccs_deselect}" />
+              </apex:panelGrid>
+            </apex:outputPanel>
+            <apex:outputPanel style="width:45%">
+              <apex:selectList id="rightList" multiselect="true" size="10" value="{!rightSelectedFields}" style="width:300px">
+                <apex:selectOptions value="{!selectedFields}" />
+              </apex:selectList>
+              <script>
+                  var rightList = "{!$Component.rightList}";
+              </script>
+            </apex:outputPanel>
+            <apex:outputPanel style="width:5%">
+              <apex:panelGrid columns="1">
+                <input type="button" onclick="moveUp();" style="width: 100%" class="btn" value="{!$Label.cccs_moveup}" />
+                <input type="button" onclick="moveDown();" style="width: 100%" class="btn" value="{!$Label.cccs_movedown}" />
+              </apex:panelGrid>
+            </apex:outputPanel>
+          </apex:panelGrid>
+        </apex:outputPanel>
+        <apex:outputPanel id="changesSection">
+          <apex:panelGrid columns="1">
+            <apex:selectCheckboxes value="{!newCheckedItems}" disabled="true" styleClass="searchableObject" onclick="configureToggling()" rendered="{!changesShown}">
+              <apex:selectOptions value="{!changedItems}" />
+            </apex:selectCheckboxes>
+            <apex:outputLabel >{!fieldConfigurationMessage}</apex:outputLabel>
+            <apex:outputLabel value="{!$Label.cc_cs302__cccs_nochanges}" rendered="{!emptyMessageShown}" styleClass="label" />
+          </apex:panelGrid>
+        </apex:outputPanel>
+        <apex:outputPanel id="actionButtons">
+          <apex:commandButton action="{!cancelEdit}" value="{!$Label.cc_cs302__cccs_cancel} {!$Label.cc_cs302__cccs_edit}" id="cancelEditButton" oncomplete="enableAllEdits();" rendered="{!cancelEditShown}" rerender="fieldConfigurationPanel,actionButtons" />
+          <apex:actionRegion rendered="{!applyEditShown}">
+            <input type="button" value="{!$Label.cccs_apply} {!$Label.cc_cs302__cccs_edit}" id="applyEditButton" class="btn" onclick="applyEdits();" />
+          </apex:actionRegion>
+          <apex:commandButton action="{!cancel}" value="{!$Label.cc_cs302__cccs_cancel}" id="cancelButton" rendered="{!cancelShown}" />
+          <apex:commandButton action="{!previous}" value="{!$Label.cc_cs302__cccs_back}" id="previousButton" rendered="{!previousShown}" oncomplete="showConfigurationBlock();" rerender="configurationBlock" />
+          <apex:commandButton action="{!confirm}" value="{!$Label.cc_cs302__cccs_confirm}" id="confirmButton" styleClass="toggle" rendered="{!confirmShown}" rerender="configurationBlock" oncomplete="layoutOptions();" onclick="disableButton(this);"/>
+          <apex:actionRegion rendered="{!saveShown}">
+            <input type="button" id="saveButton" class="btn" value="{!$Label.cccs_save}" onclick="showSavingMessage();save();" />
+          </apex:actionRegion>
+        </apex:outputPanel>
+      </apex:pageblock>
+    </div>
+  </apex:form>
+  
+</apex:page>

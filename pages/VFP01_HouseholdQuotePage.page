@@ -1,0 +1,29 @@
+<apex:page id="quotePage" standardController="Account" extensions="VFCE01_HouseHoldQuote">
+   <apex:form id="quotePageForm">
+     <apex:pageMessages id="quotePageMessage"></apex:pageMessages>
+        <apex:pageBlock id="quotePageBlock">
+        <apex:sectionHeader id="quotePageSectionHeader" title="Quoting in Producer Toolbox"/>
+              <apex:pageBlockTable id="quotePageBlockTable" value="{!houseHoldList}" var="houseHoldWrapp">
+               <apex:column id="firstname" headerValue="First Name" value="{!houseHoldWrapp.firstname}" style="width:90px"/>
+               <apex:column id="lastname" headerValue="Last Name" value="{!houseHoldWrapp.lastname}" style="width:90px"/>
+               <apex:column id="relationshiptype" headerValue="Relationship Type" style="width:125px">
+                   <apex:image value="{!If(houseHoldWrapp.relationShipType == "Applicant", $Resource.PrimaryInsured, If(houseHoldWrapp.relationShipType == "Domestic Partner", $Resource.DomesticPartnerImage,If(houseHoldWrapp.relationShipType =="Spouse", $Resource.SpouceImage,If(houseHoldWrapp.relationShipType =="Dependent", $Resource.DependentImage,''))))}" width="25" height="15"/>{!houseHoldWrapp.relationShipType}
+              </apex:column>
+               <apex:column headerValue="Age" value="{!houseHoldWrapp.age}" style="width:80px"/>
+               <apex:column headerValue="Quote" style="width:50px">
+                   <apex:inputCheckbox id="selecttoQuote" value="{!houseHoldWrapp.isSelect}"/>
+               </apex:column>
+               <apex:column headerValue="Role" id="role" style="width:50px">
+                   <apex:selectList size="1" id="roles" value="{!houseHoldWrapp.role}" >
+                     <apex:selectoptions value="{!relatedParties}"></apex:selectoptions>
+                   </apex:selectList>
+                </apex:column>
+           </apex:pageBlockTable>
+            <apex:pageBlockButtons id="quotePageBlockButtons" location="Bottom">
+               <!-- <apex:commandButton value="Back" action="{!backMethod}" />  -->          
+                <apex:commandButton value="Next" action="{!next}"/>
+            </apex:pageBlockButtons>
+         </apex:pageBlock>
+    </apex:form>
+
+</apex:page>

@@ -1,0 +1,3 @@
+<apex:page showHeader="false" showQuickActionVfHeader="false" showChat="false" >
+   <apex:canvasApp applicationName="BrokerPortal" width="100%" />
+</apex:page>

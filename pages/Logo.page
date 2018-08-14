@@ -1,0 +1,7 @@
+<apex:page showHeader="false" sidebar="false" controller="logoController" >
+
+    <apex:form >
+        <apex:image url="{!imageURL}" rendered="{!if(imageURL<>'',true, false)}" width="190"  > </apex:image>
+    </apex:form>
+
+</apex:page>

@@ -1,0 +1,118 @@
+<apex:page standardStylesheets="false" showHeader="false" sidebar="false" docType="html-5.0">
+    <apex:includeScript value="{!$Resource.vlocity_ins__UnderscoreJS}"/>
+
+    <div class="vlocity via-slds" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" ng-app="vsAnthemApp">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/es6-promise/3.2.2/es6-promise.js"></script>
+    
+        <style>
+            .vlocity .vlc-slds-wizard > label:first-child {display:none}
+            .vlocity #ViewQuoteStep .vlc-cancel {display:None;}
+            .vlocity #ViewQuoteStep .via-slds .vlc-slds-button--tertiary {display:none}
+            .via-slds section.slds-page-header.vlc-slds-page--header {
+                background: #0079C2;
+                padding-bottom: 0px;
+                min-height: 5.5rem;
+                height: 5.5rem;
+            }
+            .via-slds .vlc-slds-remote-action--button .vlc-control-wrapper .slds-box{
+                background: #00609A;
+            }
+            .via-slds .vlc-slds-remote-action--button .vlc-control-wrapper .slds-box:hover{
+                background: #00609A;
+            }
+            .via-slds .vlc-slds-remote-action--button .vlc-control-wrapper .slds-box:hover p{
+                color: #fff !important;
+            }
+            .via-slds .list-group.vertical-steps .list-group-item.active::before {
+                background-color: #0079C2;
+            }
+            .via-slds .list-group.vertical-steps .list-group-item.completed.active::before {
+                background-color: #0079C2;
+            }
+            .via-slds .list-group.vertical-steps .list-group-item.active span {
+                font-weight: bold;
+                color: #0079C2;
+            }
+            .via-slds input.ng-pristine.ng-valid:focus, .via-slds input.ng-pristine.ng-invalid:focus {
+                border: 1px solid #0079C2 !important;
+            }
+            .via-slds .vlc-slds-remote-action--button .vlc-control-wrapper .slds-box a:hover{
+                background-color: #A22036;
+            }
+            .via-slds div[msg='Requirement']{
+                background: rgb(66, 89, 104);
+            }
+
+            .via-slds .slds-page-header__title.vlc-slds-page-header__title{
+              color: #ffffff;
+            }
+
+            .via-slds .list-group.vertical-steps .list-group-item.completed {
+                border-left: 3px solid #0079C2;
+            }
+
+            .via-slds section.slds-page-header.vlc-slds-page--header{
+              min-height: 5.5rem;
+              padding-left: 0px;
+            }
+
+            .via-slds .vlc-slds-underline--gradient h1{
+              padding-left: 1.5rem;
+            }
+
+        </style>
+        <vlocity_ins:BusinessProcessComponent strOmniScriptType="SG Quoting"
+            strOmniScriptSubType="New_York"
+            strOmniScriptLang="English"
+            previewMode="{!$CurrentPage.parameters.previewEmbedded}"
+            verticalMode="{!$CurrentPage.parameters.verticalMode}"
+            strOmniScriptId="{!$CurrentPage.parameters.designerPreviewId}"
+            scriptLayout="lightning"/>
+            <!-- strOmniScriptSubType="MinInfo" -->
+        <vlocity_ins:BusinessProcessHelperComponent />
+        <vlocity_ins:JSONTreeHTMLTemplateComponent />
+
+        <c:SmallGroupAnthemSGTemplate />
+        <c:scrollOverrideComponent />
+         <c:FetchCounty />
+        <script type="text/javascript">
+            var modules = ['vlocity-business-process'];
+            var myModule = angular.module('vsAnthemApp', modules);
+        </script>
+
+        <c:SmallGroupAnthemSGController />
+
+        <script type="text/ng-template" id="TextCheck.html" >
+<!--<input id="ZipCode1" ng-focus="resetSrvErr(control)" type="text" ng-disabled="control.ro" name="loopname" ng-init="init(this, control)" ng-model="zipcode" ng-blur="baseCtrl.onenter(this)" ng-model-options="{ updateOn: 'default focusout blur', debounce: { 'default': control.propSetMap.debounceValue, 'focusout': 0, 'blur': 0 } }" class="form-control ng-pristine ng-valid-minlength ng-valid-maxlength ng-empty ng-valid ng-valid-required ng-touched" ui-mask="" ng-required="control.req" ng-maxlength="255" vlc-slds-ng-pattern="" ng-minlength="0" vlc-slds-val-checker="" style="">-->
+<div class="slds-form-element__control">
+
+            <div class="vlc-control-wrapper" help="false">
+
+                <input id="ZipCode1" type="text" name="loopname" ng-disabled="control.ro" ng-required="control.req" ng-model="zipcode" ng-change="zipcode.length == 5 ? baseCtrl.onenter(this) : null" ng-model-options="{ updateOn: 'default focusout blur', debounce: { 'default': control.propSetMap.debounceValue, 'focusout': 0, 'blur': 0 } }" class="slds-input ng-pristine ng-valid-minlength ng-valid-maxlength ng-empty ng-valid ng-valid-required ng-touched" ui-mask="" ng-maxlength="255" vlc-slds-ng-pattern="" ng-minlength="0" vlc-slds-val-watch="response" ng-init="init(this, control)" vlc-slds-val-checker="response" style="">
+
+                <label for="ZipCode1" class="slds-form-element__label ng-binding">ZipCode
+                    <!-- ngIf: control.req -->
+                </label>
+
+                <!-- tooltip template -->
+
+
+            </div>
+
+            <!-- this is the error block -->
+            <!-- ngInclude: ::errHTMLId --><div ng-include="::errHTMLId" class="ng-scope"><div class="vlc-slds-error-block ng-scope">
+
+    <div class="error ng-hide" ng-show="control.srvErr">
+        <small class="description ng-binding"></small>
+    </div>
+
+    <!-- ngIf: loopform.loopname.$error && loopform.loopname.$dirty -->
+</div>
+</div>
+
+        </div>
+</script>
+
+    </div>
+    <vlocity_ins:VFActionFunction />
+</apex:page>

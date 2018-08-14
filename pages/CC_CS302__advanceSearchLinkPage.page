@@ -1,0 +1,5 @@
+<apex:page controller="CC_CS302.AdvanceSearchLinkObject"  action="{!createObjectMap}"
+contentType="text/javascript; charset=utf-8" showHeader="false" standardStylesheets="false" sidebar="false">
+
+{!result}
+</apex:page>

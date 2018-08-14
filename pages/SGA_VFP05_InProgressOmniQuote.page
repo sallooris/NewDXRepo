@@ -1,0 +1,32 @@
+<!--
+    @Author : SGA
+    @Created Date : 07-08-2017 (DD/MM/YYYY)
+    @Name : SGA_VFP05_InProgressOmniQuote
+    @Description : 1) VF page to Display related In Progress Quotes for an Account 
+                   2) Used to embedd Lightning Component SGA_LTNG04_InProgressQuotes for Classic view
+                   3) In Classic View Lightning Components are not supported ,So this Page is created 
+                      to support the existing component in Salesforce Classic UI.
+-->
+<apex:page standardController="Account" extensions="SGA_LTNG04_InProgressController">
+ <apex:includeLightning />
+
+ <div id="InProgressQuotesContainer" />
+
+ <script>
+    //  var accountId = "{!$CurrentPage.parameters.id}";
+   var accountId="{!acct.Id}"; 
+        console.log(accountId);
+    //alert('id got'+accountId);
+  
+ $Lightning.use("c:SGA_LTNG04_InProgressQuotesAPP", function() {
+ $Lightning.createComponent("c:SGA_LTNG04_InProgressQuotes",
+                             { "recordId" : accountId,
+                             "accId" : accountId},
+
+ "InProgressQuotesContainer",
+ function(cmp) {
+ console.log('Component created for SGA_LTNG04_InProgressQuotes');
+ });
+ });
+ </script>
+</apex:page>

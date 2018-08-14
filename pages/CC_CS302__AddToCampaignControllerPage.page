@@ -1,0 +1,10 @@
+<apex:page controller="CC_CS302.AddToCampaignController" contentType="text/html; charset=utf-8" showHeader="false" standardStylesheets="false" sidebar="false">
+<apex:form >
+<input type='hidden' name = "q0" value="{!q0}"/>
+<input type='hidden' name = "q1" value= "{!q1}"/>
+<input type='hidden' name = "qColumns" value = "{!qColumns}"/>
+<input type='hidden' name = "qFieldLabels" value = "{!qFieldLabels}"/>
+<input type='hidden' name = "qObject" value = "{!qObject}"/>
+<apex:commandButton value="Add to Campaign" id="addToCampaign" action="{!initialize}"/>
+</apex:form>
+</apex:page>

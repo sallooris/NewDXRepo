@@ -1,0 +1,33 @@
+<apex:page showHeader="false" standardController="Live_Agent_Chat_Survey__c" extensions="VFCE06_PostChatSurvey">
+<script type="text/javascript">
+        function checkVal()
+        {
+            var wth= document.getElementById('{!$Component.form.pb.pbs.wth}').value;
+            var sc= document.getElementById('{!$Component.form.pb.pbs.sc}').value;
+            var caw= document.getElementById('{!$Component.form.pb.pbs.caw}').value;
+            var co= document.getElementById('{!$Component.form.pb.pbs.co}').value;
+            if(wth == '' || sc == '' || caw == '' || co == ''){
+                alert('Please Fill All Mandatory Fields');
+                return false;
+            }
+            else{
+                return true;
+            }  
+        }
+</script>
+<apex:form id="form"> 
+<apex:pageBlock title="Please Complete The Survey" id="pb">
+    <apex:pageBlockSection columns="2" id="pbs">
+        <apex:inputField value="{!Live_Agent_Chat_Survey__c.What_type_of_help_was_needed__c}" id="wth" required="true"/><br/>
+        <apex:inputField value="{!Live_Agent_Chat_Survey__c.Sales_Channel__c}" id="sc" required="true"/><br/>
+        <apex:inputField value="{!Live_Agent_Chat_Survey__c.Contact_with_Anthem_within_last_90_days__c}" id="caw" required="true"/><br/>
+        <apex:inputField value="{!Live_Agent_Chat_Survey__c.Chat_Outcome__c}" id="co" required="true"/><br/><br/><br/>
+    </apex:pageBlockSection>
+<center>
+        <apex:commandLink value="Submit" styleClass="btn" style="text-decoration:none;padding:4px;"  onclick="return checkVal()" action="{!submit}">
+            <apex:param name="chatterKey" value="{!$CurrentPage.parameters.chatKey}" assignTo="{!chatterKey}" />
+        </apex:commandLink>
+</center>
+</apex:pageBlock>
+</apex:form>
+</apex:page>

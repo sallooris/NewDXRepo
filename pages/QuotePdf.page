@@ -1,0 +1,908 @@
+<apex:page standardController="Quote" renderAs="pdf" applyBodyTag="false" sidebar="false" showHeader="false" standardStylesheets="false" extensions="pdfController" >
+    <apex:pageMessages ></apex:pageMessages>
+    <head>
+    <style>
+        <apex:stylesheet value="{!URLFOR($Resource.QuotePDFCss)}"/>        
+    </style>     
+    </head>
+    <body> 
+        <!-- page1-->   
+        <div class="page" >
+        <div></div>
+            <div>
+            <tr>
+                <td width='95%'>
+                    <h1>{!pdfContentMap['Page1Head']} {!Quote.Account.Name}</h1>
+                </td>
+                <td width='5%' align="right">
+                    <apex:image value="{!empireLogo}" width="120" height="51"/>
+               </td>
+            </tr>
+            </div>
+            <div>
+                <tr>
+                    <td>
+                        <div>
+                            <apex:image id="theImage" value="{!bigPicture}" width="600" height="400"/>
+                        </div>
+                    </td>
+                    <td>
+                        <div>{!pdfContentMap['Page1Line1']}</div>
+                        <div>{!Quote.opportunity.broker__r.name}</div>
+                        <!-- br/>
+                        <div>{!Quote.opportunity.broker__r.Account.Name}</div -->
+                        <br/>
+                        <!--<div>{!pdfContentMap['Page1Line2']}</div>
+                        <div>{!Quote.opportunity.owner.firstName}&nbsp;{!Quote.opportunity.owner.lastName}</div>-->
+                        <br/>
+                        <div>{!pdfContentMap['Page1Line3']} {!Quote.QuoteNumber}</div>
+                        <div>{!pdfContentMap['Page1Line4']} <apex:outputText value="{0,date, MMMM d', 'yyyy}"> <apex:param value="{!ed}" /> </apex:outputText> </div>
+                        <br/>
+                        <div>{!pdfContentMap['Page1Line5']} {!Quote.QuoteState__c}</div>
+                        <div>{!pdfContentMap['Page1Line7']} {!Quote.QuoteZip__c}</div>
+                        <div>{!pdfContentMap['Page1Line8']} {!Quote.QuoteCounty__c}</div> 
+                        <div>{!pdfContentMap['Page1Line6']} {!acct.SIC}</div>  
+                    </td>
+                </tr>
+             </div>
+             <div class="footer">
+                 <apex:outputText value="{!pdfContentMap['FooterServices']}" escape="false" />                 
+             </div>
+        </div><!-- end page -->
+        <div class="page"></div><!-- end page -->
+        <!-- page2-->
+        <div class="page">
+        <div></div>
+            <h1 style="margin-bottom:0px;padding-bottom:0px;">{!pdfContentMap['Page2Head']}</h1>
+            <div style="margin-top:0px;padding-top:0px">{!pdfContentMap['Page2SubHead']}</div>
+            <tr>
+                <td  style="vertical-align: top;">
+                    <apex:outputText value="{!pdfContentMap['Page2Left']}" escape="false"/>
+                </td>
+                <td  style="vertical-align: top;">
+                    <apex:outputText value="{!pdfContentMap['Page2Right']}" escape="false"/>
+                </td>
+            </tr>
+        </div><!-- end page -->
+        <!-- Page3-->
+        <apex:outputPanel layout="block" rendered="{!renMedical}">
+        <div class="page">
+            <tr>
+                <td>
+                    <h1>{!pdfContentMap['Page3Head']}</h1>
+                </td>
+                
+            </tr>
+            <div style="font-size:65%">{!pdfContentMap['Page3']}</div>
+            <br/>
+        <!--<table class="line" border="0" cellspacing="0" cellpadding="0" align="left">
+             <tr>
+                 <th>
+                     <div> -->
+                         <table width="100%" border="0" cellspacing="0" cellpadding="0" style="table-layout:fixed;">
+                             <tr class="success">
+                                 <th bgcolor="#D3D3D3" style="font-size:65%" align="center" width="200">Product</th>
+                                 <apex:repeat var="med" value="{!displayMedicalAll}">
+                                     <th bgcolor="#D3D3D3" width="100%" style="font-size:65%;" align="center" colspan="2">{!med.proName}</th>
+                                 </apex:repeat>
+                             </tr>
+                             
+                             <!--2-->
+                             <tr class="success">
+                                 <th width="100%" style="font-size:65%" align="left">{!headerMap['Page3Row1']}</th>
+                                 <apex:repeat var="med" value="{!displayMedicalAll}">
+                                     <th width="50%" style="font-size:65%" align="center" colspan="2">&nbsp;</th>
+                                 </apex:repeat>
+                             </tr>
+                             
+                             <!--3-->
+                             <tr class="success">
+                                 <th bgcolor="#D3D3D3" width="100%" style="font-size:65%" align="left">{!headerMap['Page3Row2']}</th>
+                                 <apex:repeat var="med" value="{!displayMedicalAll}">
+                                     <th width="50%" style="font-size:65%" align="center" colspan="2">{!med.aaMap['INN Deductible Combined']}&nbsp;&nbsp;</th>
+                                 </apex:repeat>
+                             </tr>
+                             
+                             <!--4-->
+                             <tr class="success">
+                                 <th bgcolor="#D3D3D3" width="100%" style="font-size:65%" align="left">{!headerMap['Page3Row3']}</th>
+                                 <apex:repeat var="med" value="{!displayMedicalAll}">
+                                     <th width="50%" style="font-size:65%" align="center" colspan="2">{!med.aaMap['INN OOP Single']} / {!med.aaMap['INN OOP Family']}</th>
+                                 </apex:repeat>
+                             </tr>
+                             
+                             <!--5-->
+                             <tr class="success">
+                                 <th bgcolor="#D3D3D3" width="100%" style="font-size:65%" align="left">{!headerMap['Page3Row4']}</th>
+                                 <apex:repeat var="med" value="{!displayMedicalAll}">
+                                     <th width="50%" style="font-size:65%" align="center" colspan="2">{!med.aaMap['PCP / Specialist']}&nbsp;</th>
+                                 </apex:repeat>
+                             </tr>
+                             
+                             <!--6-->
+                             <tr class="success">
+                                 <th bgcolor="#D3D3D3" width="100%" style="font-size:65%" align="left">{!headerMap['Page3RowCon']}</th>
+                                 <apex:repeat var="med" value="{!displayMedicalAll}">
+                                     <th width="50%" style="font-size:65%" align="center" colspan="2">{!med.aaMap['INN Coinsurance']} / {!med.aaMap['OON Coinsurance']}</th>
+                                 </apex:repeat>
+                             </tr>
+                             
+                             <!--7-->
+                             <tr class="success">
+                                 <th bgcolor="#D3D3D3" width="100%" style="font-size:65%" align="left">{!headerMap['Page3Row5']}</th>
+                                 <apex:repeat var="med" value="{!displayMedicalAll}">
+                                     <th width="50%" style="font-size:65%" align="center" colspan="2">{!med.aaMap['ER / Urgent Care']}&nbsp;</th>                         
+                                 </apex:repeat>
+                             </tr>
+                             
+                             <!--8-->
+                             <tr class="success">
+                                 <th bgcolor="#D3D3D3" width="100%" style="font-size:65%" align="left">{!headerMap['Page3Row6']}</th>
+                                 <apex:repeat var="med" value="{!displayMedicalAll}">
+                                     <th width="50%" style="font-size:65%" align="center"  colspan="2">{!med.aaMap['Rx']}&nbsp;</th>
+                                 </apex:repeat>    
+                             </tr>
+                             
+                         <!--</table>
+                     </div>
+                     <div  style="font-size:65%">
+                         {!headerMap['Page3Row7']}
+                     </div>
+                     <div> 
+                         <table width="100%" border="0" cellspacing="0" cellpadding="0">-->
+                             <tr class="success">
+                                 <th colspan="0" width="100%" style="font-size:65%" align="left">{!headerMap['Page3Row7']}</th>
+                                 <apex:repeat var="med" value="{!displayMedicalAll}">
+                                     <th width="50%" style="font-size:65%" align="center" colspan="2">&nbsp;</th>
+                                 </apex:repeat>
+                             </tr>
+                             
+                             <!--9-->
+                             <tr class="success">
+                                 <th bgcolor="#D3D3D3" width="100%" style="font-size:65%" align="left">{!headerMap['Page3Row8']}</th>                               
+                                 <apex:repeat var="med" value="{!displayMedicalAll}">
+                                     <th width="15%" style="font-size:65%" align="center" >
+                                         <apex:outputText value="{0, number, ###,##0}">
+                                             <apex:param value="{!med.cData.Number_EE}"/>
+                                         </apex:outputText>
+                                         &nbsp;
+                                     </th>
+                                     <th width="15%" style="font-size:65%" align="center" >$<!--{!med1.qlItem.C1_Total_EE__c}-->
+                                         <apex:outputText value="{0, number, ###,##0.00}">
+                                             <apex:param value="{!med.cData.Total_EE}"/>
+                                         </apex:outputText>
+                                         &nbsp;
+                                     </th>
+                                </apex:repeat>
+                             </tr>
+                             <!--10-->
+                             <tr class="success">
+                                 <th bgcolor="#D3D3D3" width="100%" style="font-size:65%" align="left">{!headerMap['Page3Row9']}</th>
+                                 <apex:repeat var="med" value="{!displayMedicalAll}">
+                                     <!--<th width="15%" style="font-size:65%" align="center" >{!med.cData.Number_EE_Spouse}&nbsp;</th>-->
+                                     <th width="15%" style="font-size:65%" align="center" >
+                                         <apex:outputText value="{0, number, ###,##0}">
+                                             <apex:param value="{!med.cData.Number_EE_Spouse}"/>
+                                         </apex:outputText>
+                                         &nbsp;
+                                     </th>
+                                     <!--<th width="85%" style="font-size:65%" align="center" >${!med1.qlItem.C1_Total_EE_Sp__c}&nbsp;</th>-->
+                                     <th width="15%" style="font-size:65%" align="center" >$
+                                         <apex:outputText value="{0, number, ###,##0.00}">
+                                             <apex:param value="{!med.cData.Total_EE_Sp}"/>
+                                         </apex:outputText>
+                                         &nbsp;
+                                     </th>
+                                 </apex:repeat>
+                             </tr>
+                             <!--11-->
+                             <tr class="success">
+                                 <th bgcolor="#D3D3D3" width="100%" style="font-size:65%" align="left">{!headerMap['Page3Row10']}</th>
+                                 <apex:repeat var="med" value="{!displayMedicalAll}">
+                                     <!--<th width="15%" style="font-size:65%" align="center" >{!med.cData.Number_EE_Child}&nbsp;</th>-->
+                                     <th width="15%" style="font-size:65%" align="center" >
+                                         <apex:outputText value="{0, number, ###,##0}">
+                                             <apex:param value="{!med.cData.Number_EE_Child}"/>
+                                         </apex:outputText>
+                                         &nbsp;
+                                     </th>
+                                     <!--<th width="85%" style="font-size:65%" align="center" >${!med1.qlItem.C1_Total_EE_Ch__c}&nbsp;</th>-->
+                                     <th width="15%" style="font-size:65%" align="center" >$
+                                         <apex:outputText value="{0, number, ###,##0.00}">
+                                             <apex:param value="{!med.cData.Total_EE_Ch}"/>
+                                         </apex:outputText>
+                                         &nbsp;
+                                     </th>
+                                 </apex:repeat>
+                             </tr>
+                             <!--12-->
+                             <tr class="success">
+                                 <th bgcolor="#D3D3D3" width="100%" style="font-size:65%" align="left">{!headerMap['Page3Row11']}</th>
+                                 <apex:repeat var="med" value="{!displayMedicalAll}">
+                                     <!--<th width="15%" style="font-size:65%" align="center" >{!med.cData.Number_EE_Family}&nbsp;</th>-->
+                                     <th width="15%" style="font-size:65%" align="center" >
+                                         <apex:outputText value="{0, number, ###,##0}">
+                                             <apex:param value="{!med.cData.Number_EE_Family}"/>
+                                         </apex:outputText>
+                                         &nbsp;
+                                     </th>
+                                     <!--<th width="85%" style="font-size:65%" align="center" >${!med1.qlItem.C1_Total_EE_Family__c}&nbsp;</th>-->
+                                     <th width="15%" style="font-size:65%" align="center" >$
+                                         <apex:outputText value="{0, number, ###,##0.00}">
+                                             <apex:param value="{!med.cData.Total_EE_Family}"/>
+                                         </apex:outputText>
+                                         &nbsp;
+                                     </th>
+                                 </apex:repeat> 
+                             </tr>
+                             <!--13-->
+                             <tr class="success">
+                                 <th bgcolor="#D3D3D3" width="100%" style="font-size:65%" align="left">{!headerMap['Page3Row12']}</th>
+                                 <apex:repeat var="med" value="{!displayMedicalAll}">
+                                     <th width="15%" style="font-size:65%" align="center" >{!pdfContentMap['Text_NA']}</th>
+                                     <!--<th width="85%" style="font-size:65%" align="center" >${!med1.qlItem.Class_1_Total__c}</th>-->
+                                     <th width="15%" style="font-size:65%" align="center" >$
+                                         <apex:outputText value="{0, number, ###,##0.00}">
+                                             <apex:param value="{!med.cData.Total}"/>
+                                         </apex:outputText>
+                                         &nbsp;
+                                     </th>
+                                 </apex:repeat>
+                             </tr>
+                             <!--14-->
+                             <tr class="success">
+                                 <th bgcolor="#D3D3D3" width="100%" style="font-size:65%" align="left">{!headerMap['Page3Row13']}</th>
+                                 <apex:repeat var="med" value="{!displayMedicalAll}">
+                                     <th width="15%" style="font-size:65%" align="center" >{!pdfContentMap['Text_NA']}</th>
+                                     <!--<th width="85%" style="font-size:65%" align="center" >${!med1.qlItem.C1_Annual_Total_Premium__c}</th>-->
+                                     <th width="15%" style="font-size:65%" align="center" >$
+                                         <apex:outputText value="{0, number, ###,##0.00}">
+                                             <apex:param value="{!med.cData.Annual_Total_Premium}"/>
+                                         </apex:outputText>
+                                         &nbsp;
+                                     </th>
+                                 </apex:repeat>
+                             </tr>
+                             <!--15-->
+                             <tr class="success">
+                                 <th bgcolor="#D3D3D3" width="100%" style="font-size:65%" align="left">{!headerMap['Page3Row14']}</th>
+                                 <apex:repeat var="med" value="{!displayMedicalAll}">
+                                     <th width="15%" style="font-size:65%" align="center" >{!med.qlItem.Employer_Contribution_Percent__c}%</th>
+                                     <!--<th width="85%" style="font-size:65%" align="center" >${!med1.qlItem.C1_Emp_Contrib_Amt__c}</th>-->
+                                     <th width="15%" style="font-size:65%" align="center" >$
+                                         <apex:outputText value="{0, number, ###,##0.00}">
+                                             <apex:param value="{!med.cData.Emp_Contrib_Amt}"/>
+                                         </apex:outputText>
+                                         &nbsp;
+                                     </th>
+                                 </apex:repeat>
+                             </tr>
+                         </table>
+                     <!-- </div>
+                 </th>
+             </tr>
+         </table> -->
+         <div class="footer">
+                 <apex:outputText value="{!pdfContentMap['Footer']}" escape="false" />  
+                 <table width="100%"><tr><td align="left">
+                 <apex:outputText value="{!pdfContentMap['FooterServices']}" escape="false" /> 
+                 </td><td align="right">
+                 <apex:image value="{!empireLogo}" width="120" height="51"/>
+                 </td></tr></table>
+             </div>
+        </div>
+        </apex:outputPanel>
+        <!-- end page -->
+        <!-- page4-->
+        <apex:outputPanel layout="block" rendered="{!renDental}">
+        <div class="page">
+        <div></div>
+            <tr>
+                <td>
+                    <h1>{!pdfContentMap['Page4Head']}</h1>
+                </td>
+                <td></td><td></td><td></td>
+                <td></td><td></td><td></td>
+                <td></td><td></td><td></td>
+                <td></td>
+                <td align="left">
+                    <div style="font-size:60%">{!headerMap['HeadRight1']} {!Quote.QuoteNumber}</div>
+                    <div style="font-size:60%">{!Quote.Account.Name}</div>
+                    <div style="font-size:60%">{!headerMap['HeadRight2']} <apex:outputText value="{0,date, MM-dd-YYYY}"> <apex:param value="{!ed}" /> </apex:outputtext></div>
+                    <div style="font-size:60%">{!headerMap['HeadRight3']} {!FLOOR(displayDental[0].qlItem.Class_1_Number_EE__c)} &nbsp; {!headerMap['HeadRight4']} {!FLOOR(displayDental[0].qlItem.Class_1_Number_EE_Child__c)}</div>
+                    <div style="font-size:60%">{!headerMap['HeadRight5']} {!FLOOR(displayDental[0].qlItem.Class_1_Number_EE_Spouse__c)} &nbsp; {!headerMap['HeadRight6']} {!FLOOR(displayDental[0].qlItem.Class_1_Number_EE_Family__c)}</div>
+                </td>
+            </tr>
+            <table class="line" width="100%" border="0" cellspacing="0" cellpadding="0" align="center">
+                <tr class="success">
+                   <th bgcolor="#D3D3D3" width="100%"  style="font-size:65%" align="center">{!headerMap['Page4Column2']}</th>
+                </tr>
+            </table>
+            <table class="line" width="100%" border="0" cellspacing="0" cellpadding="0" align="center">
+                <tr class="success">
+                   <th bgcolor="#D3D3D3" width="15%"  style="font-size:65%" align="center">{!headerMap['Page4Column1']}</th>
+                   <th bgcolor="#D3D3D3" width="9%" style="font-size:65%" align="center">{!headerMap['Page4Column3']}</th>
+                   <th bgcolor="#D3D3D3" width="9%" style="font-size:65%" align="center">{!headerMap['Page4Column4']}</th>
+                   <th bgcolor="#D3D3D3" width="10%" style="font-size:65%" align="center">{!headerMap['Page4Column5']}</th>
+                   <th bgcolor="#D3D3D3" width="10%" style="font-size:65%" align="center">{!headerMap['Page4Column6']}</th>
+                   <th bgcolor="#D3D3D3" width="10%" style="font-size:65%" align="center">{!headerMap['Page4Column7']}</th>
+                   <th bgcolor="#D3D3D3" width="10%" style="font-size:65%" align="center">{!headerMap['Page4Column8']}</th>
+                   <th bgcolor="#D3D3D3" width="10%" style="font-size:65%" align="center">{!headerMap['Page4Column9']}</th>
+                   <th bgcolor="#D3D3D3" width="17%" style="font-size:65%" align="center">{!headerMap['Page4Column10']}</th>
+                </tr>
+                <apex:variable var="planNumber" value="{!1}"/>
+                <apex:repeat var="den" value="{!displayDental}">
+                    <tr>
+                        
+                        <th width="15%" style="font-size:65%" align="left">
+                            {!pdfContentMap['Page6Table1']} {!planNumber}<br/>{!den.pro.Name} <br/>{!pdfContentMap['Page7Table1']} {!den.pro.Network__c}<br/> {!pdfContentMap['Page7Table2']} {!den.pro.ProductCode} <br/>{!pdfContentMap['Page4Table3']} {!den.aaMap['OON Reimbursement']}
+                        </th>
+                            <th width="9%" style="font-size:65%" align="center"><!--{!den.qlItem.Class_1_Total__c}-->
+                            $<apex:outputText value="{0, number, ###,##0.00}">
+                                 <apex:param value="{!den.qlItem.Class_1_Total__c}"/>
+                             </apex:outputText>
+                            &nbsp;  </th><!-- den.aaMap['Proposed Monthly Dental Premium'] -->
+                        <th width="9%" style="font-size:65%" align="center">{!den.aaMap['Deductible']}</th>
+                        <th width="10%" style="font-size:65%" align="center">{!den.aaMap['Annual Maximum']}</th>
+                        <th width="10%" style="font-size:65%" align="center">{!den.aaMap['Diagnostic & Preventive']}</th>
+                        <th width="10%" style="font-size:65%" align="center">{!den.aaMap['Basic Services']}</th>
+                        <th width="10%" style="font-size:65%" align="center">{!den.aaMap['Major Services']}</th>
+                        <th width="10%" style="font-size:65%" align="center">{!den.aaMap['Child Orthodontics']} / {!den.aaMap['Ortho Lifetime Maximum']}</th>
+                        <th width="17%" style="font-size:65%" align="left">{!pdfContentMap['Page4AddlField1']} {!den.pro.OrthoCoverage__c}<br/> {!pdfContentMap['Page4AddlField2']} {!den.aaMap['Dental Implants']}<br/> {!pdfContentMap['Page4AddlField3']} {!den.aaMap['Posterior Composites']} <br/> {!pdfContentMap['Page4AddlField4']} {!den.aaMap['Annual Maximum Carryover']}</th>
+                        <apex:variable var="planNumber" value="{!planNumber+1}"/>
+                    </tr>
+               </apex:repeat>
+            </table>
+            <br/>
+            <table class="line" width="75%" border="0" cellspacing="0" cellpadding="0" align="left" style="padding:0px;margin:0px;">
+                <tr class="success">
+                   <th bgcolor="#D3D3D3" width="100%"  style="font-size:65%" align="center">{!headerMap['Page4Column11']}</th>
+                </tr>
+            </table>
+            <table class="line" width="75%" border="0" cellspacing="0" cellpadding="0" align="left">
+                <tr class="success">
+                   <th bgcolor="#D3D3D3" width="40%"  style="font-size:65%" align="center">{!headerMap['Page4Column1']}</th>
+                   <th bgcolor="#D3D3D3" width="30%" style="font-size:65%" align="center">{!headerMap['Page4Column12']}</th>
+                   <th bgcolor="#D3D3D3" width="30%" style="font-size:65%" align="center">{!headerMap['Page4Column13']}</th>
+                </tr>
+                <apex:repeat var="den" value="{!displayDental}">
+                    <tr>
+                        <th  style="font-size:65%" align="center">{!den.pro.Name}</th> 
+                        <th width="30%"  style="font-size:65%" align="center">
+                        $<apex:outputText value="{0, number, ###,##0.00}">
+                                 <apex:param value="{!den.qlItem.Class_1_Total__c}"/>
+                             </apex:outputText>
+                            &nbsp;  </th> <!-- {!den.aaMap['Monthly Premium']} -->
+                        <th width="30%"  style="font-size:65%" align="center">
+                        $<apex:outputText value="{0, number, ###,##0.00}">
+                                 <apex:param value="{!(den.qlItem.Dental_Bundled_Price_EE__c * (FLOOR(displayDental[0].qlItem.Class_1_Number_EE__c)) + den.qlItem.Dental_Bundled_Price_EE_Ch__c * (FLOOR(displayDental[0].qlItem.Class_1_Number_EE_Child__c)) + den.qlItem.Dental_Bundled_Price_EE_Sp__c * (FLOOR(displayDental[0].qlItem.Class_1_Number_EE_Spouse__c)) + den.qlItem.Dental_Bundled_Price_EE_Fa__c * (FLOOR(displayDental[0].qlItem.Class_1_Number_EE_Family__c)))}"/>
+                             </apex:outputText>
+                            &nbsp;  </th> <!-- {!den.aaMap['Bundle Premium']} -->
+                    </tr>
+                </apex:repeat>
+                <!--<tr><td width="100%" style="font-size:65%;">
+                    {!pdfContentMap['Page4']} {!IF(Quote.Dental_Prior_Comparable_Coverage__c='1','Yes','No')}&nbsp;
+                    {!pdfContentMap['Page4_1']} {!Quote.Dental_Rate_Guarantee__c} Months &nbsp;
+                </td></tr><tr><td width="100%" style="font-size:65%;">
+                   
+                </td></tr>-->
+               
+            </table>  
+            
+             
+            <!--<apex:outputText value="{!pdfContentMap['PremiumDisclaimer']}" escape="false" /> 
+            
+            <div align="left" style="font-size:65%;clear:both;">{!pdfContentMap['Page4']} {!IF(Quote.Dental_Prior_Comparable_Coverage__c='1','Yes','No')}<br/>
+            {!pdfContentMap['Page4_1']} {!Quote.Dental_Rate_Guarantee__c} Months</div>-->
+            
+            <div class="footer" style="padding:0px;margin:0px;">
+                 <!--<apex:outputText value="{!pdfContentMap['Footer']}" escape="false" />-->
+                 <table width="100%" border="0" >
+                     <tr>
+                         <td align="left" style="padding:0px;" width="100%">
+                             <div style="font-size:65%">
+                                 {!pdfContentMap['Page4']} {!IF(Quote.Dental_Prior_Comparable_Coverage__c='1','Yes','No')}<br/>
+                                 {!pdfContentMap['Page4_1']} {!Quote.Dental_Rate_Guarantee__c} Months <br/>
+                                 <br/>
+                                 {!pdfContentMap['PremiumDisclaimer']}<br/><br/> 
+                             </div>
+                         </td>
+                    </tr>
+                    <apex:outputText value="{!pdfContentMap['Footer']}" escape="false" />
+                    <tr>
+                        <td align="left">
+                            <apex:outputText value="{!pdfContentMap['FooterServices']}" escape="false" /> 
+                        </td>
+                        <td align="right">
+                             <apex:image value="{!empireLogo}" width="120" height="51"/>
+                        </td>
+                    </tr>
+                </table>
+             </div>
+        
+        </div><!-- end page -->
+        </apex:outputPanel>
+        <!-- page6-->
+        <apex:outputPanel layout="block" rendered="{!renVision}">
+        <div class="page" style="padding-top:{!IF(displayDental.size == 5, '50px', '0px')}">
+        <div></div>
+            <tr>
+                <td>
+                    <h1>{!pdfContentMap['Page6Head']}</h1>
+                </td>
+                <td></td><td></td><td></td>
+                <td></td><td></td><td></td>
+                <td></td>
+                <td align="left">
+                    <div style="font-size:60%">{!headerMap['HeadRight1']} {!Quote.QuoteNumber}</div>
+                    <div style="font-size:60%">{!Quote.Account.Name}</div>
+                    <div style="font-size:60%">{!headerMap['HeadRight2']} <apex:outputText value="{0,date, MM-dd-YYYY}"> <apex:param value="{!ed}" /> </apex:outputtext></div>
+                    <div style="font-size:60%">{!headerMap['HeadRight3']} {!FLOOR(displayVision[0].qlItem.Class_1_Number_EE__c)} &nbsp; {!headerMap['HeadRight4']} {!FLOOR(displayVision[0].qlItem.Class_1_Number_EE_Child__c)}</div>
+                    <div style="font-size:60%">{!headerMap['HeadRight5']} {!FLOOR(displayVision[0].qlItem.Class_1_Number_EE_Spouse__c)} &nbsp; {!headerMap['HeadRight6']} {!FLOOR(displayVision[0].qlItem.Class_1_Number_EE_Family__c)}</div>
+                </td>
+            </tr>
+            <br/>
+            <table class="line" width="70%" border="0" cellspacing="0" cellpadding="0" align="left">
+            <tr class="success">
+               <th bgcolor="#D3D3D3" width="100%"  style="font-size:60%" align="center">{!headerMap['Page6Column2']}</th>
+            </tr>
+            </table>
+        <table class="line" width="70%" border="0" cellspacing="0" cellpadding="0" align="left">
+            <tr class="success">
+               <th bgcolor="#D3D3D3" width="19%"  style="font-size:60%" align="center">{!headerMap['Page6Column1']}</th>
+               <th bgcolor="#D3D3D3" width="13%" style="font-size:60%" align="center">{!headerMap['Page6Column3']}</th>
+               <th bgcolor="#D3D3D3" width="13%" style="font-size:60%" align="center">{!headerMap['Page6Column4']}</th>
+               <th bgcolor="#D3D3D3" width="13%" style="font-size:60%" align="center">{!headerMap['Page6Column8']}</th>
+               <th bgcolor="#D3D3D3" width="13%" style="font-size:60%" align="center">{!headerMap['Page6Column9']}</th>
+               <th bgcolor="#D3D3D3" width="13%" style="font-size:60%" align="center">{!headerMap['Page6Column10']}</th>
+               <th bgcolor="#D3D3D3" width="13%" style="font-size:60%" align="center">{!headerMap['Page6Column11']}</th>  
+            </tr>
+            <apex:variable var="planNumber" value="{!1}"/>
+            <apex:repeat var="vis" value="{!displayVision}">
+            <tr>
+                <th width="19%" style="font-size:60%" align="center">{!pdfContentMap['Page6Table1']} {!planNumber}<br/>{!vis.pro.Name}</th> 
+                <th width="13%" style="font-size:60%" align="center">
+                $<apex:outputText value="{0, number, ###,##0.00}">
+                                 <apex:param value="{!vis.qlItem.Class_1_Total__c}"/>
+                             </apex:outputText>
+                            <!--&nbsp; n/a--></th>
+                <th width="13%" style="font-size:60%" align="center">{!vis.pro.vlocity_ins__SubType__c} / {!vis.pro.FundingType__c}</th>
+                <th width="13%" style="font-size:60%" align="center">{!vis.aaMap['Exam Copay']}</th>
+                <th width="13%" style="font-size:60%" align="center">{!vis.aaMap['Lens Copay']}</th>
+                <th width="13%" style="font-size:60%" align="center">{!vis.aaMap['Frame Benefit']}</th>
+                <th width="13%" style="font-size:60%" align="center">{!vis.aaMap['Contact Lens Benefit']}</th>
+                <apex:variable var="planNumber" value="{!planNumber+1}"/>
+            </tr>
+            </apex:repeat>
+         </table>
+         <br/><br/><br/><br/>
+         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<div align="left" style="font-size:65%;clear:both;">{!pdfContentMap['Page6_1']} {!Quote.Vision_Rate_Guarantee__c}</div>
+         
+        
+            <div class="footer">
+                 <apex:outputText value="{!pdfContentMap['Footer']}" escape="false" />  
+                 <table width="100%"><tr><td align="left">
+                 <apex:outputText value="{!pdfContentMap['FooterServices']}" escape="false" /> 
+                 </td><td align="right">
+                 <apex:image value="{!empireLogo}" width="120" height="51"/>
+                 </td></tr></table>
+             </div>
+        </div><!-- end page -->
+        </apex:outputPanel>
+        <!-- Page7-->
+        <apex:outputPanel layout="block" rendered="{!renMedical}">
+        <div class="page">
+            <div></div>
+            <tr>
+                <td>
+                    <h1>{!pdfContentMap['Page7Head']}</h1>
+                </td>
+            </tr>
+            <div style="font-size:65%">
+                <apex:outputText value="{!pdfContentMap['Page7']}" escape="false"/> <apex:outputText value="{0,date, MMMM d', 'yyyy}"> <apex:param value="{!ed}" /> </apex:outputtext>
+            </div>
+            <div style="font-size:65%">
+                <apex:outputText value="{!pdfContentMap['Page7_3']}" escape="false"/> {!Quote.Account.Name}
+            </div>
+            <apex:outputText value="{!pdfContentMap['Page7_4']}" escape="false"/>
+            <br/>
+            <table class="line" width="80%" border="0" cellspacing="0" cellpadding="0" align="left">
+            <tr class="success">
+               <th bgcolor="#D3D3D3" width="40%"  style="font-size:70%" align="center"> {!headerMap['Page7Column1']} </th>
+               <th bgcolor="#D3D3D3" width="15%"  style="font-size:70%" align="center"> 
+                   <div>
+                       {!headerMap['Page7Column2']} <br/> {!headerMap['Page7Column6']}
+                   </div>
+               </th>
+               <th bgcolor="#D3D3D3" width="15%"  style="font-size:70%" align="center"> 
+                   <div>
+                       {!headerMap['Page7Column3']} <br/> {!headerMap['Page7Column6']}
+                   </div>
+               </th>
+               <th bgcolor="#D3D3D3" width="15%"  style="font-size:70%" align="center"> 
+                   <div>
+                       {!headerMap['Page7Column4']} <br/> {!headerMap['Page7Column6']}
+                   </div>
+               </th>
+               <th bgcolor="#D3D3D3" width="15%"  style="font-size:70%" align="center"> 
+                   <div>
+                       {!headerMap['Page7Column5']} <br/> {!headerMap['Page7Column6']}
+                   </div>
+               </th>
+            </tr>
+            <apex:repeat var="med1" value="{!displayMedical1}">
+            <tr>
+                <th width="40%" style="font-size:70%" align="center">{!med1.pro.Name}<br/>{!pdfContentMap['Page7Table1']} {!med1.pro.Network__c}<br/>{!pdfContentMap['Page7Table2']} {!med1.pro.ProductCode}</th>
+                <th width="15%"  style="font-size:70%" align="center">$
+                    <apex:outputText value="{0, number, ###,##0.00}">
+                        <apex:param value="{!IF(OR(ISNULL(med1.qlItem.Base_EE__c),ISBLANK(med1.qlItem.Base_EE__c)), 0, med1.qlItem.Base_EE__c)}"/>
+                    </apex:outputText>
+                </th>
+                <th width="15%"  style="font-size:70%" align="center">$
+                    <apex:outputText value="{0, number, ###,##0.00}">
+                        <apex:param value="{!IF(OR(ISNULL(med1.qlItem.Base_EE_Spouse__c),ISBLANK(med1.qlItem.Base_EE_Spouse__c)), 0, med1.qlItem.Base_EE_Spouse__c)}"/>
+                    </apex:outputText>
+                </th>
+                <th width="15%"  style="font-size:70%" align="center">$
+                    <apex:outputText value="{0, number, ###,##0.00}">
+                        <apex:param value="{!IF(OR(ISNULL(med1.qlItem.Base_EE_Child__c),ISBLANK(med1.qlItem.Base_EE_Child__c)), 0, med1.qlItem.Base_EE_Child__c)}"/>
+                    </apex:outputText>
+                </th>
+                <th width="15%"  style="font-size:70%" align="center">$
+                    <apex:outputText value="{0, number, ###,##0.00}">
+                    <apex:param value="{!IF(OR(ISNULL(med1.qlItem.Base_EE_Family__c),ISBLANK(med1.qlItem.Base_EE_Family__c)), 0, med1.qlItem.Base_EE_Family__c)}"/>
+                    </apex:outputText>
+                </th>                               
+            </tr>
+            </apex:repeat>
+            <apex:repeat var="med2" value="{!displayMedical2}">
+            <tr>
+                <th width="40%" style="font-size:70%" align="center">{!med2.pro.Name}<br/>{!pdfContentMap['Page7Table1']} {!med2.pro.Network__c}<br/>{!pdfContentMap['Page7Table2']} {!med2.pro.ProductCode}</th>
+                <th width="15%"  style="font-size:70%" align="center">$
+                    <apex:outputText value="{0, number, ###,##0.00}">
+                        <apex:param value="{!IF(OR(ISNULL(med2.qlItem.Base_EE__c),ISBLANK(med2.qlItem.Base_EE__c)), 0, med2.qlItem.Base_EE__c)}"/>
+                    </apex:outputText>
+                </th>
+                <th width="15%"  style="font-size:70%" align="center">$
+                    <apex:outputText value="{0, number, ###,##0.00}">
+                        <apex:param value="{!IF(OR(ISNULL(med2.qlItem.Base_EE_Spouse__c),ISBLANK(med2.qlItem.Base_EE_Spouse__c)), 0, med2.qlItem.Base_EE_Spouse__c)}"/>
+                    </apex:outputText>
+                </th>
+                <th width="15%"  style="font-size:70%" align="center">$
+                    <apex:outputText value="{0, number, ###,##0.00}">
+                        <apex:param value="{!IF(OR(ISNULL(med2.qlItem.Base_EE_Child__c),ISBLANK(med2.qlItem.Base_EE_Child__c)), 0, med2.qlItem.Base_EE_Child__c)}"/>
+                    </apex:outputText>
+                </th>
+                <th width="15%"  style="font-size:70%" align="center">$
+                    <apex:outputText value="{0, number, ###,##0.00}">
+                        <apex:param value="{!IF(OR(ISNULL(med2.qlItem.Base_EE_Family__c),ISBLANK(med2.qlItem.Base_EE_Family__c)), 0, med2.qlItem.Base_EE_Family__c)}"/>
+                    </apex:outputText>
+                </th>                              
+            </tr>
+            </apex:repeat>
+            <apex:repeat var="med3" value="{!displayMedical3}">
+            <tr>
+                <th width="40%" style="font-size:70%" align="center">{!med3.pro.Name}<br/>{!pdfContentMap['Page7Table1']} {!med3.pro.Network__c}<br/>{!pdfContentMap['Page7Table2']} {!med3.pro.ProductCode}</th>
+                <th width="15%"  style="font-size:70%" align="center">$
+                    <apex:outputText value="{0, number, ###,##0.00}">
+                        <apex:param value="{!IF(OR(ISNULL(med3.qlItem.Base_EE__c),ISBLANK(med3.qlItem.Base_EE__c)), 0, med3.qlItem.Base_EE__c)}"/>
+                    </apex:outputText>
+                </th>
+                <th width="15%"  style="font-size:70%" align="center">$
+                    <apex:outputText value="{0, number, ###,##0.00}">
+                        <apex:param value="{!IF(OR(ISNULL(med3.qlItem.Base_EE_Spouse__c),ISBLANK(med3.qlItem.Base_EE_Spouse__c)), 0, med3.qlItem.Base_EE_Spouse__c)}"/>
+                    </apex:outputText>
+                </th>
+                <th width="15%"  style="font-size:70%" align="center">$
+                    <apex:outputText value="{0, number, ###,##0.00}">
+                        <apex:param value="{!IF(OR(ISNULL(med3.qlItem.Base_EE_Child__c),ISBLANK(med3.qlItem.Base_EE_Child__c)), 0, med3.qlItem.Base_EE_Child__c)}"/>
+                    </apex:outputText>
+                </th>
+                <th width="15%"  style="font-size:70%" align="center">$
+                    <apex:outputText value="{0, number, ###,##0.00}">
+                        <apex:param value="{!IF(OR(ISNULL(med3.qlItem.Base_EE_Family__c),ISBLANK(med3.qlItem.Base_EE_Family__c)), 0, med3.qlItem.Base_EE_Family__c)}"/>
+                    </apex:outputText>
+                </th>                         
+            </tr>
+            </apex:repeat>
+         </table>
+             
+            <div class="footer" style="page-break-after:always;">
+            <table width="100%">
+                     <tr>
+                         <td align="left" width="70%">
+                         &nbsp;&nbsp;
+                         </td>
+                         <td align="left" width="30%" style="font-size:50%">
+                             {!headerMap['Signature1']}<br/>
+                             <apex:image value="{!signature}" width="160" height="40"/><br/>
+                             <apex:outputText value="{!headerMap['Signature2']}" escape="false" /><br/>
+                         </td>
+                     </tr>
+                 </table>
+                 <br/><br/>
+                 <table width="100%"><tr><td align="left">
+                 <apex:outputText value="{!pdfContentMap['FooterServices']}" escape="false" /> 
+                 </td><td align="right">
+                 <apex:image value="{!empireLogo}" width="120" height="51"/>
+                 </td></tr></table>
+             </div>
+        </div>
+        </apex:outputPanel>
+        <!-- end page -->
+        <!-- Page8-->
+        <apex:outputPanel layout="block" rendered="{!renDental}">
+        <div class="page" style="padding-top:{!IF(displayMedicalAll.size > 7, '90px', '0px')}">
+        <div></div>
+            <tr>
+                <td>
+                    <h1>{!pdfContentMap['Page8Head']}</h1>
+                </td>
+                <td></td><td></td><td></td>
+                <td></td><td></td><td></td>
+                <td></td>
+                <td align="left">
+                    <div style="font-size:60%">{!headerMap['HeadRight1']} {!Quote.QuoteNumber}</div>
+                    <div style="font-size:60%">{!Quote.Account.Name}</div>
+                    <div style="font-size:60%">{!headerMap['HeadRight2']} <apex:outputText value="{0,date, MM-dd-YYYY}"> <apex:param value="{!ed}" /> </apex:outputtext></div>
+                    <div style="font-size:60%">{!headerMap['HeadRight3']} {!FLOOR(displayDental[0].qlItem.Class_1_Number_EE__c)} &nbsp; {!headerMap['HeadRight4']} {!FLOOR(displayDental[0].qlItem.Class_1_Number_EE_Child__c)}</div>
+                    <div style="font-size:60%">{!headerMap['HeadRight5']} {!FLOOR(displayDental[0].qlItem.Class_1_Number_EE_Spouse__c)} &nbsp; {!headerMap['HeadRight6']} {!FLOOR(displayDental[0].qlItem.Class_1_Number_EE_Family__c)}</div>
+                </td>
+            </tr>
+            <br/>
+            <div style="font-size:65%">
+                <apex:outputText value="{!pdfContentMap['Page7']}" escape="false"/> <apex:outputText value="{0,date, MMMM d', 'yyyy}"> <apex:param value="{!ed}" /> </apex:outputtext>
+            </div>
+            <apex:outputText value="{!pdfContentMap['Page8']}" escape="false"/>
+            <br/>
+            <div>
+            <table class="line" width="100%" border="0" cellspacing="0" cellpadding="0" align="left">
+                <tr class="success">
+                   <th bgcolor="#D3D3D3" width="32%"  style="font-size:70%" align="center">{!headerMap['Page8Column1']}</th>
+                   <th bgcolor="#D3D3D3" width="20%"  style="font-size:70%" align="center">{!headerMap['Page8Column2']}</th>
+                   <th bgcolor="#D3D3D3" width="12%"  style="font-size:70%" align="center">{!headerMap['Page8Column3']}</th>
+                   <th bgcolor="#D3D3D3" width="12%"  style="font-size:70%" align="center">{!headerMap['Page8Column4']}</th>
+                   <th bgcolor="#D3D3D3" width="12%"  style="font-size:70%" align="center">{!headerMap['Page8Column5']}</th>
+                   <th bgcolor="#D3D3D3" width="12%"  style="font-size:70%" align="center">{!headerMap['Page8Column6']}</th>
+                </tr>
+                <apex:repeat var="den" value="{!displayDental}">
+                <tr class="success">
+                   <th width="32%"  style="font-size:70%" align="center"> {!den.pro.Name} <br/>{!pdfContentMap['Page8Table2']} {!den.pro.ProductCode} </th>
+                   <th width="20%"  style="font-size:70%" align="center">
+                       <table class="line" width="100%" border="0" cellspacing="0" cellpadding="0" align="center">
+                           <tr>
+                               <th>{!headerMap['Base Premium']}</th>
+                           </tr>
+                           <tr>
+                               <th>{!headerMap['Bundle Premium']}</th>
+                           </tr>
+                       </table>
+                   </th>
+                   <th width="12%"  style="font-size:70%" align="center">
+                       <table class="line" width="100%" border="0" cellspacing="0" cellpadding="0" align="center">
+                           <tr>
+                               <th>
+                                   <apex:outputText value="${0, number, ###,##0.00}">
+                                       <apex:param value="{!den.qlItem.Base_EE__c}"/>
+                                   </apex:outputText>
+                               </th>
+                           </tr>
+                           <tr>
+                               <th>
+                                   <apex:outputText value="${0, number, ###,##0.00}">
+                                       <apex:param value="{!den.qlItem.Dental_Bundled_Price_EE__c}"/>
+                                   </apex:outputText>
+                               </th>
+                           </tr>
+                       </table>
+                   </th>
+                   <th width="12%"  style="font-size:70%" align="center">
+                       <table class="line" width="100%" border="0" cellspacing="0" cellpadding="0" align="center">
+                           <tr>
+                               <th>
+                                   <apex:outputText value="${0, number, ###,##0.00}">
+                                       <apex:param value="{!den.qlItem.Base_EE_Spouse__c}"/>
+                                   </apex:outputText>
+                               </th>
+                           </tr>
+                           <tr>
+                               <th>
+                                   <apex:outputText value="${0, number, ###,##0.00}">
+                                       <apex:param value="{!den.qlItem.Dental_Bundled_Price_EE_Sp__c}"/>
+                                   </apex:outputText>
+                               </th>
+                           </tr>
+                       </table>
+                   </th>
+                   <th width="12%"  style="font-size:70%" align="center">
+                       <table class="line" width="100%" border="0" cellspacing="0" cellpadding="0" align="center">
+                           <tr>
+                               <th>
+                                   <apex:outputText value="${0, number, ###,##0.00}">
+                                       <apex:param value="{!den.qlItem.Base_EE_Child__c}"/>
+                                   </apex:outputText>
+                               </th>
+                           </tr>
+                           <tr>
+                               <th>
+                                   <apex:outputText value="${0, number, ###,##0.00}">
+                                       <apex:param value="{!den.qlItem.Dental_Bundled_Price_EE_Ch__c}"/>
+                                   </apex:outputText>
+                               </th>
+                           </tr>
+                       </table>
+                   </th>
+                   <th width="12%"  style="font-size:70%" align="center">
+                       <table class="line" width="100%" border="0" cellspacing="0" cellpadding="0" align="center">
+                           <tr>
+                               <th>
+                                   <apex:outputText value="${0, number, ###,##0.00}">
+                                       <apex:param value="{!den.qlItem.Base_EE_Family__c}"/>
+                                   </apex:outputText>
+                               </th>
+                           </tr>
+                           <tr>
+                               <th>
+                                   <apex:outputText value="${0, number, ###,##0.00}">
+                                       <apex:param value="{!den.qlItem.Dental_Bundled_Price_EE_Fa__c}"/>
+                                   </apex:outputText>
+                               </th>
+                           </tr>
+                       </table>
+                   </th>
+                </tr>
+                </apex:repeat>
+             </table>
+             </div>
+             <br/><br/><br/><br/>
+             <br/><br/><br/><br/>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <p>
+            <div align="left" style="font-size:65%;clear:both;">{!pdfContentMap['Page4_0']} {!Quote.Total_Eligible_Employees__c}</div>
+            <div align="left" style="font-size:65%;clear:both;">{!pdfContentMap['Page4']} {!IF(Quote.Dental_Prior_Comparable_Coverage__c='1','Yes','No')}</div>
+            <div align="left" style="font-size:65%;clear:both;">{!pdfContentMap['Page4_1']} {!Quote.Dental_Rate_Guarantee__c} Months</div>
+            </p>
+            <div class="footer">
+                <table width="100%">
+                     <tr>
+                         <td align="left" width="70%">
+                         &nbsp;&nbsp;
+                         </td>
+                         <td align="left" width="30%" style="font-size:50%">
+                             {!headerMap['Signature1']}<br/>
+                             <apex:image value="{!signature}" width="160" height="40"/><br/>
+                             <apex:outputText value="{!headerMap['Signature2']}" escape="false" /><br/>
+                         </td>
+                     </tr>
+                 </table>
+                 <br/><br/>
+                 <table width="100%"><tr><td align="left">
+                 <apex:outputText value="{!pdfContentMap['FooterServices']}" escape="false" /> 
+                 </td><td align="right">
+                 <apex:image value="{!empireLogo}" width="120" height="51"/>
+                 </td></tr></table>
+             </div>
+        </div><!-- end page -->
+        </apex:outputPanel>
+        <!-- page9-->
+        <apex:outputPanel layout="block" rendered="{!renVision}">
+        <div class="page">
+        <div></div>
+            <tr>
+                <td>
+                    <h1>{!pdfContentMap['Page9Head']}</h1>
+                </td>
+                <td></td><td></td><td></td>
+                <td></td><td></td><td></td>
+                <td></td>
+                <td align="left">
+                    <div style="font-size:60%">{!headerMap['HeadRight1']} {!Quote.QuoteNumber}</div>
+                    <div style="font-size:60%">{!Quote.Account.Name}</div>
+                    <div style="font-size:60%">{!headerMap['HeadRight2']} <apex:outputText value="{0,date, MM-dd-YYYY}"> <apex:param value="{!ed}" /> </apex:outputtext></div>
+                    <div style="font-size:60%">{!headerMap['HeadRight3']} {!FLOOR(displayVision[0].qlItem.Class_1_Number_EE__c)} &nbsp; {!headerMap['HeadRight4']} {!FLOOR(displayVision[0].qlItem.Class_1_Number_EE_Child__c)}</div>
+                    <div style="font-size:60%">{!headerMap['HeadRight5']} {!FLOOR(displayVision[0].qlItem.Class_1_Number_EE_Spouse__c)} &nbsp; {!headerMap['HeadRight6']} {!FLOOR(displayVision[0].qlItem.Class_1_Number_EE_Family__c)}</div>
+                </td>
+            </tr>
+            <br/><br/>
+            <table class="line" width="80%" border="0" cellspacing="0" cellpadding="0" align="left">
+                <tr class="success">
+                   <th bgcolor="#D3D3D3" width="32%"  style="font-size:70%" align="center">{!headerMap['Page9Column1']}</th>
+                   <th bgcolor="#D3D3D3" width="20%"  style="font-size:70%" align="center">{!headerMap['Page9Column2']}</th>
+                   <th bgcolor="#D3D3D3" width="12%"  style="font-size:70%" align="center">{!headerMap['Page9Column3']}</th>
+                   <th bgcolor="#D3D3D3" width="12%"  style="font-size:70%" align="center">{!headerMap['Page9Column4']}</th>
+                   <th bgcolor="#D3D3D3" width="12%"  style="font-size:70%" align="center">{!headerMap['Page9Column5']}</th>
+                   <th bgcolor="#D3D3D3" width="12%"  style="font-size:70%" align="center">{!headerMap['Page9Column6']}</th>
+                </tr>
+                <apex:repeat var="vis" value="{!displayVision}">
+                <tr class="success">
+                   <th width="32%"  style="font-size:70%" align="center"> {!vis.pro.Name}<br/> {!pdfContentMap['Page9Table2']} {!vis.pro.ProductCode}<br/>{!pdfContentMap['Page9Table3']} {!vis.pro.FundingType__c} </th>
+                   <th width="20%"  style="font-size:70%" align="center">{!headerMap['Base Premium']}</th>
+                   <!--<th width="12%"  style="font-size:70%" align="center">${!vis.qlItem.Base_EE__c}</th>
+                   <th width="12%"  style="font-size:70%" align="center">${!vis.qlItem.Base_EE_Spouse__c}</th>
+                   <th width="12%"  style="font-size:70%" align="center">${!vis.qlItem.Base_EE_Child__c}</th>
+                   <th width="12%"  style="font-size:70%" align="center">${!vis.qlItem.Base_EE_Family__c}</th>-->
+                   <th width="12%"  style="font-size:70%" align="center">$
+                       <apex:outputText value="{0, number, ###,##0.00}">
+                          <apex:param value="{!vis.qlItem.Base_EE__c}"/>
+                        </apex:outputText>
+                   </th>
+                   <th width="12%"  style="font-size:70%" align="center">$
+                       <apex:outputText value="{0, number, ###,##0.00}">
+                          <apex:param value="{!vis.qlItem.Base_EE_Spouse__c}"/>
+                        </apex:outputText>
+                   </th>
+                   <th width="12%"  style="font-size:70%" align="center">$
+                       <apex:outputText value="{0, number, ###,##0.00}">
+                          <apex:param value="{!vis.qlItem.Base_EE_Child__c}"/>
+                        </apex:outputText>
+                   </th>
+                   <th width="12%"  style="font-size:70%" align="center">$
+                       <apex:outputText value="{0, number, ###,##0.00}">
+                          <apex:param value="{!vis.qlItem.Base_EE_Family__c}"/>
+                        </apex:outputText>
+                   </th>
+                </tr>
+                </apex:repeat>
+             </table>
+             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<div align="left" style="font-size:65%;clear:both;">{!pdfContentMap['Page6_1']} {!Quote.Vision_Rate_Guarantee__c}</div>
+             <div class="footer">
+                 <table width="100%">
+                     <tr>
+                         <td align="left" width="70%">
+                         &nbsp;&nbsp;
+                         </td>
+                         <td align="left" width="30%" style="font-size:50%">
+                             {!headerMap['Signature1']}<br/>
+                             <apex:image value="{!signature}" width="160" height="40"/><br/>
+                             <apex:outputText value="{!headerMap['Signature2']}" escape="false" /><br/>
+                         </td>
+                     </tr>
+                 </table>
+                 <br/><br/>
+                 <table width="100%">
+                     <tr>
+                         <td align="left">
+                             <apex:outputText value="{!pdfContentMap['VisionFooterServices']}" escape="false" /> 
+                         </td>
+                         <td align="right">
+                             <apex:image value="{!empireLogo}" width="120" height="51"/>
+                         </td>
+                     </tr>
+                 </table>
+             </div>
+        </div><!-- end page -->
+        </apex:outputPanel>
+        <!-- page10-->
+        <apex:outputPanel layout="block" rendered="{!IF(renVision || renDental ,true,false)}">
+        <div></div>
+        <div>
+            <tr>
+                <td>
+                    <h1>{!pdfContentMap['Page10Head']}</h1>
+                </td>
+            </tr>
+            <div>
+            <tr>
+                <td width='50%'>
+                    <apex:outputText value="{!pdfContentMap['Page10Left']}" escape="false"/>
+                </td>
+                <td width='50%'>
+                    <div style="font-size:70%">{!pdfContentMap['Page10Right_1']} <apex:outputText value="{0,date, MMMM d', 'yyyy}"> <apex:param value="{!ed}" /> </apex:outputtext>{!pdfContentMap['Page10Right_2']} {!Quote.BillingPostalCode} {!pdfContentMap['Page10Right_3']} {!acct.SIC}{!pdfContentMap['Page10Right_4']} <apex:outputText value="{!pdfContentMap['Page10Right_5']}" escape="false" /> </div>
+                    
+               </td>
+            </tr>
+            </div>
+            <div class="footer">
+                 <table width="100%"><tr><td align="left">
+                 <apex:outputText value="{!pdfContentMap['FooterServices']}" escape="false" /> 
+                 </td><td align="right">
+                 <apex:image value="{!empireLogo}" width="120" height="51"/>
+                 </td></tr></table>
+             </div>
+        </div>
+        </apex:outputPanel>
+        <!-- end page -->
+    
+    </body>
+<apex:form ><apex:inputHidden value="{!Quote.vlocity_ins__EffectiveDate__c}"/></apex:form>
+</apex:page>

@@ -1,0 +1,12 @@
+<apex:page standardController="Case" extensions="E2C_CaseReopenExtCtrl" action="{!reopenCase}">
+    <apex:form >
+         	<apex:outputPanel >
+                <br/>    
+	            <apex:pageMessages />
+	            <br/>
+	            <div align="Center">
+	            	<apex:commandbutton value="Return to Case" action="{!returnToCase}"/>
+	            </div>
+	        </apex:outputPanel>
+    </apex:form>
+</apex:page>

@@ -1,0 +1,81 @@
+<apex:page standardStylesheets="false" showHeader="false" sidebar="false" docType="html-5.0">
+    <apex:includeScript value="{!$Resource.vlocity_ins__UnderscoreJS}"/>
+    <div class="vlocity via-slds" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" ng-app="vsAnthemApp">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/es6-promise/3.2.2/es6-promise.js"></script>
+     <style>
+            .vlocity .vlc-slds-wizard > label:first-child {display:none}
+            .vlocity #Print/ElectronicSignature_prevBtn {display: none;}
+            .vlocity label.ng-binding {text-transform: none;}
+             a.form-control[confirmed-click="completeScript(true)"]{display:none}
+             .vlocity .vlc-msg-success {display:none;}
+             .vlocity label.vlc-textblock-label {display:none;}
+             .vlocity #ViewQuoteStep .vlc-cancel {display:None;}
+             .vlocity #NewEligibilityLabel {position:relative;top: 0.8rem;}
+             .vlocity #VisionOptions {position:relative;top: 0.8rem;}
+            .via-slds section.slds-page-header.vlc-slds-page--header {
+                background: #00609A;
+                padding-bottom: 0px;
+                min-height: 5.5rem;
+                height: 5.5rem;
+            }
+            .via-slds .vlc-slds-remote-action--button .vlc-control-wrapper .slds-box{
+                background: #00609A;
+            }
+            .via-slds .vlc-slds-remote-action--button .vlc-control-wrapper .slds-box:hover{
+                background: #00609A;
+            }
+            .via-slds .list-group.vertical-steps .list-group-item.active::before {
+                background-color: #00609A;
+            }
+            .via-slds .list-group.vertical-steps .list-group-item.completed.active::before {
+                background-color: #00609A;
+            }
+            .via-slds .list-group.vertical-steps .list-group-item.active span {
+                font-weight: bold;
+                color: #00609A;
+            }
+            .via-slds input.ng-pristine.ng-valid:focus, .via-slds input.ng-pristine.ng-invalid:focus {
+                border: 1px solid #00609A !important;
+            }
+            .via-slds .vlc-slds-remote-action--button .vlc-control-wrapper .slds-box a:hover{
+                background-color: #A22036;
+            }
+            .via-slds div[msg='Requirement']{
+                background: rgb(66, 89, 104);
+            }
+
+            .via-slds .slds-page-header__title.vlc-slds-page-header__title{
+              color: #ffffff;
+            }
+
+            .via-slds section.slds-page-header.vlc-slds-page--header{
+              min-height: 5.5rem;
+              padding-left: 0px;
+            }
+
+            .via-slds .vlc-slds-underline--gradient h1{
+              padding-left: 1.5rem;
+            }
+
+        </style>
+        <vlocity_ins:BusinessProcessComponent strOmniScriptLang="English"
+            strOmniScriptType="Enrollment"
+            strOmniScriptSubType="New_York"
+            previewMode="{!$CurrentPage.parameters.previewEmbedded}"
+            verticalMode="{!$CurrentPage.parameters.verticalMode}"
+            strOmniScriptId="{!$CurrentPage.parameters.designerPreviewId}"
+            scriptLayout="lightning"/>
+        <vlocity_ins:BusinessProcessHelperComponent />
+        <vlocity_ins:JSONTreeHTMLTemplateComponent />
+
+        <c:SmallGroupAnthemEnrollmentTemplate />
+        <c:scrollOverrideComponent />
+        <script type="text/javascript">
+            var modules = ['vlocity-business-process'];
+            var myModule = angular.module('vsAnthemApp', modules);
+        </script>
+        <c:SmallGroupAnthemEnrollmentController />
+
+    </div>
+    <vlocity_ins:VFActionFunction />
+</apex:page>

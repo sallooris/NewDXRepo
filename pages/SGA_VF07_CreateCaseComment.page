@@ -1,0 +1,28 @@
+<!--
+    @Author : IDC Dev Team
+    @Created Date : 07-08-2017 (DD/MM/YYYY)
+    @Name : SGA_VF07_CreateCaseComment
+    @Description : 1)  VF page to create a case comment. 
+                   2)  Used to embedd Lightning Component c:SGA_LTNG13_CreateCaseComment.
+-->
+<apex:page standardController="Case" extensions="SGA_AP33_CreateCaseComment">
+
+    <apex:includeScript value="/lightning/lightning.out.js" />
+    
+     <div id="lightning" />
+    <apex:Form >
+    <script>
+        var csId="{!cas.Id}"; 
+    
+        $Lightning.use("c:SGA_LTNG13_CreateCaseComment", function() {
+          $Lightning.createComponent("c:SGA_LTNG13_CaseComment",
+              { label : "Create Case Comment",
+               "recordId" : csId },
+          "lightning",
+          function(cmp) {
+            
+          });
+        });
+    </script>
+    </apex:Form>
+</apex:page>

@@ -1,0 +1,24 @@
+<!--
+    @Author : SGA
+    @Created Date : 25-08-2017 (DD/MM/YYYY)
+    @Name : SGA_VFP09_BrokerSearch
+    @Description : 1) In Classic View Lightning Components are not supported ,So this Page is created 
+                      to support the existing component in Salesforce Classic UI. 
+                   2)  Used to embedd Lightning Component SGA_Ltng01_BrokerSearch for Classic view
+-->
+<apex:page >
+ <apex:includeLightning />
+
+ <div id="BrokerSearchContainer" />
+
+ <script>
+
+ $Lightning.use("c:SGA_LTNG01_BrokerSearch_App", function(){
+    $Lightning.createComponent("c:SGA_Ltng01_BrokerSearch",{},                      
+                               "BrokerSearchContainer",
+        function(cmp) {
+        console.log('Component created for SGA_Ltng01_BrokerSearch');
+       });
+    });
+ </script>
+</apex:page>

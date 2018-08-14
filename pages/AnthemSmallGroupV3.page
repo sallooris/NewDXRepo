@@ -1,0 +1,55 @@
+<apex:page standardStylesheets="false" showHeader="true" sidebar="true" standardController="Account" extensions="vlocity_ins.VFPageControllerBase" docType="html-5.0" >
+    <Script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.3.1/angular.js"></Script>
+    <link rel="stylesheet" type="text/css" href="{!URLFOR($Resource.jQuery_1_8_10,'css/ui-lightness/jquery-ui-1.8.10.custom.css')}" />
+    <apex:stylesheet value="{!URLFOR($Resource.vlocity_icons, '/css/vlocity-icons.css')}"/>
+        <style>
+            .vlocity .field-label {
+               font-size: 1.1em;
+               text-transform: none;
+               color: rgb(0, 0, 0);
+           }
+            .vlocity .panel-oui>.panel-heading>.panel-title>span {    
+              text-transform:none;   
+           } 
+            .vlocity label.ng-binding {
+             text-transform: none;
+           }
+             a.form-control[confirmed-click="completeScript(true)"]{display:none}
+             .vlocity .vlc-auto-sfl-msg {display:none;}
+             .vlocity .vlc-msg-success {display:none;}
+             .vlocity label.vlc-textblock-label {display:none;}
+             .vlocity #ViewQuoteStep .vlc-cancel {display:None;}  
+             .vlocity #NewEligibilityLabel {position:relative;top: 0.8rem;}
+             .vlocity #VisionOptions {position:relative;top: 0.8rem;}
+    </style> 
+    <div ng-app="vsApp" class='vlocity services'>
+      <a ng-if="!isSforce" ng-href="{!$Site.Prefix}/{!currentRecord['Id']}" ><i class="fa fa-caret-left"></i>{!$Label.vlocity_ins__NewBackTo} {!sParentObjectLabel} {!$Label.vlocity_ins__DetailLC}</a>
+      <a ng-if="isSforce" href="javascript:sforce.one.navigateToURL('{!$Site.Prefix}/{!currentRecord['Id']}')"><i class="fa fa-caret-left"></i>{!$Label.vlocity_ins__NewBackTo} {!sParentObjectLabel} {!$Label.vlocity_ins__DetailLC}</a>
+      <hr/>
+
+    <vlocity_ins:BusinessProcessComponent standardController="{!stdController}"
+      strOmniScriptType="Small Group"
+      strOmniScriptSubType="MinInfo"
+      strOmniScriptLang="English"
+      strPrefillDataRaptorBundle=""
+    />
+
+      <vlocity_ins:BusinessProcessHelperComponent />
+      <vlocity_ins:JSONTreeHTMLTemplateComponent />
+
+      <c:SmallGroupController />
+      <c:SmallGroupTemplate />
+
+        <script type="text/javascript">
+        var vsAppModule = angular
+        .module('vsApp', [
+            'vsAnthemApp',
+            'vlocity-business-process'
+            
+        ]);
+        
+        </script>
+
+    </div>
+    <vlocity_ins:VFActionFunction /> 
+</apex:page>

@@ -1,0 +1,202 @@
+<apex:page controller="BrokerSearchController" id="searchPage">
+    <apex:sectionHeader title="Search"/>
+    <script>
+    	function onKeyPress(evt)
+        {
+            if(evt.keyCode ==13)
+            {
+                //alert(evt.keyCode);
+                evt.preventDefault();
+                document.getElementById("searchPage:Searchform:searchBlock:pgbklBtns:srchbtn").click();
+            }
+        }
+    </script>
+    <apex:form id="Searchform" onkeypress="return onKeyPress(event);">
+        <apex:pageBlock mode="edit" id="searchBlock">
+            <apex:pageBlockButtons id="pgbklBtns">
+                <apex:commandButton value="Search" action="{!Search}" styleClass="btn" id="srchbtn" rerender="SearchResults"/>
+            </apex:pageBlockButtons>
+            <apex:messages />
+            <apex:pageBlockSection title="Basic Search" id="bssearch" >
+                <apex:inputText value="{!accountNameSearch}" label="Account Name:" id="accountName"/>
+                <apex:inputText value="{!firstNameSearch}" label="First Name:" id="frstName"/>
+                <apex:inputText value="{!lastNameSearch}" label="Last Name:" id="lastName"/>
+                <apex:inputText value="{!phoneSearch}" label="Phone No:" styleClass="cphone" id="phonenum" title="Please enter phone no in (XXX)XXX-XXXX format"/>
+                <apex:inputText value="{!emailSearch}" label="Email:" />
+                <apex:inputText value="{!employerTinSearch}" label="Employer TIN:" />
+                <apex:inputText value="{!agencyTinSearch}" label="General Agency TIN:" />
+                <apex:inputText value="{!agentTinSearch}" label="Paid Agency TIN:" />
+                <apex:inputText value="{!writingAgentSearch}" label="Writing Agent:" />
+            </apex:pageBlockSection>
+            <apex:pageBlockSection title="Address Search" id="addresssearch">
+                <apex:inputText value="{!streetSearch}" Label="Address:" id="street"/>
+                <apex:inputText value="{!citySearch}" Label="City:" id="city"/>
+                <apex:inputText value="{!stateSearch}" Label="State:" id="state"/>
+                <apex:inputText value="{!zipCodeSearch}" label="Zip Code:" styleClass="cpostal" id="zipcode"/>
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+        <apex:pageBlock >
+            
+            <apex:pageBlockSection title="Actions" id="actions" columns="3">
+                
+                <!-- button onclick="location.href='/brokerportal/setup/ui/recordtypeselect.jsp?ent=Lead';return false;">Create new lead</button --> 
+                <button onclick="location.href='AnthemSmallGroupV3#/OmniScriptType/Small Group/OmniScriptSubType/MinInfo/OmniScriptLang/English/ContextId/PrefillDataRaptorBundle/true/false';return false;">Create new small group quote</button>
+            </apex:pageBlockSection>
+            
+        </apex:pageBlock>
+        <apex:outputPanel id="SearchResults">
+            <apex:pageBlock id="searchpg" tabStyle="Account"  rendered="{!filteredRecAccnts.size>0 }" >
+                
+                <apex:sectionHeader title="Matching Accounts ({!filteredRecAccnts.size})" id="macts"    rendered="{!filteredRecAccnts.size>0}"  >
+                </apex:sectionHeader>
+                
+                <br/>
+                <apex:pageBlockTable value="{!filteredRecAccnts}" var="FRA"  rendered="{!filteredRecAccnts.size>0}" >
+                    <apex:column headerValue="Full Name">
+                        <apex:outputLink value="/{!FRA.id}" >{!FRA.Name}</apex:outputLink>
+                    </apex:column>
+                    <apex:column headerValue="DOB">
+                        <apex:outputText value="{0,date,MM'/'dd'/'yyyy}">
+                            <apex:param value="{!FRA.PersonBirthdate}" />
+                        </apex:outputText>
+                    </apex:column>
+                    <apex:column headerValue="Email">
+                        <apex:outputText value="{!FRA.PersonEmail}" />
+                    </apex:column>
+                    <apex:column headerValue="Home Phone">
+                        <apex:outputText value="{!FRA.PersonHomePhone}" />
+                    </apex:column>
+                    <apex:column headerValue="Mobile">
+                        <apex:outputText value="{!FRA.PersonMobilePhone}" rendered="{!FRA.PersonMobilePhone!=null}" />
+                    </apex:column>
+                    <apex:column headerValue="Work Phone" >
+                        <apex:outputText value="{!FRA.PersonOtherPhone}" rendered="{!FRA.PersonOtherPhone!=null}" />
+                    </apex:column>
+                    <apex:column headerValue="Address1">
+                        <apex:outputText value="{!FRA.BillingStreet}"/>
+                    </apex:column>
+                    <apex:column headerValue="City">
+                        <apex:outputText value="{!FRA.BillingCity}"/>
+                    </apex:column>
+                    <apex:column headerValue="State">
+                        <apex:outputText value="{!FRA.BillingState}"/>
+                    </apex:column>
+                    <apex:column headerValue="Zip Code">
+                        <apex:outputText value="{!FRA.BillingPostalCode}"/>
+                    </apex:column>
+                    
+                </apex:pageBlockTable>
+            </apex:pageBlock>
+            <apex:pageBlock id="leadSearch" tabstyle="Lead" rendered="{!filteredRecords.size>0 }">
+                <apex:sectionHeader title="Matching Leads ({!filteredRecords.size})"  rendered="{!filteredRecords.size>0}"  />
+                <apex:pageBlockTable value="{!filteredRecords}" var="FR" rendered="{!filteredRecords.size>0}">
+                    <apex:column headerValue="Full Name">
+                        <apex:outputLink value="/{!FR.id}" >{!FR.firstName}&nbsp;{!FR.lastName}</apex:outputLink>
+                    </apex:column>
+                    <apex:column headerValue="DOB">
+                        <apex:outputText value="{0,date,MM'/'dd'/'yyyy}">
+                            <apex:param value="{!FR.Date_of_Birth__c}" />
+                        </apex:outputText>
+                    </apex:column>
+                    <apex:column headerValue="Email">
+                        <apex:outputText value="{!FR.Email}" />
+                    </apex:column>
+                    <apex:column headerValue="SSN" >
+                        <apex:outputText value="{!FR.Social_Security_Number__c}" />
+                    </apex:column>
+                    <apex:column headerValue="Home Phone">
+                        <apex:outputText value="{!FR.Phone}" rendered="{!(FR.Phone!=null && FR.Phone!='')}" />
+                    </apex:column>
+                    <apex:column headerValue="Mobile">
+                        <apex:outputText value="{!FR.MobilePhone}" rendered="{!FR.MobilePhone!=null}" />
+                    </apex:column>
+                    <apex:column headerValue="Work Phone" >
+                        <apex:outputText value="{!FR.Work_Phone__c}" rendered="{!FR.Work_Phone__c!=null}" />
+                    </apex:column>
+                    <apex:column headerValue="Lead Status">
+                        <apex:outputText value="{!FR.Status}"/>
+                    </apex:column>
+                    <apex:column headerValue="Address1">
+                        <apex:outputText value="{!FR.Street}"/>
+                    </apex:column>
+                    <apex:column headerValue="City">
+                        <apex:outputText value="{!FR.city}"/>
+                    </apex:column>
+                    <apex:column headerValue="State">
+                        <apex:outputText value="{!FR.State}"/>
+                    </apex:column>
+                    <apex:column headerValue="Zip Code">
+                        <apex:outputText value="{!FR.PostalCode}"/>
+                    </apex:column>
+                    
+                    
+                </apex:pageBlockTable>
+            </apex:pageBlock>
+            <apex:pageBlock id="contactSearch" tabstyle="Contact" rendered="{!filteredRecContacts.size>0 }">
+                <apex:sectionHeader title="Matching Contacts ({!filteredRecContacts.size})"  rendered="{!filteredRecContacts.size>0}"  />
+                <apex:pageBlockTable value="{!filteredRecContacts}" var="FR" rendered="{!filteredRecContacts.size>0}">
+                    <apex:column headerValue="Full Name">
+                        <apex:outputLink value="/{!FR.id}" >{!FR.firstName}&nbsp;{!FR.lastName}</apex:outputLink>
+                    </apex:column>
+                    <apex:column headerValue="Email">
+                        <apex:outputText value="{!FR.Email}" />
+                    </apex:column>
+                    <apex:column headerValue="Phone">
+                        <apex:outputText value="{!FR.Phone}" />
+                    </apex:column>
+                    <apex:column headerValue="Mobile Phone">
+                        <apex:outputText value="{!FR.MobilePhone}" />
+                    </apex:column>
+                    <apex:column headerValue="Home Phone">
+                        <apex:outputText value="{!FR.HomePhone}" />
+                    </apex:column>
+                    <apex:column headerValue="Other Phone">
+                        <apex:outputText value="{!FR.OtherPhone}" />
+                    </apex:column>
+                    <apex:column headerValue="Mailing Street">
+                        <apex:outputText value="{!FR.MailingStreet}" />
+                    </apex:column>
+                    <apex:column headerValue="Mailing City">
+                        <apex:outputText value="{!FR.MailingCity}" />
+                    </apex:column>
+                    <apex:column headerValue="Mailing State">
+                        <apex:outputText value="{!FR.MailingState}" />
+                    </apex:column>
+                    <apex:column headerValue="Mailing Country">
+                        <apex:outputText value="{!FR.MailingCountry}" />
+                    </apex:column>
+                    <apex:column headerValue="Mailing Postal Code">
+                        <apex:outputText value="{!FR.MailingPostalCode}" />
+                    </apex:column>
+                    
+                </apex:pageBlockTable>
+            </apex:pageBlock>
+            
+            <apex:pageBlock id="oppportunitySearch" tabstyle="Opportunity" rendered="{!filteredRecOpportunities.size>0}">
+                <apex:sectionHeader title="Matching Opportunities ({!filteredRecOpportunities.size})"  rendered="{!filteredRecOpportunities.size>0}"/>
+                <apex:pageBlockTable value="{!filteredRecOpportunities}" var="FR" rendered="{!filteredRecOpportunities.size>0}">
+                    <apex:column headerValue="Full Name">
+                        <apex:outputLink value="/{!FR.id}">{!FR.Name}</apex:outputLink>
+                    </apex:column>
+                    <apex:column headerValue="Description">
+                        <apex:outputText value="{!FR.description}" />
+                    </apex:column>
+                    <apex:column headerValue="Stage Name">
+                        <apex:outputText value="{!FR.stageName}" />
+                    </apex:column>
+                    <apex:column headerValue="Type">
+                        <apex:outputText value="{!FR.type}" />
+                    </apex:column>
+                    <apex:column headerValue="Close Date">
+                        <apex:outputText value="{0,date,MM'/'dd'/'yyyy}">
+                            <apex:param value="{!FR.CloseDate}" />
+                        </apex:outputText>
+                    </apex:column>
+                    <apex:column headerValue="Amount">
+                        <apex:outputText value="{!FR.Amount}" />
+                    </apex:column>
+                </apex:pageBlockTable>
+            </apex:pageBlock>
+        </apex:outputPanel>
+    </apex:form>
+</apex:page>

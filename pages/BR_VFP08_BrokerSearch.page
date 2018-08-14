@@ -1,0 +1,122 @@
+<apex:page controller="BR_VFC01_BrokerSearchController" title="broker Search" tabStyle="Account">
+    <apex:includeScript value="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"/>
+    <apex:includeScript value="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"/>
+    <apex:includeScript value="/support/console/22.0/integration.js"/>
+
+    <script>
+    window.onkeypress=jClickEnter;
+    $j = jQuery.noConflict();
+    function jSearchBroker(){
+        var iCount = 0;
+        $j.each($j('[id*="pbBrokerSearch"]').serializeArray(), function(i, field) {
+            if(field.value.length > 0){
+                iCount++;
+            }
+        });
+        if(iCount !== 1){
+            alert('One field must be populated when searching. Searching by more than one criteria is not permitted.', 'Broker Search');
+            jClearFields();
+            return(false);
+        }
+        else{
+            return(true);
+        }
+    }
+    
+    function jClickEnter(e){
+        var eventInstance = window.event ? event : e; 
+        var keyCode = eventInstance.charCode ? eventInstance.charCode : eventInstance.keyCode; 
+        if (keyCode == 13 && jSearchBroker()){ 
+            actionSearchBroker(); 
+            return false; 
+        }  
+    }
+    function jClearFields(){
+        clearFields();
+    }
+    
+    function selectAllCheckboxes(obj,receivedInputID){
+            var inputCheckBox = document.getElementsByTagName("input");
+            for(var i=0; i<inputCheckBox.length; i++){
+                if(inputCheckBox[i].id.indexOf(receivedInputID)!=-1){
+                    inputCheckBox[i].checked = obj.checked;
+                }
+            }
+    }
+
+    function testOpenPrimaryTab(accountId) {
+        sforce.console.openPrimaryTab(null, '/'+accountId, true);
+    }
+ 
+    </script>
+    <apex:sectionHeader title="Broker Search" subtitle="Search for a Broker"  />
+    <p class="bDescription">Enter the search criteria in one of the fields for a Broker or Agency and click on Search.</p>
+    <apex:form id="frmBrokerSearch">
+        <apex:actionFunction action="{!searchBroker}" name="actionSearchBroker" rerender="searchResultsPageBlock" status="counterStatus"/>
+        <apex:actionFunction action="{!ClearFields}" name="clearFields" />
+        <apex:pageBlock id="pbBrokerSearch"> 
+            <apex:pageBlockSection id="pgBrokerSearch" title="Broker Search" columns="2">  
+                <apex:inputText id="iBSBrokerTIN" label="Broker TIN" value="{!BrokerTIN}"/>
+                <apex:inputText id="iBSBrokerETIN" label="Broker Encrypted TIN" value="{!BrokerETIN}"/>
+                <apex:inputText id="iBSAgentCode" label="Agent Code" value="{!AgencyCode}"/>
+                <apex:inputText id="iBSBrokerName" label="Broker Name" value="{!BrokerName}"/>
+                <apex:inputText id="iBSBrokerNPN" label="National Producer Number" value="{!BrokerNPN}"/>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection id="pgAgentSearch" title="Agency Search" columns="2">  
+                <apex:inputText id="iBSAgencyTIN" label="Agency TIN" value="{!AgencyTIN}"/>
+                <apex:inputText id="iBSAgencyETIN" label="Agency Encrypted TIN" value="{!AgencyETIN}"/>
+                <apex:inputText id="iBSAgencyName" label="Agency Name" value="{!AgencyName}"/>
+            </apex:pageBlockSection>
+            <apex:pageBlockButtons >
+                <apex:commandButton id="cmdSearchBroker" value="Search" action="{!searchBroker}" onclick="if(!jSearchBroker()) return false" rerender="searchResultsPageBlock" status="counterStatus"/> 
+                <apex:commandButton id="cmdClearSearch" value="Clear" action="{!ClearFields}" />                 
+            </apex:pageBlockButtons>
+        </apex:pageBlock>
+        <apex:pageBlock id="searchResultsPageBlock">
+            <apex:messages />
+            <apex:actionstatus id="counterStatus">
+                <apex:facet name="start">
+                    <div class="waitingSearchDiv" id="el_loading" style="background-color: #fbfbfb; height:100%;opacity:0.65;width:100%;">
+                        <div class="waitingHolder" style="top: 100px; width: 91px;">
+                        <img class="waitingImage" src="/resource/AjaxLoaderImage" title="Please Wait..." />
+                        <span class="waitingDescription">Loading...</span>
+                        </div>
+                    </div>
+                </apex:facet>
+            </apex:actionstatus>
+            <apex:pageBlockSection title="Search Results" columns="1" id="searchResults">
+            <apex:pageBlockTable id="tblAccounts" value="{!wrapAccountList}" var="brokers" rendered="{!IF(AND(wrapAccountList != null, errorMsg == null), true, false)}">
+                <apex:column rendered="{!IF(AND(wrapAccountList != null, showCheckboxandBtn), true, false)}">
+                        <apex:facet name="header">
+                            <apex:inputCheckbox onclick="selectAllCheckboxes(this,'inputId')" />
+                        </apex:facet>
+                        <apex:inputCheckbox value="{!brokers.selected}" id="inputId" />
+                </apex:column>
+                <apex:column id="cAccName" headerValue="Name" >
+                    <apex:facet name="header">
+                    </apex:facet>
+                    <!--<a href="#" onClick="testOpenPrimaryTab('{!brokers.acc.Id}');return false">{!brokers.acc.Name}</a> -->
+                    <apex:commandLink onclick="testOpenPrimaryTab('{!brokers.acc.Id}');return false">{!brokers.acc.Name}</apex:commandLink>
+                </apex:column>   
+                <apex:column id="ascsAccountType" headerValue="Account Type" value="{!brokers.accountType}">
+                    <apex:facet name="header">
+                    </apex:facet>
+                </apex:column>
+                <apex:column id="cTIN" headerValue="TIN" value="{!brokers.acc.BR_Tax_Identification_Number__c}">
+                    <apex:facet name="header">
+                    </apex:facet>
+                </apex:column>
+                <apex:column id="cETIN" headerValue="Encrypted TIN" value="{!brokers.acc.BR_Encrypted_TIN__c}">
+                    <apex:facet name="header">
+                    </apex:facet>
+                </apex:column>               
+            </apex:pageBlockTable>
+            </apex:pageBlockSection>
+            <apex:outputText value="No records to display." rendered="{!IF(AND(wrapAccountList == null, errorMsg == null), true, false)}"/>
+            <apex:outputText value="{!errorMsg}" rendered="{!errorMsg != null}"/>
+            <apex:pageBlockButtons location="bottom" rendered="{!IF(showCheckboxandBtn, true, false)}">
+                <apex:commandButton value="Add Broker/Agency to Salesforce" action="{!createSelectedData}" id="createbtn" />
+            </apex:pageBlockButtons>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

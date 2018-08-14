@@ -1,0 +1,16 @@
+<apex:page showHeader="false" standardController="Live_Agent_Chat_Survey__c" extensions="VFCE06_PostChatSurvey">
+<apex:form id="form"> 
+<apex:pageBlock title="Please Complete The Survey" id="pb">
+    <apex:pageBlockSection columns="2" id="pbs">
+        <apex:inputField value="{!Live_Agent_Chat_Survey__c.Please_rate_your_chat_experience__c}" id="wth" /><br/>
+        <apex:inputField value="{!Live_Agent_Chat_Survey__c.Please_rate_your_operator__c}" id="sc" /><br/>
+        <apex:inputField value="{!Live_Agent_Chat_Survey__c.Comments__c}" id="caw" /><br/><br/><br/>
+    </apex:pageBlockSection>
+<center>
+        <apex:commandLink value="Submit" styleClass="btn" style="text-decoration:none;padding:4px;" action="{!submit}">
+            <apex:param name="chatterKey" value="{!$CurrentPage.parameters.chatKey}" assignTo="{!chatterKey}" />
+        </apex:commandLink>
+</center>
+</apex:pageBlock>
+</apex:form>
+</apex:page>

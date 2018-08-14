@@ -1,0 +1,17 @@
+<apex:page >
+  <!--   <iframe height="600px" id="theIframe" name="theIframe" src="https://brokerportal.anthem.com/ehb/web/bkr/activeusersession" width="100%"></iframe> -->
+    <iframe height="600px" id="theIframe" name="theIframe" src="https://brokerportal.anthem.com/ehb/group/bkr/activeusersession" width="100%"></iframe>
+
+
+
+  <script type="text/javascript">
+
+    window.setInterval(callPage, 600000);
+
+    function callPage()
+    {
+         var iframe = document.getElementById('theIframe');
+         iframe.src = iframe.src;
+    }
+  </script>
+</apex:page>

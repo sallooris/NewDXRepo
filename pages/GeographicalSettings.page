@@ -1,0 +1,53 @@
+<apex:page title="Geographical Settings" >
+    <c:setupJS />
+    <c:setupCSS /> 
+ 
+     <apex:sectionHeader title="Assignment Lead Rules"/> 
+    <apex:pageBlock >
+    
+        <div class="outterSection">
+          <div class="titleSection"><a href="javascript:toggleSection('Assignment_Rule__c')">[<span id="ToggleEmployee__c">+</span>] {!$ObjectType.Assignment_Rule__c.LabelPlural}</a></div>
+          <div id="Assignment_Rule__c" style="display:none">
+              <br/>
+              <apex:listViews type="Assignment_Rule__c"/>
+          </div>
+        </div>
+
+    </apex:pageBlock>
+    
+     <apex:sectionHeader title="User Settings"/> 
+    <apex:pageBlock >
+            
+        <div class="outterSection">
+          <div class="titleSection"><a href="javascript:toggleSection('User_by_Zip_City_County__c')">[<span id="ToggleEmployee__c">+</span>] {!$ObjectType.User_by_Zip_City_County__c.LabelPlural}</a></div>
+          <div id="User_by_Zip_City_County__c" style="display:none">
+              <br/>
+              <apex:listViews type="User_by_Zip_City_County__c"/>
+          </div>
+        </div>                        
+
+    </apex:pageBlock>    
+    
+    <apex:sectionHeader title="Geographical Settings"/>
+    <apex:pageBlock >
+    
+        <div class="outterSection">
+          <div class="titleSection"><a href="javascript:toggleSection('State__c')">[<span id="ToggleEmployee__c">+</span>] {!$ObjectType.State__c.LabelPlural}</a></div>
+          <div id="State__c" style="display:none">
+              <br/>
+              <apex:listViews type="State__c"/>
+          </div>
+        </div>
+        
+        <div class="outterSection">
+          <div class="titleSection"><a href="javascript:toggleSection('Zip_City_County__c')">[<span id="ToggleCountry__c">+</span>] {!$ObjectType.Zip_City_County__c.LabelPlural}</a></div>
+          <div id="Zip_City_County__c" style="display:none">
+              <br/>
+              <apex:listViews type="Zip_City_County__c"/>
+          </div>
+        </div>                 
+        
+
+    </apex:pageBlock>
+    
+</apex:page>

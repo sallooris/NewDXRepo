@@ -1,0 +1,7 @@
+<apex:page showheader="false" sidebar="false">
+	<apex:form >
+		<br/>
+		&nbsp;&nbsp;<apex:image width="300px" value="{!$Resource.AnthemLogo}"/><br/><br/>
+		&nbsp;&nbsp;<apex:commandButton value="Launch Keep It Local Tool"  onClick="window.open('/KeepItLocal/value_prop_score', 'Value Prop', 'width=350, height=400, location=no')"/>
+	</apex:form>
+</apex:page>

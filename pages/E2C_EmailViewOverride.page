@@ -1,0 +1,79 @@
+<apex:page showHeader="true" sidebar="true" standardController="EmailMessage" id="emailPage" extensions="E2C_EmailViewOverrideCtrl">
+   
+    <apex:includeScript value="{!$Resource.E2C_jsFunctions}"/>
+    <apex:includeScript value="{!$Resource.E2C_jquery3_minjs}"/>
+    
+    <script>
+       var pageLoad = window.onload;
+            window.onload = function() {
+                if (pageLoad) {
+                        pageLoad();
+                }
+
+                var title = '';
+                if({!EmailMessage.Incoming}) {
+                    title = 'Inbound';
+                }
+                else {
+                    title = 'Outbound';
+                }
+                title += ' Email Message ';
+
+                setTabTitle(title);
+            }
+
+        // To remove 'Previous' and 'Next' links and override 'Email Message List' link on standard Email Message detail page
+        // To replace standard Reply, Reply To All and Forward buttons
+        $j = jQuery.noConflict();
+        $j(document).ready(function overrideLinks(){
+            var url = window.location.href;
+            if(url != -1){
+
+                var topButtons = $j('#topButtonRow');
+                topButtons.empty();
+
+                var bottomButtons = $j('#bottomButtonRow');
+                bottomButtons.empty();
+                
+                var newButtons = $j('#newButtons');
+                topButtons.append(newButtons);
+                newButtons.clone().appendTo(bottomButtons);
+
+                var navLinks = $j('[class="pbLinks"]'); //div component containing the navigation links
+                var emaiListLink = '"/apex/E2C_EmailListCustom?id={!EmailMessage.ParentId}"';
+                navLinks.empty();   //remove all links
+                navLinks.append("[&nbsp;&nbsp;<a href='#' onClick='openURL(" + emaiListLink + ");'>Email Message List</a>&nbsp;&nbsp;]");    //add new link
+            }
+        })
+        ;
+    </script>
+    
+    <apex:form id="buttonsForm">
+        <div id="newButtons">
+            <apex:commandButton value="Reply" action="{!reply}" onComplete="navigateToUrl('{!redirectURL}',null,'reply');" id="replyBtn">
+                <apex:param name="emailId" value="{!EmailMessage.Id}"/>
+                <apex:param name="retURL" value="%2Fapex%2F{!$CurrentPage.Name}%3Fid%3D{!EmailMessage.Id}"/>
+                <apex:param name="emailFrom" value="{!EmailMessage.FromAddress}"/>
+            </apex:commandButton>
+            
+            &nbsp;
+
+            <apex:commandButton value="Reply To All" action="{!replyToAll}" onComplete="navigateToUrl('{!redirectURL}',null,'replyAll');" id="replyAllButton">
+                <apex:param name="emailId" value="{!EmailMessage.Id}"/>
+                <apex:param name="retURL" value="%2Fapex%2F{!$CurrentPage.Name}%3Fid%3D{!EmailMessage.Id}"/>
+                <apex:param name="emailCC" value="{!EmailMessage.CcAddress}"/>
+                <apex:param name="emailFrom" value="{!EmailMessage.FromAddress}"/>
+                <apex:param name="emailTo" value="{!EmailMessage.ToAddress}"/>
+            </apex:commandButton>
+
+            &nbsp;
+
+            <apex:commandButton value="Forward" action="{!forward}" onComplete="navigateToUrl('{!redirectURL}',null,'forward');" id="forwardBtn">
+                <apex:param name="emailId" value="{!EmailMessage.Id}"/>
+                <apex:param name="retURL" value="%2Fapex%2F{!$CurrentPage.Name}%3Fid%3D{!EmailMessage.Id}"/>
+            </apex:commandButton>
+        </div>
+    </apex:form>
+    
+    <apex:detail />
+</apex:page>

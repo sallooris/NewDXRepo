@@ -1,0 +1,105 @@
+<apex:page standardController="vlocity_ins__Application__c" extensions="BRPSGCUploadDocumentController" showHeader="false" sidebar="false" >
+    <c:Importvisualstrap />
+        <style type="text/css">
+    .vbtn-primary {
+    background-image: -webkit-linear-gradient(#12abe0 0%, #059dd3 100%);
+    background-image: -moz-linear-gradient(#12abe0 0%, #059dd3 100%);
+    background-image: -o-linear-gradient(#12abe0 0%, #059dd3 100%);
+    background-image: linear-gradient(#12abe0 0%, #059dd3 100%);
+      background-repeat: repeat-x;
+      border-color: #00a7e1;
+      color: #fff;
+      height: 30px;
+      width: 145px;
+    }
+
+    .vbtn-primary:hover {
+        background: #018aba none;
+        border-color: #00a7e1;
+    }
+
+    .vbtn {
+        display: inline-block;
+        margin-bottom: 0;
+        font-weight: normal;
+        text-align: center;
+        vertical-align: middle;
+        touch-action: manipulation;
+        cursor: pointer;
+        border: 1px solid #00a7e1;
+        white-space: nowrap;
+        padding: 4px 8px;
+        font-size: 12px;
+         line-height: 1.428571429;
+        border-radius: 3px;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+    </style>
+    <c:Visualstrapblock >   
+    <apex:form id="form">
+    <apex:pagemessages id="errorCode" escape="false"></apex:pagemessages>
+            <apex:pageBlock >
+               <table class="table table-striped">
+                    <tr>
+                     <th style="color:black;font-family: Verdana;font-size: 12px;font-weight: 500"> DOCUMENT NAME </th>
+                     <th style="color:black;font-family: Verdana;font-size: 12px;font-weight: 500"> STATUS </th>
+                     <th style="color:black;font-family: Verdana;font-size: 12px;font-weight: 500"> CLICK TO UPLOAD </th>
+                    </tr> 
+                <apex:repeat value="{!fileHolder}" var="fh" >
+                    <tr>
+                    <td width="15%">
+                 <apex:pageBlockSection rendered="{!fh.required}">
+                            <apex:pageBlockSectionItem >
+                                <apex:outputPanel >
+                                    <div class="requiredInput">
+                                        <div class="requiredBlock"></div>       
+                                            <apex:outputLabel value="{!fh.fcategory}" style="width:100%;color:black;font-family: Verdana;font-size: 12px;font-weight: 500"></apex:outputLabel>
+                                     </div>
+                                </apex:outputPanel>
+                              </apex:pageBlockSectionItem>
+                        </apex:pageBlockSection> 
+                        <apex:pageBlockSection rendered="{! If(fh.required ==false,true,false) }">
+                            <apex:pageBlockSectionItem >   
+                                <apex:outputPanel >
+                                    <div class="">
+                                        <div class=""></div>       
+                                            <apex:outputLabel value="{!fh.fcategory}" style="width:100%;color:black;font-family: Verdana;font-size: 12px;font-weight: 500"></apex:outputLabel>
+                                     </div>
+                                </apex:outputPanel>
+                               </apex:pageBlockSectionItem>
+                        </apex:pageBlockSection> 
+
+                    </td>
+                  <td width="15%">
+            <apex:selectList value="{!fh.fstatus}" id="filestatus" multiselect="false" size="1" disabled="true" styleClass="form-control" style="width: 80%;">
+                   <apex:selectOptions value="{!optionList}" ></apex:selectOptions> 
+            </apex:selectList>         
+                    </td>
+
+                    <td width="40%" >
+                                        <apex:inputFile id="file1" fileSize="{!fh.fileSize}"  value="{!fh.fileContent}" contentType="{!fh.contentType}" fileName="{!fh.fname}" styleClass="form-control" style="width: 80%;"/>
+                    </td>
+                     </tr>
+        </apex:repeat>
+        </table>
+             <table class="table table-striped" width="80%">
+                    <tr>
+                    <td width="80%">
+                     <center>
+                     <apex:actionRegion >
+                   <apex:commandLink action="{!SaveDoc}" styleClass="vbtn vbtn-primary" style="color:white;" value="Upload" status="status">        
+                     </apex:commandLink>
+                    </apex:actionRegion>
+                     </center>
+                   </td>
+                   </tr>    
+                </table>
+   
+            </apex:pageBlock>
+
+    </apex:form>
+    </c:Visualstrapblock>
+</apex:page>

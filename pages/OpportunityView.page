@@ -1,0 +1,17 @@
+<!--
+* OpportunityView page when "Insufficient Previlages" message displayed then show custom message instead of native
+*
+* @Date:       02.13.2016
+* @Author:     Usman Ali (Magnet360)
+* @Updates:    
+* @Purpose:    
+* -->
+
+<apex:page standardController="Opportunity" extensions="OpportunityViewController" action="{!redirect}" >
+
+    <apex:detail rendered="{!NOT(isNeedToDisplayMsg)}" />
+ 	
+ 	<apex:pageBlock title="Opportunity" rendered="{!isNeedToDisplayMsg}" >
+    	<apex:outputText value="{!message}" />
+    </apex:pageBlock>
+</apex:page>

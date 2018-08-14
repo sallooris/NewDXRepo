@@ -1,0 +1,8 @@
+<apex:page sidebar="false" Controller="WaveForCommunity">
+        
+  <wave:dashboard dashboardId="0FK0Z000000CbK9WAK" 
+        showTitle="true" 
+        height="600px" 
+        openLinksInNewWindow="false"
+        />
+</apex:page>

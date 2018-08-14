@@ -1,0 +1,6 @@
+<apex:page controller="CC_CS302.LocaleInfoController" contentType="application/x-JavaScript; charset=utf-8" showHeader="false" 
+standardStylesheets="false" sidebar="false" action="{!getLocaleInfo}">
+  
+  {!localeInfoJsonString}
+  
+</apex:page>

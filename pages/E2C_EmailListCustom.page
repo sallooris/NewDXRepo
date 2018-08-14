@@ -1,0 +1,155 @@
+<apex:page sidebar="true" standardController="Case" extensions="E2C_CaseCustomEmailMessageListCtrl" title="Email Messages for Case {!Case.CaseNumber}">
+
+    <apex:includeScript value="{!$Resource.E2C_jsFunctions}"/>
+    <apex:includeScript value="{!$Resource.E2C_jquery3_minjs}"/>
+    
+    <script>
+       var pageLoad = window.onload;
+            window.onload = function() {
+                if (pageLoad) {
+                        pageLoad();
+                }
+
+                var title = '';
+                setTabTitle('Email Messages for Case {!Case.CaseNumber}');
+            }
+    </script>
+
+    <div class="bPageTitle">
+        <div class="ptBody">
+            <div class="content">
+                <h1 class="noSecondHeader pageType">Email Messages for Case {!Case.CaseNumber}</h1>
+                <div class="blank">&nbsp;</div>
+            </div>
+        </div>
+        <div class="ptBreadcrumb">
+            &nbsp;&nbsp;<a href="#" onClick="openURL('/{!Case.Id}');">Back to Case {!Case.CaseNumber}</a>
+        </div>
+    </div>
+
+    <apex:form >   
+        <apex:pageBlock mode="maindetail" id="emailBlock">
+            
+            <apex:outputPanel >
+                <div class="bNext">
+                    <div class="withFilter">
+                        <div class="next">
+                            <apex:variable var="render" value="" rendered="{!NOT(hasPrevious)}">
+                                <span class="greyedLink">
+                                    &lt;Previous Page
+                                </span> 
+                            </apex:variable>
+                            <apex:commandLink action="{!previous}" reRender="emailBlock" value="<Previous Page " rendered="{!hasPrevious}"/>
+                            | 
+                            <apex:variable var="render" value="" rendered="{!NOT(hasMoreRecords)}">
+                                <span class="greyedLink">
+                                    Next Page&gt;
+                                </span> 
+                            </apex:variable>
+                            <apex:commandLink action="{!next}" reRender="emailBlock" value=" Next Page>" rendered="{!hasMoreRecords}"/>
+                        </div>
+                        <div class="clearingBox">
+                        </div>
+                    </div>
+                </div>
+            </apex:outputPanel>
+            
+            <apex:variable var="recordNum" value="{!1}" />
+            <apex:pageBlockTable value="{!pageEmailList}" var="email" rendered="{!emailList.size > 0}">  
+                <apex:column headerValue="Action" styleClass="actionColumn">
+                        <apex:commandLink action="{!reply}" onComplete="openURL('{!redirectURL}');" styleClass="actionLink" title="Reply - Record {!recordNum} - {!email.ToAddress}">
+                            <apex:param name="emailId" value="{!email.Id}"/>
+                            <apex:param name="retURL" value="%2Fapex%2F{!$CurrentPage.name}%3Fid%3D{!Case.Id}" assignTo="{!retURL}"/>
+                            <apex:param name="emailFrom" value="{!email.FromAddress}"/>
+                            Reply
+                        </apex:commandLink>
+                        &nbsp;|&nbsp;
+
+                        <apex:commandLink action="{!replyToAll}" onComplete="openURL('{!redirectURL}');"  styleClass="actionLink" title="Reply To All - Record {!recordNum} - {!email.ToAddress}">
+                            <apex:param name="emailId" value="{!email.Id}"/>
+                            Reply To All
+                            <apex:param name="retURL" value="%2Fapex%2F{!$CurrentPage.name}%3Fid%3D{!Case.Id}" assignTo="{!retURL}"/>
+                            <apex:param name="emailCC" value="{!email.CcAddress}"/>
+                            <apex:param name="emailFrom" value="{!email.FromAddress}"/>
+                            <apex:param name="emailTo" value="{!email.ToAddress}"/>
+                        </apex:commandLink>
+                        <apex:variable var="recordNum" value="{!recordNum + 1}"/>
+                </apex:column>  
+                <apex:column value="{!email.Status}"> 
+                    <apex:facet name="header"  >
+                        <apex:commandlink action="{!sort}" rerender="emailBlock">
+                                    Status
+                                <apex:image value="/s.gif" styleClass="sortAsc" alt="Sorted Ascending" title="Sorted Ascending" rendered="{!sortOrder == 'ASC' && sortByField == 'Status'}"/>
+                                <apex:image value="/s.gif" styleClass="sortDesc" alt="Sorted Descending" title="Sorted Descending" rendered="{!sortOrder == 'DESC' && sortByField == 'Status'}"/>
+                            <apex:param value="Status" name="newSortByField" assignTo="{!newSortByField}" ></apex:param>
+                        </apex:commandlink>
+                    </apex:facet>
+                </apex:column>  
+                <apex:column > <img src="{!IF(email.Incoming, '/img/emailInbound.gif', '/img/emailOutbound.gif')}"/> </apex:column>  
+                 <apex:column styleClass="dataCell  cellCol2 booleanColumn"> 
+                    <apex:facet name="header"  >
+                        <apex:commandlink action="{!sort}" rerender="emailBlock">
+                                    Has Attachment
+                                <apex:image value="/s.gif" styleClass="sortAsc" alt="Sorted Ascending" title="Sorted Ascending" rendered="{!sortOrder == 'ASC' && sortByField == 'HasAttachment'}"/>
+                                <apex:image value="/s.gif" styleClass="sortDesc" alt="Sorted Descending" title="Sorted Descending" rendered="{!sortOrder == 'DESC' && sortByField == 'HasAttachment'}"/>
+                            <apex:param value="HasAttachment" name="newSortByField" assignTo="{!newSortByField}" ></apex:param>       
+                        </apex:commandlink>               
+                    </apex:facet>
+                    <apex:image value="/img/checkbox_unchecked.gif" styleClass="checkImg" alt="Not Checked" title="Not Checked" rendered="{!!email.HasAttachment}" width="21" height="16"/>
+                    <apex:image value="/img/checkbox_checked.gif" styleClass="checkImg" alt="Checked" title="Checked" rendered="{!email.HasAttachment}" width="21" height="16"/>
+                    <!--<img src="/img/checkbox_unchecked.gif" alt="Not Checked" width="21" height="16" class="checkImg" title="Not Checked">-->
+                </apex:column>  
+                <apex:column headerValue="Subject">
+                    <apex:facet name="header"  >
+                        <apex:commandlink action="{!sort}" rerender="emailBlock" >
+                                    Subject 
+                                <apex:image value="/s.gif" styleClass="sortAsc" alt="Sorted Ascending" title="Sorted Ascending" rendered="{!sortOrder == 'ASC' && sortByField == 'Subject'}"/>
+                                <apex:image value="/s.gif" styleClass="sortDesc" alt="Sorted Descending" title="Sorted Descending" rendered="{!sortOrder == 'DESC' && sortByField == 'Subject'}"/>
+                            <apex:param value="Subject" name="newSortByField" assignTo="{!newSortByField}" ></apex:param>
+                        </apex:commandlink>
+                    </apex:facet>
+                    <a href="#" onClick="openURL('/apex/E2C_EmailViewOverride?id={!email.Id}');">{!email.Subject}</a>
+                </apex:column>  
+                <apex:column value="{!email.ToAddress}"> 
+                    <apex:facet name="header"  >
+                        <apex:commandlink action="{!sort}" rerender="emailBlock">
+                                    To Address
+                                <apex:image value="/s.gif" styleClass="sortAsc" alt="Sorted Ascending" title="Sorted Ascending" rendered="{!sortOrder == 'ASC' && sortByField == 'ToAddress'}"/>
+                                <apex:image value="/s.gif" styleClass="sortDesc" alt="Sorted Descending" title="Sorted Descending" rendered="{!sortOrder == 'DESC' && sortByField == 'ToAddress'}"/>
+                            <apex:param value="ToAddress" name="newSortByField" assignTo="{!newSortByField}" ></apex:param>
+                        </apex:commandlink>
+                    </apex:facet>
+                </apex:column>  
+                <apex:column value="{!email.MessageDate}" >
+                    <apex:facet name="header">
+                        Message Date
+                        <apex:commandlink action="{!sort}" rerender="emailBlock">
+                                    Message Date
+                                <apex:image value="/s.gif" styleClass="sortAsc" alt="Sorted Ascending" title="Sorted Ascending" rendered="{!sortOrder == 'ASC' && sortByField == 'MessageDate'}"/>
+                                <apex:image value="/s.gif" styleClass="sortDesc" alt="Sorted Descending" title="Sorted Descending" rendered="{!sortOrder == 'DESC' && sortByField == 'MessageDate'}"/>
+                            <apex:param value="MessageDate" name="newSortByField" assignTo="{!newSortByField}" ></apex:param>
+                        </apex:commandlink>
+                    </apex:facet>
+                    <!--<apex:outputText value="{0,date,M/d/yyy h:mm a}">
+                        <apex:param value="{!email.MessageDate}" /> 
+                    </apex:outputText>-->
+                </apex:column>
+            </apex:pageBlockTable>
+
+            <apex:variable var="render" value="" rendered="{!canShowLess || hasMoreRecords}">
+                <div class="fewerMore">Show me 
+                    <apex:commandLink action="{!showLess}" reRender="emailBlock" rendered="{!canShowLess}">
+                        <img src="/s.gif" alt="Show Fewer" class="fewerArrow" title="Show Fewer"/>
+                        fewer
+                    </apex:commandlink>
+                       {!IF(canShowLess && hasMoreRecords,'/','')}  
+                    <apex:commandLink action="{!showMore}" reRender="emailBlock" rendered="{!hasMoreRecords}">
+                        <img src="/s.gif" alt="Show More" class="moreArrow" title="Show More"/>
+                        more
+                    </apex:commandlink> records per list page
+                </div>
+            </apex:variable>
+
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>
