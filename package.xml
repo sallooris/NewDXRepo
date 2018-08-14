@@ -3,6 +3,7 @@
     <version>40.0</version>
     <types>
         <members>AInsertAction</members>
+        <members>A_XLS</members>
         <members>AccessToken</members>
         <members>AccountAssessment_TEST</members>
         <members>AccountInsertAction</members>
