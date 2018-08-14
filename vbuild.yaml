@@ -1,0 +1,10 @@
+projectPath: ./autorabit_vlocity_build1
+queries: 
+  - VlocityDataPackType: DataRaptor 
+    query: Select Id from %vlocity_namespace%__DRBundle__c where Name = 'DataRaptor Migration' LIMIT 1
+  - VlocityDataPackType: AttributeAssignmentRule
+    query: Select Id, Name from %vlocity_namespace%__AttributeAssignmentRule__c
+  - VlocityDataPackType: AttributeCategory
+    query: Select Id, Name, %vlocity_namespace%__Code__c from %vlocity_namespace%__AttributeCategory__c
+  - VlocityDataPackType: CalculationMatrix
+    query: Select Id, Name from %vlocity_namespace%__CalculationMatrix__c
