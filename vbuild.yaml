@@ -8,3 +8,9 @@ queries:
     query: Select Id, Name, %vlocity_namespace%__Code__c from %vlocity_namespace%__AttributeCategory__c
   - VlocityDataPackType: CalculationMatrix
     query: Select Id, Name from %vlocity_namespace%__CalculationMatrix__c
+  - VlocityDataPackType: OmniScript 
+    query: Select Id, %vlocity_namespace%__Type__c,  %vlocity_namespace%__SubType__c, %vlocity_namespace%__Language__c from %vlocity_namespace%__OmniScript__c where Id = 'a3Z0R00000008DAUAY' LIMIT 1
+  - VlocityDataPackType: DataRaptor
+    query: Select Id from %vlocity_namespace%__DRBundle__c where Name = 'TestDataRaptor'
+  - VlocityDataPackType: VlocityUITemplate
+    query: Select Id from %vlocity_namespace%__VlocityUITemplate__c where Name LIKE 'campaign%'
