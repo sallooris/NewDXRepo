@@ -1335,6 +1335,7 @@
     <types>
         <members>Case.NewTest</members>
         <members>Case.Standard</members>
+        <members>Lead.1234</members>
         <members>Lead.Lead Rule</members>
         <members>Lead.Second rule</members>
         <members>Lead.Standard</members>
