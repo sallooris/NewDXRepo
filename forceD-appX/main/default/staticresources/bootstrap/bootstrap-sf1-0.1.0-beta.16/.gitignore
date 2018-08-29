@@ -1,8 +1,0 @@
-/node_modules
-/bower_components
-/tmp
-/vartmp
-**.DS_Store
-
-/dist/fonts/proxima*
-Proxima*
