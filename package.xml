@@ -52,5 +52,5 @@
     <members>Account.Billing</members>
   </types>
   <version>43.0</version>
-  <fullName>forceD-appX</fullName>
+  <fullName>force-app</fullName>
 </Package>
