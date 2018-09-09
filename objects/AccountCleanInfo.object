@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
     <enableFeeds>false</enableFeeds>
-    <sharingModel>ControlledByParent</sharingModel>
     <fields>
         <fullName>Industry</fullName>
         <type>Picklist</type>
@@ -10,4 +9,5 @@
         <fullName>Ownership</fullName>
         <type>Picklist</type>
     </fields>
+    <sharingModel>ControlledByParent</sharingModel>
 </CustomObject>

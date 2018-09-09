@@ -1,0 +1,4 @@
+<apex:page >
+
+  Test:<apex:outputText value="Hello" style="white-space:pre;" escape="false" />
+</apex:page>
