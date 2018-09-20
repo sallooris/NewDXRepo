@@ -1,0 +1,27 @@
+projectPath: ./packExport
+expansionPath: .
+buildFile: AllDataPacks.json
+
+manifest:
+  - OmniScript/License_Validation_English
+  - OmniScript/SG Quoting_ABF_English
+  - OmniScript/Enrollment_DocuSign_UploadDocumentsABF_English
+  - DataRaptor/CreateABFQuote
+  - DataRaptor/CreateABFQuoteLineItems
+  - DataRaptor/CreateSecondaryABFQLIs
+  - DataRaptor/CreateFinalABFQLIs
+  - DataRaptor/UpdateABFAccOppQuote
+  - DataRaptor/ABF_KY_Employer_Application
+  - DataRaptor/ABF_VA_Employer_Application
+  - DataRaptor/ABF_CO_Employer_Application
+  - IntegrationProcedure/ABFQuote_FetchProducts
+  
+activate: true
+compileOnBuild: true
+maxDepth: 0
+continueAfterError: true
+defaultMaxParallel: 10
+exportPacksMaxSize: 10
+useAllRelationships: false
+supportHeadersOnly: true
+supportForceDeploy: true
