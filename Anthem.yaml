@@ -3,18 +3,21 @@ expansionPath: .
 buildFile: AllDataPacks.json
 
 manifest:
-  - OmniScript/License_Validation_English
+  - OmniScript/License_ABF_English
   - OmniScript/SG Quoting_ABF_English
+  - OmniScript/Enrollment_ABF_English
   - OmniScript/Enrollment_DocuSign_UploadDocumentsABF_English
-  - DataRaptor/CreateABFQuote
-  - DataRaptor/CreateABFQuoteLineItems
-  - DataRaptor/CreateSecondaryABFQLIs
-  - DataRaptor/CreateFinalABFQLIs
+  - DataRaptor/ABFSIC TypeAhead
+  - DataRaptor/ABF_CT_Employer_Application
+  - DataRaptor/ABF_ME_Employer_Application
+  - DataRaptor/ABF_NV_Employer_Application
+  - DataRaptor/FetchABFQuoteDetails
   - DataRaptor/UpdateABFAccOppQuote
-  - DataRaptor/ABF_KY_Employer_Application
-  - DataRaptor/ABF_VA_Employer_Application
-  - DataRaptor/ABF_CO_Employer_Application
+  - IntegrationProcedure/ABFQuote_SG_Initialize
+  - IntegrationProcedure/ABFQuote_SG_Create
   - IntegrationProcedure/ABFQuote_FetchProducts
+  - IntegrationProcedure/ABFQuote_UpdateContact
+  - IntegrationProcedure/ABFQuote_SG_AccountProcessing
   
 activate: true
 compileOnBuild: true
