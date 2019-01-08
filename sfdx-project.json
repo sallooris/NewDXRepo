@@ -2,10 +2,16 @@
   "packageDirectories": [
     {
       "path": "force-app",
-      "default": true
+      "default": true,
+	  "package": "resume",
+      "versionName": "tested",
+      "versionNumber": "1.0.0.0"
     }
   ],
   "namespace": "",
   "sfdcLoginUrl": "https://login.salesforce.com",
-  "sourceApiVersion": "43.0"
+  "sourceApiVersion": "43.0",
+   "packageAliases": {
+        "resume": "0Ho0o000000blKRCAY"
+    }
 }
