@@ -1,0 +1,17 @@
+{
+    "packageDirectories": [
+        {
+            "path": "TestMod2301",
+            "default": true,
+            "package": "TestMod2301",
+            "versionName": "ver 0.1",
+            "versionNumber": "0.1.0.NEXT"
+        }
+    ],
+    "namespace": "",
+    "sfdcLoginUrl": "https://login.salesforce.com",
+    "sourceApiVersion": "44.0",
+    "packageAliases": {
+        "TestMod2301": "0Ho7F000000KyrtSAC"
+    }
+}
